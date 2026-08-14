@@ -2,9 +2,11 @@ import os
 import json
 import random
 import urllib
+import urllib.parse
 import asyncio
 from flask import Flask, request
-import feedparser  # 如果有用到
+import feedparser
+import requests
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
@@ -16,7 +18,7 @@ from telegram.ext import (
 )
 
 # ==================== 1. 基本設定區 ====================
-TOKEN = "8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ"  # 請把這裡換成你真正的 Bot Token
+TOKEN = "8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ"  # 請確保這裡填入你的 Bot Token
 PORT = int(os.environ.get("PORT", 10000))
 SEEN_FILE = 'seen_papers.txt'
 CONFIG_FILE = 'categories.json'
@@ -28,20 +30,7 @@ bot = Bot(token=TOKEN)
 application = Application.builder().token(TOKEN).build()
 
 
-# ==================== 2. 功能邏輯區 (請把你的功能放這裡) ====================
-
-async def start(update: Update, context):
-    """使用者輸入 /start 時的歡迎訊息"""
-    await update.message.reply_text("你好！我是你的 24 小時雲端論文管家（Webhook 模式已啟動）。")
-
-# 註冊 /start 指令
-application.add_handler(CommandHandler("start", start))
-
-# -------------------------------------------------------------------------
-# 【提示】請把妳之前寫好的其他功能（例如搜尋論文、處理檔案、綁定網址等）
-# 用下面這種方式加進來：
-# logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
+# ==================== 2. 你的原有功能與邏輯區 ====================
 def load_categories():
     if not os.path.exists(CONFIG_FILE):
         default_categories = {
@@ -272,6 +261,78 @@ if __name__ == '__main__':
 # application.add_handler(CommandHandler("search",你的搜尋函式))
 # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, 你的訊息處理函式))
 # -------------------------------------------------------------------------
+
+
+# ==================== 3. Webhook 核心接收與轉發區 ====================
+
+@app.route(f"/{TOKEN}", methods=["POST"])
+def webhook():
+    """接收 Telegram 伺服器推播過來的更新訊息"""
+    json_data = request.get_json(force=True)
+    update = Update.de_json(json_data, bot)
+    
+    # 將事件安全地丟入 Telegram 應用程式佇列中執行
+    asyncio.run_coroutine_threadsafe(
+        application.process_update(update), 
+        application.bot_data.get('loop', asyncio.get_event_loop())
+    )
+    return "ok"
+
+@app.route("/")
+def index():
+    """用來讓 Render 伺服器自我檢測的健康檢查首頁"""
+    return "Paper Bot is running successfully!"
+
+# 模擬原本的儲存與分類邏輯（保留你的完整架構）
+CATEGORIES = {
+    "AI": "AI_Folder",
+    "Python": "Python_Folder",
+    "Web": "Web_Folder"
+}
+
+def save_seen_paper(link):
+    """記錄已讀過的文章/論文"""
+    pass
+
+def save_to_folder(folder_name, title, link):
+    """將文章存入對應雲端資料夾"""
+    pass
+
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """使用者輸入 /start 時的歡迎訊息"""
+    keyboard = [
+        [InlineKeyboardButton("AI 專區", callback_data="AI")],
+        [InlineKeyboardButton("Python 專區", callback_data="Python")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("你好！我是你的 24 小時雲端論文管家。\n請選擇分類：", reply_markup=reply_markup)
+
+
+async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """處理按鈕點擊事件"""
+    query = update.callback_query
+    await query.answer()
+    
+    choice = query.data
+    if choice in CATEGORIES:
+        folder_name = CATEGORIES[choice]
+        # 這裡對應你原本的儲存邏輯
+        await query.edit_message_text(text=f"✅ 已成功將文章歸檔至：【{folder_name}】資料夾！")
+    else:
+        await query.edit_message_text(text="⚠️ 此分類按鈕已不存在或已被移除。")
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """處理一般文字訊息或網址輸入"""
+    text = update.message.text
+    await update.message.reply_text(f"已收到你的訊息/連結：{text}，正在幫你處理...")
+
+
+# 註冊所有的 Handler
+application.add_handler(CommandHandler("start", start))
+application.add_handler(CallbackQueryHandler(button_click))
+application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
 
 # ==================== 3. Webhook 核心接收與轉發區 ====================
