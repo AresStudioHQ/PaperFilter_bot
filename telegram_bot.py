@@ -4,7 +4,7 @@ import random
 import urllib
 import asyncio
 from flask import Flask, request
-from feedparser import feedparser  # 如果有用到
+import feedparser  # 如果有用到
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
