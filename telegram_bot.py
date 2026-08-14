@@ -98,10 +98,10 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<b>🔍 1. 搜尋最新未讀論文</b>\n"
         "• 直接輸入想找的關鍵字即可開始搜尋（建議使用英文）。\n\n"
         "<b>📁 2. 資料夾與分類管理</b>\n"
-        "• 查看目前資料夾：<code>我的資料夾</code> 或 <code>/folders</code>\n"
+        "• 查看目前資料夾：<code>我的資料夾</code>\n"
         "• 新增資料夾：<code>新增 類別名稱</code>\n"
         "• 重新命名：<code>改名 舊名稱to新名稱</code>\n"
-        "• 移除資料夾：<code>移除 名稱</code>"
+        "• 移除資料夾：<code>移除 類別名稱</code>"
     )
     await update.message.reply_text(help_text, parse_mode="HTML")
 
