@@ -1,5 +1,5 @@
 flask[async]
-python-telegram-bot
+python-telegram-bot[webhooks]
 requests
 feedparser
 gunicorn
