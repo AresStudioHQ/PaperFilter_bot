@@ -1,17 +1,46 @@
-import logging
-import random
 import os
 import json
-import urllib.parse
-import feedparser
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ApplicationBuilder, MessageHandler, CallbackQueryHandler, CommandHandler, ContextTypes, filters
+import random
+import urllib
+import asyncio
+from flask import Flask, request
+from feedparser import feedparser  # 如果有用到
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    filters,
+    ContextTypes
+)
 
-TOKEN = '8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ'
+# ==================== 1. 基本設定區 ====================
+TOKEN = "你的_TELEGRAM_BOT_TOKEN"  # 請把這裡換成你真正的 Bot Token
+PORT = int(os.environ.get("PORT", 10000))
 SEEN_FILE = 'seen_papers.txt'
 CONFIG_FILE = 'categories.json'
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+app = Flask(__name__)
+bot = Bot(token=TOKEN)
+
+# 建立 Telegram 應用程式容器
+application = Application.builder().token(TOKEN).build()
+
+
+# ==================== 2. 功能邏輯區 (請把你的功能放這裡) ====================
+
+async def start(update: Update, context):
+    """使用者輸入 /start 時的歡迎訊息"""
+    await update.message.reply_text("你好！我是你的 24 小時雲端論文管家（Webhook 模式已啟動）。")
+
+# 註冊 /start 指令
+application.add_handler(CommandHandler("start", start))
+
+# -------------------------------------------------------------------------
+# 【提示】請把妳之前寫好的其他功能（例如搜尋論文、處理檔案、綁定網址等）
+# 用下面這種方式加進來：
+# logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def load_categories():
     if not os.path.exists(CONFIG_FILE):
@@ -75,7 +104,7 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<b>🔍 1. 搜尋最新未讀論文</b>\n"
         "• 直接輸入想找的關鍵字即可開始搜尋。\n"
         "• 💡 <b>建議</b>：因資料庫為國際英文介面，使用 <b>英文關鍵字</b>（例如：<code>quantum computing</code>）搜尋效果最好、文章最豐富！\n\n"
-        "<b>📁 2. 資料夾與分類管理輸入法</b>\n"
+        "<b>📁 2. 資料夾與分類管理</b>\n"
         "• 查看目前資料夾：<code>/folders</code> 或 <code>我的資料夾</code>\n"
         "• 新增資料夾：<code>新增 「資料夾名稱」</code>（例如：<code>新增 量子物理</code>）\n"
         "• 重新命名資料夾：<code>改名 「舊名稱」to「新名稱」</code>（例如：<code>改名 量子物理to統計學</code>) (另外，雲端資料夾會同步更改）\n"
@@ -235,11 +264,44 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text="⚠️ 此分類按鈕已不存在或已被移除。")
 
 if __name__ == '__main__':
-    application = ApplicationBuilder().token(TOKEN).build()
-    
+    application = Application.builder().token(TOKEN).build()    
     application.add_handler(CommandHandler("help", send_help))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(CallbackQueryHandler(button_click))
     
-    print("直覺語法版論文管家已啟動！")
-    application.run_polling()
+# application.add_handler(CommandHandler("search",你的搜尋函式))
+# application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, 你的訊息處理函式))
+# -------------------------------------------------------------------------
+
+
+# ==================== 3. Webhook 核心接收與轉發區 ====================
+
+@app.route(f"/{TOKEN}", methods=["POST"])
+def webhook():
+    """接收 Telegram 伺服器推播過來的更新訊息"""
+    json_data = request.get_json(force=True)
+    update = Update.de_json(json_data, bot)
+    
+    # 將事件安全地丟入 Telegram 應用程式佇列中執行
+    asyncio.run_coroutine_threadsafe(
+        application.process_update(update), 
+        application.bot_data.get('loop', asyncio.get_event_loop())
+    )
+    return "ok"
+
+@app.route("/")
+def index():
+    """用來讓 Render 伺服器自我檢測的健康檢查首頁"""
+    return "Paper Bot is running successfully!"
+
+
+# ==================== 4. 伺服器啟動與初始化 ====================
+
+if __name__ == "__main__":
+    # 初始化 Telegram 應用程式的事件迴圈
+    loop = asyncio.get_event_loop()
+    application.bot_data['loop'] = loop
+    loop.run_until_complete(application.initialize())
+    
+    # 啟動 Flask 伺服器，監聽 Render 指定的 Port
+    app.run(host="0.0.0.0", port=PORT)
