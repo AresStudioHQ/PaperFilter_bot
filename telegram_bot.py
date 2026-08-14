@@ -24,6 +24,21 @@ SEEN_FILE = 'seen_papers.txt'
 CONFIG_FILE = 'categories.json'
 
 app = Flask(__name__)
+
+# 讓根目錄同時支援 GET 檢查與 POST 接收 Telegram 訊息
+@app.route("/", methods=["GET", "POST"])
+def webhook():
+    if request.method == "POST":
+        # 接收 Telegram 傳來的 JSON 資料
+        json_data = request.get_json(force=True)
+        update = Update.de_json(json_data, application.bot)
+        
+        # 讓機器人非同步處理這個更新
+        asyncio.run(application.process_update(update))
+        return "OK"
+    else:
+        return "Telegram Bot is running!"
+    
 bot = Bot(token=TOKEN)
 
 # 建立 Telegram 應用程式容器
@@ -256,25 +271,28 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await query.edit_message_text(text="⚠️ 此分類按鈕已不存在或已被移除。")
 
-# ==================== 3. Webhook 核心接收與轉發區 ====================
+# =================== 3. 綁定與初始化 ===================
+TOKEN = "8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ"
+RENDER_URL = "[https://api.telegram.org/bot](https://api.telegram.org/bot)<8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ>/getWebhookInfo"  # 換成你真正的 Render 網址
 
+# 初始化 Telegram Bot
+application = Application.builder().token(TOKEN).build()
+
+# 註冊你的指令與訊息處理器 (例如 /start, handle_message 等)
+application.add_handler(CommandHandler("start", start))
+application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+# 讓 Flask 啟動時自動設定 Webhook
 @app.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
-    """接收 Telegram 伺服器推播過來的更新訊息"""
-    json_data = request.get_json(force=True)
-    update = Update.de_json(json_data, bot)
-    
-    # 將事件安全地丟入 Telegram 應用程式佇列中執行
-    asyncio.run_coroutine_threadsafe(
-        application.process_update(update), 
-        application.bot_data.get('loop', asyncio.get_event_loop())
-    )
-    return "ok"
+async def webhook():
+    """接收 Telegram 傳來的更新"""
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    await application.process_update(update)
+    return "OK"
 
 @app.route("/")
 def index():
-    """用來讓 Render 伺服器自我檢測的健康檢查首頁"""
-    return "Paper Bot is running successfully!"
+    return "PaperFilter Bot is running!"
 
 # 註冊所有的 Handler
 application.add_handler(CommandHandler("start", start))
@@ -284,15 +302,11 @@ application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle
 
 # =================== 4. 伺服器啟動與初始化 ===================
 if __name__ == "__main__":
-    # 初始化 Telegram 應用程式的事件迴圈
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
-    application.bot_data['loop'] = loop
-    loop.run_until_complete(application.initialize())
+    # 自動向 Telegram 註冊 Webhook 網址
+    import requests
+    webhook_url = f"{RENDER_URL}/{TOKEN}"
+    requests.get(f"https://api.telegram.org/bot{TOKEN}/setWebhook?url={webhook_url}")
+    print(f"Webhook 已自動設定為: {webhook_url}")
 
-    # 啟動 Flask 伺服器，監聽 Render 指定的 Port
+    # 啟動 Flask 伺服器
     app.run(host="0.0.0.0", port=PORT)
