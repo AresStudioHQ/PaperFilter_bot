@@ -24,21 +24,6 @@ SEEN_FILE = 'seen_papers.txt'
 CONFIG_FILE = 'categories.json'
 
 app = Flask(__name__)
-
-# 讓根目錄同時支援 GET 檢查與 POST 接收 Telegram 訊息
-@app.route("/", methods=["GET", "POST"])
-def webhook():
-    if request.method == "POST":
-        # 接收 Telegram 傳來的 JSON 資料
-        json_data = request.get_json(force=True)
-        update = Update.de_json(json_data, application.bot)
-        
-        # 讓機器人非同步處理這個更新
-        asyncio.run(application.process_update(update))
-        return "OK"
-    else:
-        return "Telegram Bot is running!"
-    
 bot = Bot(token=TOKEN)
 
 # 建立 Telegram 應用程式容器
@@ -273,7 +258,7 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # =================== 3. 綁定與初始化 ===================
 TOKEN = "8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ"
-RENDER_URL = "[https://api.telegram.org/bot](https://api.telegram.org/bot)<8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ>/getWebhookInfo"  # 換成你真正的 Render 網址
+RENDER_URL = "https://paperfilter-bot.onrender.com"  #換成你真正的 Render 網址
 
 # 初始化 Telegram Bot
 application = Application.builder().token(TOKEN).build()
