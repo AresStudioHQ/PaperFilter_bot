@@ -190,9 +190,19 @@ application.add_handler(CallbackQueryHandler(handle_callback))
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 # ========================== 4. Webhook 路由 ==========================
+# 1. 先定義好所有的路由與函式
 @app.route("/webhook", methods=["POST"])
 async def webhook():
     await application.initialize()
     update = Update.de_json(request.get_json(force=True), application.bot)
     await application.process_update(update)
     return "OK"
+
+@app.route("/", methods=["GET"])
+def index():
+    return "Telegram Bot is running!"
+
+# 2. 永遠把這行放在整個檔案的最底部！
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
