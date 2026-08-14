@@ -99,7 +99,10 @@ def main():
         listen="0.0.0.0",
         port=PORT,
         webhook_url=f"https://paperfilter-bot.onrender.com/{TOKEN}",
+        drop_pending_updates=True,
     )
+
+
 
 if __name__ == "__main__":
     main()
