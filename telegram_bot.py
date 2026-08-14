@@ -101,6 +101,10 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(help_text, parse_mode='HTML')
 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """使用者輸入 /start 時的歡迎與引導訊息"""
+    await send_help(update, context)
+    
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text.strip()
     
@@ -252,17 +256,6 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await query.edit_message_text(text="⚠️ 此分類按鈕已不存在或已被移除。")
 
-if __name__ == '__main__':
-    application = Application.builder().token(TOKEN).build()    
-    application.add_handler(CommandHandler("help", send_help))
-    application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-    application.add_handler(CallbackQueryHandler(button_click))
-    
-# application.add_handler(CommandHandler("search",你的搜尋函式))
-# application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, 你的訊息處理函式))
-# -------------------------------------------------------------------------
-
-
 # ==================== 3. Webhook 核心接收與轉發區 ====================
 
 @app.route(f"/{TOKEN}", methods=["POST"])
@@ -282,79 +275,12 @@ def webhook():
 def index():
     """用來讓 Render 伺服器自我檢測的健康檢查首頁"""
     return "Paper Bot is running successfully!"
-
-# 模擬原本的儲存與分類邏輯（保留你的完整架構）
-CATEGORIES = {
-    "AI": "AI_Folder",
-    "Python": "Python_Folder",
-    "Web": "Web_Folder"
-}
-
-def save_seen_paper(link):
-    """記錄已讀過的文章/論文"""
-    pass
-
-def save_to_folder(folder_name, title, link):
-    """將文章存入對應雲端資料夾"""
-    pass
-
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """使用者輸入 /start 時的歡迎訊息"""
-    keyboard = [
-        [InlineKeyboardButton("AI 專區", callback_data="AI")],
-        [InlineKeyboardButton("Python 專區", callback_data="Python")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("你好！我是你的 24 小時雲端論文管家。\n請選擇分類：", reply_markup=reply_markup)
-
-
-async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """處理按鈕點擊事件"""
-    query = update.callback_query
-    await query.answer()
-    
-    choice = query.data
-    if choice in CATEGORIES:
-        folder_name = CATEGORIES[choice]
-        # 這裡對應你原本的儲存邏輯
-        await query.edit_message_text(text=f"✅ 已成功將文章歸檔至：【{folder_name}】資料夾！")
-    else:
-        await query.edit_message_text(text="⚠️ 此分類按鈕已不存在或已被移除。")
-
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """處理一般文字訊息或網址輸入"""
-    text = update.message.text
-    await update.message.reply_text(f"已收到你的訊息/連結：{text}，正在幫你處理...")
-
 
 # 註冊所有的 Handler
 application.add_handler(CommandHandler("start", start))
+application.add_handler(CommandHandler("help", send_help))
 application.add_handler(CallbackQueryHandler(button_click))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-
-
-# ==================== 3. Webhook 核心接收與轉發區 ====================
-
-@app.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
-    """接收 Telegram 伺服器推播過來的更新訊息"""
-    json_data = request.get_json(force=True)
-    update = Update.de_json(json_data, bot)
-    
-    # 將事件安全地丟入 Telegram 應用程式佇列中執行
-    asyncio.run_coroutine_threadsafe(
-        application.process_update(update), 
-        application.bot_data.get('loop', asyncio.get_event_loop())
-    )
-    return "ok"
-
-@app.route("/")
-def index():
-    """用來讓 Render 伺服器自我檢測的健康檢查首頁"""
-    return "Paper Bot is running successfully!"
-
 
 # ==================== 4. 伺服器啟動與初始化 ====================
 
