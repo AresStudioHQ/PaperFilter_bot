@@ -271,6 +271,7 @@ application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_m
 @app.route(f"/{TOKEN}", methods=["POST"])
 async def webhook():
     """接收 Telegram 傳來的更新"""
+    await application.initialize()
     update = Update.de_json(request.get_json(force=True), application.bot)
     await application.process_update(update)
     return "OK"
