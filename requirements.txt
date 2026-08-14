@@ -1,3 +1,4 @@
-flask[async]>=2.0.0
+flask[async]
 python-telegram-bot
 requests
+feedparser
