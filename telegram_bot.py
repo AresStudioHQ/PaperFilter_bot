@@ -9,7 +9,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 import feedparser
 
 # ========================== 1. 基礎設定 ==========================
-TOKEN = "8933939727:AAGqGDok3XMo1Ppm1ZvduAD80554N51ILUQ"
+TOKEN = "8933939727:AAFF_TbfwqqcwXN72WCjL1qFQfMJ-P7iSoU"
 SEEN_FILE = 'seen_papers.txt'
 CONFIG_FILE = 'categories.json'
 
@@ -190,19 +190,23 @@ application.add_handler(CallbackQueryHandler(handle_callback))
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 # ========================== 4. Webhook 路由 ==========================
-# 1. 先定義好所有的路由與函式
+
 @app.route("/webhook", methods=["POST"])
 async def webhook():
-    await application.initialize()
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    await application.process_update(update)
-    return "OK"
+    try:
+        await application.initialize()
+        update = Update.de_json(request.get_json(force=True), application.bot)
+        await application.process_update(update)
+        return "OK"
+    except Exception as e:
+        print(f"⚠️ Webhook 處理發生錯誤: {e}")
+        return "OK"
 
 @app.route("/", methods=["GET"])
 def index():
     return "Telegram Bot is running!"
 
-# 2. 永遠把這行放在整個檔案的最底部！
+# 永遠把這兩行放在整個檔案的最底部！
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
