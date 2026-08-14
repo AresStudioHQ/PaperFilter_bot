@@ -192,21 +192,18 @@ application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_m
 # ========================== 4. Webhook 路由 ==========================
 
 @app.route("/webhook", methods=["POST"])
-async def webhook():
+def webhook():
     try:
-        await application.initialize()
-        update = Update.de_json(request.get_json(force=True), application.bot)
-        await application.process_update(update)
-        return "OK"
+        # 使用 Flask 的 request 取得 Telegram 傳來的 JSON 資料
+        json_data = request.get_json(force=True)
+        update = Update.de_json(json_data, application.bot)
+        
+        # 讓 application 在背景或直接同步處理 update
+        # 針對 python-telegram-bot v20+，我們可以用 runner 把它跑起來
+        import asyncio
+        asyncio.run(application.process_update(update))
+        
+        return "OK", 200
     except Exception as e:
-        print(f"⚠️ Webhook 處理發生錯誤: {e}")
-        return "OK"
-
-@app.route("/", methods=["GET"])
-def index():
-    return "Telegram Bot is running!"
-
-# 永遠把這兩行放在整個檔案的最底部！
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+        print(f"⚠️ Webhook 處理發生錯誤：{e}")
+        return "OK", 200
