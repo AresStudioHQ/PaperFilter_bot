@@ -282,13 +282,17 @@ application.add_handler(CommandHandler("help", send_help))
 application.add_handler(CallbackQueryHandler(button_click))
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
-# ==================== 4. 伺服器啟動與初始化 ====================
-
+# =================== 4. 伺服器啟動與初始化 ===================
 if __name__ == "__main__":
     # 初始化 Telegram 應用程式的事件迴圈
-    loop = asyncio.get_event_loop()
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
     application.bot_data['loop'] = loop
     loop.run_until_complete(application.initialize())
-    
+
     # 啟動 Flask 伺服器，監聽 Render 指定的 Port
     app.run(host="0.0.0.0", port=PORT)
