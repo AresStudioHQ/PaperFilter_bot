@@ -16,7 +16,7 @@ from telegram.ext import (
 )
 
 # ==================== 1. 基本設定區 ====================
-TOKEN = "你的_TELEGRAM_BOT_TOKEN"  # 請把這裡換成你真正的 Bot Token
+TOKEN = "8933939727:AAGqGDOk3XMo1Ypm1ZvdUAD8o554N51ILUQ"  # 請把這裡換成你真正的 Bot Token
 PORT = int(os.environ.get("PORT", 10000))
 SEEN_FILE = 'seen_papers.txt'
 CONFIG_FILE = 'categories.json'
