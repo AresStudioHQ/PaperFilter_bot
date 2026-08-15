@@ -331,7 +331,7 @@ def generate_ai_summary(text: str) -> str:
         return text[:250] + "..." if len(text) > 250 else text
     try:
         res = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=" gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "你是學術論文導讀助手。請用繁體中文以 2 句話總結這篇論文的核心研究與成果。"},
                 {"role": "user", "content": text[:1500]}
