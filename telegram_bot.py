@@ -117,9 +117,9 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
         "<b>🤖 專屬論文管家 - 操作指引</b>\n\n"
         "<b>🔍 1. 搜尋最新未讀論文</b>\n"
-        "• 輸入英文關鍵字，例如 <code>fly</code>、<code>psychology</code>\n"
-        "• 部分中文會自動翻譯，例如 <code>蒼蠅</code> → fly\n"
-        "• 明確搜尋：<code>搜尋 fly</code> 或 <code>/search fly</code>\n"
+        "• 輸入英文關鍵字，例如 <code>space</code>\n"
+        "• 部分中文會自動翻譯，例如 <code>太空</code> → space\n"
+        "• 明確搜尋：<code>搜尋 space</code> 或 <code>/search space</code>\n"
         "• arXiv 以英文為主，建議優先英文關鍵字\n\n"
         "<b>💬 關於聊天</b>\n"
         "• 我是論文工具 Bot，不是 ChatGPT，不能自由閒聊\n"
@@ -139,13 +139,28 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def drive_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.effective_user:
+        return
+
+    user_id = update.effective_user.id
+    token = db.get_token(user_id)
+    
+    if token:
+        status_text = "✅ 你的 Google Drive 雲端已成功連線！\n（點擊論文分類按鈕即可直接自動歸檔）"
+    else:
+        auth_url = drive_manager.get_auth_url(user_id)
+        status_text = (
+            "⚠️ 尚未綁定 Google Drive 雲端！\n\n"
+            f"👉 <a href='{auth_url}'>點我獲取 Google 授權碼</a>\n"
+            "授權後請將<b>驗證碼複製貼在此對話框</b>發送給我即可完成綁定。"
+        )
+
     msg = (
         f"<b>☁️ Google Drive 狀態</b>\n\n"
-        f"{drive.status_message}\n\n"
+        f"{status_text}\n\n"
         f"略過論文資料夾名稱：<code>{SKIPPED_FOLDER_NAME}</code>"
     )
     await update.message.reply_text(msg, parse_mode="HTML")
-
 
 async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/search fly — 明確觸發論文搜尋。"""

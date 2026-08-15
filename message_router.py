@@ -6,10 +6,10 @@ CJK_RE = re.compile(r"[\u4e00-\u9fff\u3040-\u30ff]")
 
 _GREETING_REPLY = (
     "你好！我是<b>論文管家</b> 🤖\n\n"
-    "我專門幫你從 arXiv 找論文、摘要、歸檔到雲端，"
+    "我專門幫你找論文、摘要、歸檔到雲端，"
     "不是像 ChatGPT 那種自由聊天機器人。\n\n"
-    "• 搜尋論文：輸入 <code>fly</code>、<code>psychology</code>\n"
-    "• 中文可試：<code>蒼蠅</code>（會自動翻成 fly）\n"
+    "• 搜尋論文：輸入 <code>psychology</code>\n"
+    "• 中文可試：<code>太空</code>（會自動翻成 space）\n"
     "• 完整說明：<code>/help</code>"
 )
 
@@ -64,8 +64,7 @@ SEARCH_PREFIXES = ("搜尋 ", "搜索 ", "search ")
 NOT_A_SEARCH_HINT = (
     "我是<b>論文管家</b>，專門搜尋論文，不能像一般聊天機器人自由對話。\n\n"
     "<b>你可以：</b>\n"
-    "• 輸入英文關鍵字，例如 <code>fly</code>、<code>psychology</code>\n"
-    "• 輸入 <code>搜尋 fly</code> 明確搜尋\n"
+    "• 輸入英文關鍵字，例如 <code>space</code>\n"
     "• 打 <code>/help</code> 看完整功能\n"
     "• 打 <code>我的資料夾</code> 管理分類"
 )
@@ -73,12 +72,12 @@ NOT_A_SEARCH_HINT = (
 
 def cn_hint(original: str) -> str:
     return (
-        f"arXiv 論文庫以<b>英文</b>為主，「{original}」請改用英文關鍵字。\n\n"
+        f"論文庫以<b>英文</b>為主，「{original}」建議改用英文關鍵字。\n\n"
         "範例：\n"
-        "• 蒼蠅 → <code>fly</code> 或 <code>drosophila</code>\n"
+        "• 太空 → <code>space</code> 或 <code>cosmology</code>\n"
         "• 心理學 → <code>psychology</code>\n"
         "• 金融 → <code>financial</code>\n\n"
-        "也可輸入 <code>搜尋 fly</code>"
+        "也可輸入 <code>搜尋 financial</code>"
     )
 
 
