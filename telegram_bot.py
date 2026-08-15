@@ -4,9 +4,6 @@ import random
 import sys
 import asyncio
 import html
-from database import db
-from OAthur2 import drive_manager, SKIPPED_FOLDER_NAME
-from paper_search import fetch_paper_multi_source, extract_arxiv_id
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -17,8 +14,9 @@ from telegram.ext import (
     ContextTypes,
 )
 
+from database import db
 from OAthur2 import drive_manager, SKIPPED_FOLDER_NAME, SKIPPED_KEY
-from telegram_bot.paper_search import fetch_paper_by_keyword, extract_arxiv_id
+from paper_search import fetch_paper_multi_source, extract_arxiv_id
 from message_router import (
     is_chitchat,
     get_chitchat_response,
@@ -182,7 +180,7 @@ async def do_paper_search(
     seen = load_seen_papers()
     try:
         title, summary, link, already_seen = await asyncio.to_thread(
-            fetch_paper_by_keyword, arxiv_query, seen
+           fetch_paper_multi_source, arxiv_query, seen
         )
     except Exception as exc:
         print(f"搜尋例外: {exc}", file=sys.stderr)
