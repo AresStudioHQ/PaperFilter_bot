@@ -1,10 +1,9 @@
 import os
 import json
-import urllib.parse
 import random
 import sys
+import asyncio
 
-import feedparser
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -13,6 +12,17 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters,
     ContextTypes,
+)
+
+from drive_storage import get_drive, SKIPPED_FOLDER_NAME, SKIPPED_KEY
+from arxiv_search import fetch_paper_by_keyword, extract_arxiv_id
+from message_router import (
+    is_chitchat,
+    get_chitchat_response,
+    is_likely_chat_not_search,
+    resolve_search_query,
+    NOT_A_SEARCH_HINT,
+    cn_hint,
 )
 
 # ===================== 1. 基礎設定 =====================
@@ -29,7 +39,7 @@ def require_token() -> str:
 
 
 # ===================== 2. 資料與檔案處理函式 =====================
-def load_categories():
+def load_categories() -> dict[str, str]:
     if not os.path.exists(CONFIG_FILE):
         default = {
             "cat_1": "生物生態",
@@ -44,51 +54,62 @@ def load_categories():
         return json.load(f)
 
 
-def save_categories(categories):
+def save_categories(categories: dict[str, str]):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(categories, f, ensure_ascii=False, indent=4)
 
 
-def load_seen_papers():
+def load_seen_papers() -> set[str]:
     if not os.path.exists(SEEN_FILE):
         return set()
     with open(SEEN_FILE, "r", encoding="utf-8") as f:
-        return set(line.strip() for line in f)
+        return {extract_arxiv_id(line) for line in f if line.strip()}
 
 
-def save_seen_paper(link):
+def save_seen_paper(link: str):
+    arxiv_id = extract_arxiv_id(link)
     with open(SEEN_FILE, "a", encoding="utf-8") as f:
-        f.write(link + "\n")
+        f.write(arxiv_id + "\n")
 
 
-def save_to_folder(folder_name, title, link):
+def save_to_folder_local(folder_name: str, title: str, link: str, summary: str = ""):
+    """本機備份（雲端失敗時仍保留紀錄）。"""
     os.makedirs(folder_name, exist_ok=True)
     file_path = os.path.join(folder_name, "saved_papers.txt")
     with open(file_path, "a", encoding="utf-8") as f:
-        f.write(f"標題: {title}\n連結: {link}\n" + "-" * 50 + "\n")
+        block = f"標題: {title}\n連結: {link}\n"
+        if summary:
+            block += f"摘要: {summary}\n"
+        block += "-" * 50 + "\n"
+        f.write(block)
 
 
-def fetch_unseen_paper_by_keyword(user_input):
-    seen = load_seen_papers()
-    encoded_query = urllib.parse.quote(user_input)
-    url = (
-        "http://export.arxiv.org/api/query"
-        f"?search_query=all:{encoded_query}"
-        "&max_results=50&sortBy=submittedDate&sortOrder=descending"
-    )
-    try:
-        feed = feedparser.parse(url)
-        if feed.entries:
-            unseen_entries = [e for e in feed.entries if e.link not in seen]
-            if unseen_entries:
-                entry = random.choice(unseen_entries)
-                title = entry.title.strip().replace("\n", " ")
-                summary = entry.summary.strip().replace("\n", " ")[:250] + "..."
-                link = entry.link
-                return title, summary, link
-    except Exception as e:
-        print(f"解析失敗: {e}")
-    return None, None, None
+def build_category_keyboard(categories: dict[str, str]) -> InlineKeyboardMarkup:
+    keyboard = [
+        [InlineKeyboardButton(name, callback_data=cid) for cid, name in categories.items()]
+    ]
+    keyboard.append([InlineKeyboardButton("❌ 沒興趣", callback_data="skip")])
+    return InlineKeyboardMarkup(keyboard)
+
+
+async def archive_paper(
+    folder_key: str,
+    folder_name: str,
+    title: str,
+    summary: str,
+    link: str,
+) -> str:
+    """歸檔到雲端 + 本機備份，回傳給用戶的狀態訊息片段。"""
+    drive = get_drive()
+    save_to_folder_local(folder_name, title, link, summary)
+
+    if not drive.enabled:
+        return "（僅本機備份，雲端尚未設定）"
+
+    ok, detail = drive.archive_paper(folder_key, folder_name, title, summary, link)
+    if ok:
+        return "☁️ 已同步至 Google Drive"
+    return f"⚠️ 雲端同步失敗：{detail}（本機已備份）"
 
 
 # ===================== 3. Telegram 指令與訊息處理 =====================
@@ -96,23 +117,117 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
         "<b>🤖 專屬論文管家 - 操作指引</b>\n\n"
         "<b>🔍 1. 搜尋最新未讀論文</b>\n"
-        "• 直接輸入想找的關鍵字即可開始搜尋（建議使用英文）。\n\n"
+        "• 輸入英文關鍵字，例如 <code>fly</code>、<code>psychology</code>\n"
+        "• 部分中文會自動翻譯，例如 <code>蒼蠅</code> → fly\n"
+        "• 明確搜尋：<code>搜尋 fly</code> 或 <code>/search fly</code>\n"
+        "• arXiv 以英文為主，建議優先英文關鍵字\n\n"
+        "<b>💬 關於聊天</b>\n"
+        "• 我是論文工具 Bot，不是 ChatGPT，不能自由閒聊\n"
+        "• 打「你好」會有說明；問句或長句不會被當成搜尋\n\n"
         "<b>📁 2. 資料夾與分類管理</b>\n"
         "• 查看目前資料夾：<code>我的資料夾</code>\n"
         "• 新增資料夾：<code>新增 類別名稱</code>\n"
         "• 重新命名：<code>改名 舊名稱to新名稱</code>\n"
-        "• 移除資料夾：<code>移除 類別名稱</code>"
+        "• 移除資料夾：<code>移除 類別名稱</code>\n"
+        "（資料夾變更會同步至 Google Drive）\n\n"
+        "<b>☁️ 3. 雲端歸檔</b>\n"
+        "• 選擇資料夾 → 論文存入你的 Google Drive\n"
+        "• 點「沒興趣」→ 存入「沒興趣 (略過)」資料夾，日後可找回\n"
+        "• 檢查雲端狀態：<code>/drive</code>"
     )
     await update.message.reply_text(help_text, parse_mode="HTML")
 
 
+async def drive_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    drive = get_drive()
+    msg = (
+        f"<b>☁️ Google Drive 狀態</b>\n\n"
+        f"{drive.status_message}\n\n"
+        f"略過論文資料夾名稱：<code>{SKIPPED_FOLDER_NAME}</code>"
+    )
+    await update.message.reply_text(msg, parse_mode="HTML")
+
+
+async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/search fly — 明確觸發論文搜尋。"""
+    if not context.args:
+        await update.message.reply_text(
+            "請輸入關鍵字，例如：<code>/search fly</code>",
+            parse_mode="HTML",
+        )
+        return
+    query_text = " ".join(context.args)
+    await do_paper_search(update, context, query_text)
+
+
+async def do_paper_search(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, user_text: str
+):
+    """執行論文搜尋並推送結果。"""
+    arxiv_query, display_label, _ = resolve_search_query(user_text)
+
+    if arxiv_query is None:
+        await update.message.reply_text(cn_hint(display_label), parse_mode="HTML")
+        return
+
+    translate_note = ""
+    if arxiv_query.lower() != display_label.lower() and display_label != arxiv_query:
+        translate_note = f"（<code>{display_label}</code> → <code>{arxiv_query}</code>）"
+
+    await update.message.reply_text(
+        f"🔍 正在搜尋【{display_label}】{translate_note} 的最新論文...",
+        parse_mode="HTML",
+    )
+    seen = load_seen_papers()
+    try:
+        title, summary, link, already_seen = await asyncio.to_thread(
+            fetch_paper_by_keyword, arxiv_query, seen
+        )
+    except Exception as exc:
+        print(f"搜尋例外: {exc}", file=sys.stderr)
+        await update.message.reply_text(
+            "⚠️ 搜尋時發生錯誤，請稍後再試。若持續失敗請換個關鍵字。"
+        )
+        return
+
+    if not title:
+        await update.message.reply_text(
+            f"😅 arXiv 上找不到與【{display_label}】相關的論文，請換個關鍵字試試。"
+        )
+        return
+
+    context.user_data["current_title"] = title
+    context.user_data["current_summary"] = summary
+    context.user_data["current_link"] = link
+
+    categories = load_categories()
+    seen_note = (
+        "\n\n<i>（此領域新論文你已看過不少，這篇是最相關的已讀候選）</i>"
+        if already_seen
+        else ""
+    )
+    message_text = (
+        f"📚 <b>{title}</b>\n\n{summary}\n\n"
+        f"🔗 <a href='{link}'>閱讀原文</a>\n\n請選擇歸檔資料夾：{seen_note}"
+    )
+    await update.message.reply_text(
+        message_text,
+        reply_markup=build_category_keyboard(categories),
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    drive = get_drive()
     await update.message.reply_text("歡迎使用論文管家！")
+    await update.message.reply_text(drive.status_message)
     await send_help(update, context)
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text.strip()
+    drive = get_drive()
 
     if user_text.lower() in ("/help",) or user_text in [
         "說明書",
@@ -123,8 +238,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user_text in ["/folders", "我的資料夾"]:
             categories = load_categories()
             folder_list = "\n".join([f"• {name}" for name in categories.values()])
+            cloud_hint = "☁️ 雲端同步：已啟用" if drive.enabled else "☁️ 雲端同步：未設定"
             help_msg = (
                 f"📁 <b>目前的資料夾清單</b>：\n{folder_list}\n\n"
+                f"{cloud_hint}\n"
+                f"略過歸檔至：<code>{SKIPPED_FOLDER_NAME}</code>\n\n"
                 "🛠️ <b>管理指令</b>：\n"
                 "• 新增：<code>新增 名稱</code>\n"
                 "• 改名：<code>改名 舊to新</code>\n"
@@ -135,15 +253,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await send_help(update, context)
         return
 
-    if user_text.startswith("新增"):
-        new_name = user_text.replace("新增", "").strip()
+    if user_text.startswith("新增") or (
+        user_text.startswith("+") and not user_text.startswith("++")
+    ):
+        new_name = user_text.replace("新增", "").replace("+", "", 1).strip()
         if new_name:
             categories = load_categories()
             new_id = f"cat_{len(categories) + 1}_{random.randint(100, 999)}"
             categories[new_id] = new_name
             save_categories(categories)
+
+            cloud_msg = ""
+            if drive.enabled:
+                if drive.create_category_folder(new_id, new_name):
+                    cloud_msg = "\n☁️ 已同步建立 Google Drive 資料夾"
+                else:
+                    cloud_msg = "\n⚠️ 雲端資料夾建立失敗"
+
             await update.message.reply_text(
-                f"✅ 成功新增資料夾：【<b>{new_name}</b>】！", parse_mode="HTML"
+                f"✅ 成功新增資料夾：【<b>{new_name}</b>】！{cloud_msg}",
+                parse_mode="HTML",
             )
         return
 
@@ -163,8 +292,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 save_categories(categories)
                 if os.path.exists(old_name):
                     os.rename(old_name, new_name)
+
+                cloud_msg = ""
+                if drive.enabled:
+                    if drive.rename_category_folder(target_key, new_name):
+                        cloud_msg = "\n☁️ 已同步更新 Google Drive 資料夾名稱"
+                    else:
+                        cloud_msg = "\n⚠️ 雲端資料夾更名失敗"
+
                 await update.message.reply_text(
-                    f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！",
+                    f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！{cloud_msg}",
                     parse_mode="HTML",
                 )
             else:
@@ -176,8 +313,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         return
 
-    if user_text.startswith("移除"):
-        target_name = user_text.replace("移除", "").strip()
+    if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
+        target_name = user_text.replace("移除", "").replace("刪除資料夾", "").strip()
         categories = load_categories()
         target_key = next(
             (k for k, v in categories.items() if v == target_name), None
@@ -188,43 +325,37 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             save_categories(categories)
             if os.path.exists(target_name):
                 os.rename(target_name, f"{target_name} (已刪除選項)")
+
+            cloud_msg = ""
+            if drive.enabled:
+                if drive.mark_category_deleted(target_key, target_name):
+                    cloud_msg = (
+                        f"\n☁️ 雲端資料夾已標記為【{target_name} (已刪除選項)】"
+                    )
+                else:
+                    cloud_msg = "\n⚠️ 雲端資料夾標記失敗"
+
             await update.message.reply_text(
-                f"✅ 已將【<b>{target_name}</b>】從選單移除。", parse_mode="HTML"
+                f"✅ 已將【<b>{target_name}</b>】從選單移除。{cloud_msg}",
+                parse_mode="HTML",
             )
         else:
             await update.message.reply_text(f"❌ 找不到名為【{target_name}】的資料夾。")
         return
 
-    await update.message.reply_text(
-        f"🔍 正在搜尋【{user_text}】的最新論文...", parse_mode="HTML"
-    )
-    title, summary, link = fetch_unseen_paper_by_keyword(user_text)
-
-    if not title:
+    # --- 閒聊 / 問句：不當搜尋 ---
+    if is_chitchat(user_text):
         await update.message.reply_text(
-            f"😅 找不到與【{user_text}】相關的新論文，或都已經看過了！"
+            get_chitchat_response(user_text), parse_mode="HTML"
         )
         return
 
-    context.user_data["current_title"] = title
-    context.user_data["current_link"] = link
+    if is_likely_chat_not_search(user_text):
+        await update.message.reply_text(NOT_A_SEARCH_HINT, parse_mode="HTML")
+        return
 
-    categories = load_categories()
-    keyboard = [
-        [InlineKeyboardButton(name, callback_data=cid) for cid, name in categories.items()]
-    ]
-    keyboard.append([InlineKeyboardButton("❌ 略過", callback_data="skip")])
-
-    message_text = (
-        f"📚 <b>{title}</b>\n\n{summary}\n\n"
-        f"🔗 <a href='{link}'>閱讀原文</a>\n\n請選擇歸檔資料夾："
-    )
-    await update.message.reply_text(
-        message_text,
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="HTML",
-        disable_web_page_preview=True,
-    )
+    # --- 論文搜尋 ---
+    await do_paper_search(update, context, user_text)
 
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -233,19 +364,35 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     choice = query.data
     title = context.user_data.get("current_title", "未知標題")
+    summary = context.user_data.get("current_summary", "")
     link = context.user_data.get("current_link", "#")
     categories = load_categories()
 
+    if link == "#":
+        await query.edit_message_text(text="⚠️ 論文資料已過期，請重新搜尋。")
+        return
+
     if choice == "skip":
-        if link != "#":
-            save_seen_paper(link)
-        await query.edit_message_text(text="❌ 此篇論文已略過。")
+        save_seen_paper(link)
+        cloud_detail = await archive_paper(
+            SKIPPED_KEY,
+            SKIPPED_FOLDER_NAME,
+            title,
+            summary,
+            link,
+        )
+        await query.edit_message_text(
+            text=f"📂 已歸檔至【{SKIPPED_FOLDER_NAME}】\n{cloud_detail}"
+        )
     elif choice in categories:
         folder_name = categories[choice]
-        if link != "#":
-            save_to_folder(folder_name, title, link)
-            save_seen_paper(link)
-        await query.edit_message_text(text=f"✅ 已成功歸檔至：【{folder_name}】！")
+        save_seen_paper(link)
+        cloud_detail = await archive_paper(
+            choice, folder_name, title, summary, link
+        )
+        await query.edit_message_text(
+            text=f"✅ 已成功歸檔至：【{folder_name}】\n{cloud_detail}"
+        )
     else:
         await query.edit_message_text(text="⚠️ 此分類按鈕已不存在。")
 
@@ -256,6 +403,8 @@ def build_application():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", send_help))
+    application.add_handler(CommandHandler("drive", drive_status))
+    application.add_handler(CommandHandler("search", search_command))
     application.add_handler(CallbackQueryHandler(handle_callback))
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
@@ -263,8 +412,19 @@ def build_application():
     return application
 
 
+def bootstrap_drive():
+    drive = get_drive()
+    if drive.enabled:
+        categories = load_categories()
+        drive.sync_categories(categories)
+        print("Google Drive 資料夾已同步")
+    else:
+        print(drive.status_message)
+
+
 # ===================== 4. 主程式啟動 =====================
 def main():
+    bootstrap_drive()
     application = build_application()
     run_mode = os.getenv("RUN_MODE", "webhook").lower()
 
