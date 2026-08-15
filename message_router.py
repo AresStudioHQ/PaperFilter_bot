@@ -8,8 +8,6 @@ _GREETING_REPLY = (
     "你好！我是<b>論文管家</b> 🤖\n\n"
     "我專門幫你找論文、摘要、歸檔到雲端，"
     "不是像 ChatGPT 那種自由聊天機器人。\n\n"
-    "• 搜尋論文：輸入 <code>psychology</code>\n"
-    "• 中文可試：<code>太空</code>（會自動翻成 space）\n"
     "• 完整說明：<code>/help</code>"
 )
 
