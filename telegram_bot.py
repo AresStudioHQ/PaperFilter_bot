@@ -120,7 +120,7 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• 輸入英文關鍵字，例如 <code>space</code>\n"
         "• 部分中文會自動翻譯，例如 <code>太空</code> → space\n"
         "• 明確搜尋：<code>搜尋 space</code> 或 <code>/search space</code>\n"
-        "• arXiv 以英文為主，建議優先英文關鍵字\n\n"
+        "• 論文平臺以英文為主，建議優先英文關鍵字\n\n"
         "<b>💬 關於聊天</b>\n"
         "• 我是論文工具 Bot，不是 ChatGPT，不能自由閒聊\n"
         "• 打「你好」會有說明；問句或長句不會被當成搜尋\n\n"
@@ -256,6 +256,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_text = update.message.text.strip()
     user_id = update.effective_user.id
+    is_drive_linked = bool(db.get_token(user_id))
 
     # 1. 判斷是否為 Google OAuth 授權碼
     if len(user_text) > 30 and " " not in user_text:
@@ -263,23 +264,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("✅ Google Drive 授權成功！以後按按鈕即可直接歸檔進你的雲端。")
             return
 
-    if user_text.lower() in ("/help",) or user_text in [
-        "說明書",
-        "功能",
-        "/folders",
-        "我的資料夾",
-    ]:
+    # 2. 說明書與資料夾清單
+    if user_text.lower() in ("/help",) or user_text in ["說明書", "功能", "/folders", "我的資料夾"]:
         if user_text in ["/folders", "我的資料夾"]:
             categories = load_categories()
             folder_list = "\n".join([f"• {name}" for name in categories.values()])
-            cloud_hint = "☁️ 雲端同步：已啟用" if drive.enabled else "☁️ 雲端同步：未設定"
+            cloud_hint = "☁️ 雲端同步：已綁定" if is_drive_linked else "☁️ 雲端同步：未授權（請點 /start 綁定）"
+            
             help_msg = (
                 f"📁 <b>目前的資料夾清單</b>：\n{folder_list}\n\n"
                 f"{cloud_hint}\n"
                 f"略過歸檔至：<code>{SKIPPED_FOLDER_NAME}</code>\n\n"
-                "🛠️ <b>管理指令</b>：\n"
+                "🛠 <b>管理指令</b>：\n"
                 "• 新增：<code>新增 名稱</code>\n"
-                "• 改名：<code>改名 舊to新</code>\n"
+                "• 改名：<code>改名 舊名稱to新名稱</code>\n"
                 "• 移除：<code>移除 名稱</code>"
             )
             await update.message.reply_text(help_msg, parse_mode="HTML")
@@ -287,108 +285,61 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await send_help(update, context)
         return
 
-    if user_text.startswith("新增") or (
-        user_text.startswith("+") and not user_text.startswith("++")
-    ):
+    # 3. 新增資料夾
+    if user_text.startswith("新增") or (user_text.startswith("+") and not user_text.startswith("++")):
         new_name = user_text.replace("新增", "").replace("+", "", 1).strip()
         if new_name:
             categories = load_categories()
             new_id = f"cat_{len(categories) + 1}_{random.randint(100, 999)}"
             categories[new_id] = new_name
             save_categories(categories)
-
-            cloud_msg = ""
-            if drive.enabled:
-                if drive.create_category_folder(new_id, new_name):
-                    cloud_msg = "\n☁️ 已同步建立 Google Drive 資料夾"
-                else:
-                    cloud_msg = "\n⚠️ 雲端資料夾建立失敗"
-
-            await update.message.reply_text(
-                f"✅ 成功新增資料夾：【<b>{new_name}</b>】！{cloud_msg}",
-                parse_mode="HTML",
-            )
+            await update.message.reply_text(f"✅ 成功新增資料夾：【<b>{new_name}</b>】！", parse_mode="HTML")
         return
 
+    # 4. 改名資料夾
     if user_text.startswith("改名"):
         try:
             content = user_text.replace("改名", "").strip()
             parts = content.split("to") if "to" in content else content.split("->")
             old_name, new_name = parts[0].strip(), parts[1].strip()
-
             categories = load_categories()
-            target_key = next(
-                (k for k, v in categories.items() if v == old_name), None
-            )
-
+            target_key = next((k for k, v in categories.items() if v == old_name), None)
+            
             if target_key:
                 categories[target_key] = new_name
                 save_categories(categories)
-                if os.path.exists(old_name):
-                    os.rename(old_name, new_name)
-
-                cloud_msg = ""
-                if drive.enabled:
-                    if drive.rename_category_folder(target_key, new_name):
-                        cloud_msg = "\n☁️ 已同步更新 Google Drive 資料夾名稱"
-                    else:
-                        cloud_msg = "\n⚠️ 雲端資料夾更名失敗"
-
-                await update.message.reply_text(
-                    f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！{cloud_msg}",
-                    parse_mode="HTML",
-                )
+                await update.message.reply_text(f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！", parse_mode="HTML")
             else:
                 await update.message.reply_text(f"❌ 找不到名為【{old_name}】的資料夾。")
         except Exception:
-            await update.message.reply_text(
-                "⚠️ 格式錯誤！範例：<code>改名 量子物理to統計學</code>",
-                parse_mode="HTML",
-            )
+            await update.message.reply_text("⚠️ 格式錯誤！範例：<code>改名 量子物理to統計學</code>", parse_mode="HTML")
         return
 
+    # 5. 移除資料夾
     if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
         target_name = user_text.replace("移除", "").replace("刪除資料夾", "").strip()
         categories = load_categories()
-        target_key = next(
-            (k for k, v in categories.items() if v == target_name), None
-        )
-
+        target_key = next((k for k, v in categories.items() if v == target_name), None)
+        
         if target_key:
             del categories[target_key]
             save_categories(categories)
-            if os.path.exists(target_name):
-                os.rename(target_name, f"{target_name} (已刪除選項)")
-
-            cloud_msg = ""
-            if drive.enabled:
-                if drive.mark_category_deleted(target_key, target_name):
-                    cloud_msg = (
-                        f"\n☁️ 雲端資料夾已標記為【{target_name} (已刪除選項)】"
-                    )
-                else:
-                    cloud_msg = "\n⚠️ 雲端資料夾標記失敗"
-
-            await update.message.reply_text(
-                f"✅ 已將【<b>{target_name}</b>】從選單移除。{cloud_msg}",
-                parse_mode="HTML",
-            )
+            await update.message.reply_text(f"✅ 已將【<b>{target_name}</b>】從選單移除。", parse_mode="HTML")
         else:
             await update.message.reply_text(f"❌ 找不到名為【{target_name}】的資料夾。")
         return
 
-    # --- 閒聊 / 問句：不當搜尋 ---
+    # 6. 閒聊過濾
     if is_chitchat(user_text):
-        await update.message.reply_text(
-            get_chitchat_response(user_text), parse_mode="HTML"
-        )
+        await update.message.reply_text(get_chitchat_response(user_text), parse_mode="HTML")
         return
 
+    # 7. 長句防呆
     if is_likely_chat_not_search(user_text):
         await update.message.reply_text(NOT_A_SEARCH_HINT, parse_mode="HTML")
         return
 
-    # --- 論文搜尋 ---
+    # 8. 執行論文搜尋
     await do_paper_search(update, context, user_text)
 
 

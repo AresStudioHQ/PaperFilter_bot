@@ -72,7 +72,7 @@ NOT_A_SEARCH_HINT = (
 
 def cn_hint(original: str) -> str:
     return (
-        f"論文庫以<b>英文</b>為主，「{original}」建議改用英文關鍵字。\n\n"
+        f"論文平臺以<b>英文</b>為主，「{original}」建議改用英文關鍵字。\n\n"
         "範例：\n"
         "• 太空 → <code>space</code> 或 <code>cosmology</code>\n"
         "• 心理學 → <code>psychology</code>\n"
