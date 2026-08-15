@@ -4,7 +4,9 @@ import random
 import sys
 import asyncio
 import html
-
+from database import db
+from OAthur2 import drive_manager, SKIPPED_FOLDER_NAME
+from paper_search import fetch_paper_multi_source, extract_arxiv_id
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -15,8 +17,8 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from drive_storage import get_drive, SKIPPED_FOLDER_NAME, SKIPPED_KEY
-from arxiv_search import fetch_paper_by_keyword, extract_arxiv_id
+from telegram_bot.OAthur2 import get_drive, SKIPPED_FOLDER_NAME, SKIPPED_KEY
+from telegram_bot.paper_search import fetch_paper_by_keyword, extract_arxiv_id
 from message_router import (
     is_chitchat,
     get_chitchat_response,
@@ -221,15 +223,34 @@ async def do_paper_search(
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    drive = get_drive()
-    await update.message.reply_text("歡迎使用論文管家！")
-    await update.message.reply_text(drive.status_message)
+    if not update.effective_user:
+        return
+        
+    user_id = update.effective_user.id
+    auth_url = drive_manager.get_auth_url(user_id)
+    
+    welcome_text = (
+        "👋 歡迎使用<b>論文管家</b>！\n\n"
+        "若要將論文自動歸檔進你的 Google 雲端硬碟：\n"
+        f"👉 <a href='{auth_url}'>點我獲取 Google 授權碼</a>\n\n"
+        "授權後請直接將<b>驗證碼複製貼在此對話框</b>發送給我！"
+    )
+    await update.message.reply_text(welcome_text, parse_mode="HTML")
     await send_help(update, context)
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message or not update.message.text or not update.effective_user:
+        return
+
     user_text = update.message.text.strip()
-    drive = get_drive()
+    user_id = update.effective_user.id
+
+    # 1. 判斷是否為 Google OAuth 授權碼
+    if len(user_text) > 30 and " " not in user_text:
+        if drive_manager.exchange_code(user_id, user_text):
+            await update.message.reply_text("✅ Google Drive 授權成功！以後按按鈕即可直接歸檔進你的雲端。")
+            return
 
     if user_text.lower() in ("/help",) or user_text in [
         "說明書",
@@ -362,39 +383,43 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    if not query or not update.effective_user:
+        return
+
     await query.answer()
 
     choice = query.data
+    user_id = update.effective_user.id
     title = context.user_data.get("current_title", "未知標題")
     summary = context.user_data.get("current_summary", "")
     link = context.user_data.get("current_link", "#")
     categories = load_categories()
 
+    # 1. 檢查論文是否過期
     if link == "#":
         await query.edit_message_text(text="⚠️ 論文資料已過期，請重新搜尋。")
         return
 
+    # 2. 使用者點擊「沒興趣 / 略過」
     if choice == "skip":
-        save_seen_paper(link)
-        cloud_detail = await archive_paper(
-            SKIPPED_KEY,
-            SKIPPED_FOLDER_NAME,
-            title,
-            summary,
-            link,
-        )
-        await query.edit_message_text(
-            text=f"📂 已歸檔至【{SKIPPED_FOLDER_NAME}】\n{cloud_detail}"
-        )
+        # 記錄負面偏好（越推越準）
+        db.update_preference(user_id, title, is_interested=False)
+        # 存入雲端的略過資料夾
+        ok, msg = drive_manager.archive_paper(user_id, SKIPPED_FOLDER_NAME, title, summary, link)
+        cloud_hint = "\n☁️ 已同步至 Google Drive【略過】資料夾" if ok else ""
+        await query.edit_message_text(f"🗑 已略過並記錄偏好（未來將減少此類推薦）{cloud_hint}")
+
+    # 3. 使用者點擊指定自訂資料夾
     elif choice in categories:
         folder_name = categories[choice]
-        save_seen_paper(link)
-        cloud_detail = await archive_paper(
-            choice, folder_name, title, summary, link
-        )
-        await query.edit_message_text(
-            text=f"✅ 已成功歸檔至：【{folder_name}】\n{cloud_detail}"
-        )
+        # 記錄正面偏好（越推越準）
+        db.update_preference(user_id, title, is_interested=True)
+        # 上傳到該使用者的 Google Drive 資料夾
+        ok, detail = drive_manager.archive_paper(user_id, folder_name, title, summary, link)
+        if ok:
+            await query.edit_message_text(f"✅ 已成功歸檔至你的 Google Drive：【{folder_name}】！")
+        else:
+            await query.edit_message_text(f"⚠️ 雲端歸檔失敗：{detail}\n👉 若尚未綁定雲端，請打 /start 點連結授權。")
     else:
         await query.edit_message_text(text="⚠️ 此分類按鈕已不存在。")
 

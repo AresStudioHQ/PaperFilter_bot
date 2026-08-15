@@ -62,7 +62,7 @@ CN_TO_EN: dict[str, str] = {
 SEARCH_PREFIXES = ("搜尋 ", "搜索 ", "search ")
 
 NOT_A_SEARCH_HINT = (
-    "我是<b>論文管家</b>，專門搜尋 arXiv 論文，不能像一般聊天機器人自由對話。\n\n"
+    "我是<b>論文管家</b>，專門搜尋論文，不能像一般聊天機器人自由對話。\n\n"
     "<b>你可以：</b>\n"
     "• 輸入英文關鍵字，例如 <code>fly</code>、<code>psychology</code>\n"
     "• 輸入 <code>搜尋 fly</code> 明確搜尋\n"
