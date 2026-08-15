@@ -234,7 +234,7 @@ async def do_paper_search(
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.effective_user:
+    if not update.effective_user or not update.message:
         return
         
     user_id = update.effective_user.id
@@ -243,10 +243,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "👋 歡迎使用<b>論文管家</b>！\n\n"
         "若要將論文自動歸檔進你的 Google 雲端硬碟：\n"
-        f"👉 <a href='{auth_url}'>點我獲取 Google 授權碼</a>\n\n"
-        "授權後請直接將<b>驗證碼複製貼在此對話框</b>發送給我！"
+        "1. 請點擊下方按鈕獲取授權碼\n"
+        "2. 授權後請將<b>驗證碼貼在此對話框</b>發送給我！\n\n"
+        "或直接輸入關鍵字開始搜尋！"
     )
-    await update.message.reply_text(welcome_text, parse_mode="HTML")
+    
+    # 使用 Telegram 互動式網址按鈕（保證直接跳出瀏覽器開啟）
+    keyboard = []
+    if auth_url and auth_url != "#":
+        keyboard.append([InlineKeyboardButton("🔗 點我開啟 Google 授權頁面", url=auth_url)])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
+    await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode="HTML")
     await send_help(update, context)
 
 

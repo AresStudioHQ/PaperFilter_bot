@@ -291,11 +291,56 @@ def entry_to_result(entry) -> tuple[str, str, str]:
 from Bio import Entrez
 import openai
 
-Entrez.email = os.getenv("ENTREZ_EMAIL", "paperfilter-bot@example.com")
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# ===================== 多來源搜尋 (最新年份) + 現代 OpenAI 導讀 =====================
+import os
+import sys
+from Bio import Entrez
+from openai import OpenAI
 
-# 1. PubMed 搜尋 (生物、昆蟲、醫學)
-def search_pubmed(query: str, max_results=5) -> list[dict]:
+Entrez.email = os.getenv("ENTREZ_EMAIL", "paperfilter-bot@example.com")
+
+# 1. 現代 OpenAI 摘要函式 (支援 OpenAI v1.0+)
+def generate_ai_summary(text: str) -> str:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return text[:250] + "..." if len(text) > 250 else text
+
+    try:
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "你是專業學術論文導讀助手。請用繁體中文以 2 到 3 句話精準總結這篇論文的核心研究與成果。"},
+                {"role": "user", "content": text[:1500]}
+            ],
+            temperature=0.3
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"OpenAI 呼叫失敗，改用截斷原文: {e}", file=sys.stderr)
+        return text[:250] + "..."
+
+# 2. PubMed 最新生物醫學論文搜尋
+from datetime import datetime
+
+# 1. 統一計算「年份新鮮度加分」
+def calculate_recency_score(year_str: str) -> int:
+    try:
+        current_year = datetime.now().year
+        year = int(re.search(r'\d{4}', str(year_str)).group(0))
+        diff = current_year - year
+        if diff <= 1:   # 2024~2026 年最新論文
+            return 20
+        elif diff <= 2: # 2023 年
+            return 10
+        elif diff <= 4: # 2021~2022 年
+            return 5
+        return 0
+    except Exception:
+        return 5 # 若抓不到年份給予基礎分
+
+# 2. 搜尋 PubMed (生物/醫學/自然科學)
+def search_pubmed(query: str, max_results=8) -> list[dict]:
     papers = []
     try:
         handle = Entrez.esearch(db="pubmed", term=query, retmax=max_results, sort="pub_date")
@@ -309,95 +354,126 @@ def search_pubmed(query: str, max_results=5) -> list[dict]:
         records = Entrez.read(fetch_handle)
         fetch_handle.close()
 
-        for article in records['PubmedArticle']:
-            title = article['MedlineCitation']['Article']['ArticleTitle']
-            abstract_list = article['MedlineCitation']['Article'].get('Abstract', {}).get('AbstractText', ['無摘要'])
+        for article in records.get('PubmedArticle', []):
+            medline = article['MedlineCitation']
+            title = medline['Article']['ArticleTitle']
+            abstract_list = medline['Article'].get('Abstract', {}).get('AbstractText', ['無摘要'])
             abstract = "".join(str(x) for x in abstract_list)
-            pmid = article['MedlineCitation']['PMID']
+            pmid = str(medline['PMID'])
+            
+            # 解析年份
+            pub_date = medline['Article'].get('Journal', {}).get('JournalIssue', {}).get('PubDate', {})
+            year = pub_date.get('Year', str(datetime.now().year))
+
             papers.append({
                 "source": "PubMed",
                 "title": title,
                 "summary": abstract,
                 "link": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
-                "id": str(pmid)
+                "id": f"pmid_{pmid}",
+                "year": year
             })
     except Exception as e:
-        print(f"PubMed 搜尋失敗: {e}", file=sys.stderr)
+        print(f"PubMed 搜尋異常: {e}", file=sys.stderr)
     return papers
 
-# 2. AI 摘要導讀
-def generate_ai_summary(text: str) -> str:
-    if not os.getenv("OPENAI_API_KEY"):
-        return text[:250] + "..." if len(text) > 250 else text
-    try:
-        res = openai.ChatCompletion.create(
-            model=" gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "你是學術論文導讀助手。請用繁體中文以 2 句話總結這篇論文的核心研究與成果。"},
-                {"role": "user", "content": text[:1500]}
-            ],
-            timeout=8
-        )
-        return res.choices[0].message.content.strip()
-    except Exception:
-        return text[:250] + "..."
+# 3. 搜尋 arXiv (資工/AI/物理/數學/計量金融)
+def search_arxiv_candidates(words: list[str], max_results=8) -> list[dict]:
+    papers = []
+    # 使用 submittedDate（依提交日期排序，保證抓到最新）
+    for tier_name, query in build_tiered_queries(words):
+        feed = fetch_feed(query, max_results=max_results)
+        for entry in feed.entries:
+            if not entry_matches_keywords(entry, words):
+                continue
+            t, s, l = entry_to_result(entry)
+            pub_year = entry.get("published", str(datetime.now().year))[:4]
+            aid = extract_arxiv_id(l)
+            papers.append({
+                "source": "arXiv",
+                "title": t,
+                "summary": s,
+                "link": l,
+                "id": aid,
+                "year": pub_year,
+                "raw_entry": entry
+            })
+    return papers
 
-# 3. 升級版論文搜尋（整合多來源 + 動態偏好排序）
+# 4. 跨平台評分與最強論文選拔引擎
 def fetch_paper_multi_source(user_input: str, seen_raw: set[str], user_bias: tuple = ({}, {})) -> tuple:
     pos_bias, neg_bias = user_bias
     words = parse_words(user_input)
     if not words:
         return None, None, None, False
 
-    candidates = []
+    all_candidates = []
 
-    # (A) arXiv 搜尋
-    for tier_name, query in build_tiered_queries(words):
-        feed = fetch_feed(query, max_results=10)
-        for entry in feed.entries:
-            if not entry_matches_keywords(entry, words):
-                continue
-            base_score = score_entry(entry, words)
-            t, s, l = entry_to_result(entry)
-            
-            # 動態偏好評分
-            pref_score = 0
-            for w, weight in pos_bias.items():
-                if w in t.lower(): pref_score += weight * 2
-            for w, weight in neg_bias.items():
-                if w in t.lower(): pref_score -= weight * 3
+    # 🚀 同時向兩大平台發起檢索
+    pubmed_list = search_pubmed(user_input, max_results=6)
+    arxiv_list = search_arxiv_candidates(words, max_results=6)
+    raw_list = pubmed_list + arxiv_list
 
-            candidates.append({
-                "score": base_score + pref_score,
-                "title": t,
-                "summary": s,
-                "link": l,
-                "id": extract_arxiv_id(l)
-            })
-
-    # (B) 若包含生物、昆蟲等關鍵字，同步搜 PubMed
-    if any(w.lower() in BIOLOGY_KEYWORDS for w in words):
-        pubmed_results = search_pubmed(user_input, max_results=5)
-        for p in pubmed_results:
-            candidates.append({
-                "score": 25, 
-                "title": p["title"],
-                "summary": p["summary"],
-                "link": p["link"],
-                "id": p["id"]
-            })
-
-    if not candidates:
+    if not raw_list:
         return None, None, None, False
 
-    candidates.sort(key=lambda x: x["score"], reverse=True)
-
     seen_ids = {extract_arxiv_id(s) for s in seen_raw}
-    unseen = [c for c in candidates if c["id"] not in seen_ids]
-    selected = unseen[0] if unseen else candidates[0]
+
+    # ⚖️ 統一評分天平 (公平比對)
+    for p in raw_list:
+        title = p["title"]
+        summary = p["summary"]
+        text_lower = (title + " " + summary).lower()
+
+        # (1) 關鍵字精準度評分 (0~35 分)
+        match_score = 0
+        for w in words:
+            forms = keyword_forms(w)
+            if any(contains_whole_word(title, f) for f in forms):
+                match_score += 25  # 標題命中大幅加分
+            elif any(contains_whole_word(summary, f) for f in forms):
+                match_score += 10  # 摘要命中加分
+
+        # (2) 年份新鮮度加分 (0~20 分)
+        recency_score = calculate_recency_score(p.get("year", "2020"))
+
+        # (3) 個人偏好動態加減分
+        pref_score = 0
+        for w, weight in pos_bias.items():
+            if w in text_lower:
+                pref_score += weight * 2
+        for w, weight in neg_bias.items():
+            if w in text_lower:
+                pref_score -= weight * 3
+
+        # (4) 領域防誤配過濾
+        domain_score = domain_adjustment({"title": title, "summary": summary}, words)
+
+        total_score = match_score + recency_score + pref_score + domain_score
+
+        all_candidates.append({
+            "score": total_score,
+            "title": title,
+            "summary": summary,
+            "link": p["link"],
+            "id": p["id"],
+            "source": p["source"],
+            "year": p["year"]
+        })
+
+    # 排序：綜合總分最高者勝出
+    all_candidates.sort(key=lambda x: x["score"], reverse=True)
+
+    # 優先篩選未讀過的新論文
+    unseen_candidates = [c for c in all_candidates if c["id"] not in seen_ids]
+    selected = unseen_candidates[0] if unseen_candidates else all_candidates[0]
     already_seen = selected["id"] in seen_ids
 
-    # 產生 AI 摘要
+    # 調用 GPT-4o-mini 生成地道繁中 2 句摘要
     ai_summary = generate_ai_summary(selected["summary"])
 
+    print(f"🏆 選拔勝出平台: [{selected['source']}] (年份: {selected['year']}, 總分: {selected['score']})", file=sys.stderr)
+
     return selected["title"], ai_summary, selected["link"], already_seen
+
+fetch_paper_by_keyword = fetch_paper_multi_source
