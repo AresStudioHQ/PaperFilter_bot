@@ -151,8 +151,8 @@ async def drive_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         auth_url = drive_manager.get_auth_url(user_id)
         status_text = (
             "⚠️ 尚未綁定 Google Drive 雲端！\n\n"
-            f"👉 <a href='{auth_url}'>點我獲取 Google 授權碼</a>\n"
-            "授權後請將<b>驗證碼複製貼在此對話框</b>發送給我即可完成綁定。"
+            f"👉 <a href='{auth_url}'>點我獲取 Google 授權</a>\n"
+            "授權後即可完成綁定。"
         )
 
     msg = (
@@ -243,8 +243,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "👋 歡迎使用<b>論文管家</b>！\n\n"
         "若要將論文自動歸檔進你的 Google 雲端硬碟：\n"
-        "1. 請點擊下方按鈕獲取授權碼\n"
-        "2. 授權後請將<b>驗證碼貼在此對話框</b>發送給我！\n\n"
+        "1. 請點擊下方按鈕獲取授權\n"
+        "2. 授權後即可完成綁定！\n\n"
         "或直接輸入關鍵字開始搜尋！"
     )
     
@@ -412,48 +412,149 @@ def build_application():
 from aiohttp import web
 
 async def handle_oauth_callback(request):
-    """ Google 授權完成後，自動跳轉到這裡處理 """
+    """ Google 授權完成後，自動跳轉到這裡處理並顯示全螢幕自適應精美字卡 """
     code = request.query.get("code")
     user_id_str = request.query.get("state")
 
     if code and user_id_str:
         user_id = int(user_id_str)
         if drive_manager.exchange_code(user_id, code):
-            # 1. 透過 Telegram 主動發送成功通知給使用者
-            bot_token = require_token()
-            from telegram import Bot
-            bot = Bot(token=bot_token)
-            await bot.send_message(
-                chat_id=user_id,
-                text="🎉 <b>Google Drive 授權成功！</b>\n\n現在你可以直接點擊任何論文分類按鈕，論文就會自動歸檔進你的雲端硬碟囉！",
-                parse_mode="HTML"
-            )
+            # 1. 透過 Telegram 發送訊息
+            try:
+                bot_token = require_token()
+                from telegram import Bot
+                bot = Bot(token=bot_token)
+                await bot.send_message(
+                    chat_id=user_id,
+                    text="🎉 <b>Google Drive 授權成功！</b>\n\n現在你可以直接點擊任何論文分類按鈕，論文就會自動歸檔進你的雲端硬碟囉！",
+                    parse_mode="HTML"
+                )
+            except Exception:
+                pass
 
-            # 2. 在使用者的瀏覽器顯示漂亮的成功頁面
+            # 2. 全螢幕垂直水平完美置中、大字體綠色成功卡片
             html_success = """
             <!DOCTYPE html>
-            <html>
+            <html lang="zh-TW">
             <head>
                 <meta charset="utf-8">
-                <title>授權成功</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                <title>授權成功 - 論文管家</title>
                 <style>
-                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 60px 20px; background: #f0fdf4; color: #166534; }
-                    .card { background: white; max-width: 420px; margin: 0 auto; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-                    h1 { font-size: 24px; margin-bottom: 12px; }
-                    p { color: #4b5563; font-size: 16px; line-height: 1.5; }
+                    * { box-sizing: border-box; margin: 0; padding: 0; }
+                    body {
+                        min-height: 100vh;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+                        padding: 24px;
+                    }
+                    .card {
+                        background: rgba(255, 255, 255, 0.95);
+                        backdrop-filter: blur(10px);
+                        width: 100%;
+                        max-width: 520px;
+                        padding: 48px 36px;
+                        border-radius: 28px;
+                        box-shadow: 0 20px 40px rgba(22, 101, 52, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+                        text-align: center;
+                        border: 1px solid rgba(255, 255, 255, 0.8);
+                    }
+                    .icon {
+                        font-size: 72px;
+                        line-height: 1;
+                        margin-bottom: 24px;
+                        display: inline-block;
+                    }
+                    h1 {
+                        font-size: 30px;
+                        font-weight: 800;
+                        color: #166534;
+                        margin-bottom: 16px;
+                        letter-spacing: -0.5px;
+                    }
+                    p {
+                        font-size: 19px;
+                        line-height: 1.6;
+                        color: #374151;
+                        margin-bottom: 32px;
+                    }
+                    .badge {
+                        display: inline-block;
+                        background: #dcfce7;
+                        color: #15803d;
+                        padding: 8px 18px;
+                        border-radius: 999px;
+                        font-size: 15px;
+                        font-weight: 600;
+                        margin-bottom: 24px;
+                    }
+                    .hint {
+                        font-size: 16px;
+                        color: #6b7280;
+                        border-top: 1px dashed #e5e7eb;
+                        padding-top: 20px;
+                    }
                 </style>
             </head>
             <body>
                 <div class="card">
-                    <h1>✅ 授權成功！</h1>
-                    <p>您的 Google Drive 已成功與<b>論文管家</b>綁定。<br><br>現在可以關閉此網頁，回到 Telegram 開始使用了！</p>
+                    <div class="icon">🎉</div>
+                    <div class="badge">已成功連線至 Google Drive</div>
+                    <h1>授權成功！</h1>
+                    <p>您的雲端硬碟已成功與 <b>論文管家</b> 綁定。<br>現在每次點擊分類，系統將自動為您極速歸檔！</p>
+                    <div class="hint">👉 您現在可以關閉此分頁，回到 Telegram 開始使用了。</div>
                 </div>
             </body>
             </html>
             """
             return web.Response(text=html_success, content_type="text/html")
 
-    return web.Response(text="❌ 授權失敗，請返回 Telegram 重新嘗試。", status=400)
+    # 失敗時的置中紅色卡片
+    html_failed = """
+    <!DOCTYPE html>
+    <html lang="zh-TW">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>授權未完成</title>
+        <style>
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                padding: 24px;
+            }
+            .card {
+                background: white;
+                width: 100%;
+                max-width: 500px;
+                padding: 44px 32px;
+                border-radius: 24px;
+                box-shadow: 0 20px 40px rgba(159, 18, 57, 0.08);
+                text-align: center;
+            }
+            .icon { font-size: 64px; margin-bottom: 20px; }
+            h1 { font-size: 26px; color: #9f1239; margin-bottom: 12px; }
+            p { font-size: 17px; line-height: 1.6; color: #4b5563; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="icon">⚠️</div>
+            <h1>授權未完成</h1>
+            <p>無法取得 Google 授權憑證。<br>請回到 Telegram 對話框重新點擊授權連結！</p>
+        </div>
+    </body>
+    </html>
+    """
+    return web.Response(text=html_failed, content_type="text/html", status=400)
 
 async def handle_telegram_webhook(request, application):
     """ 接收 Telegram 的訊息更新 """
