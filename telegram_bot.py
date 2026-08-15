@@ -408,7 +408,60 @@ def build_application():
     )
     return application
 
-# ===================== 4. 主程式啟動 =====================
+# ===================== 4. 主程式啟動 (支援自動網頁授權回傳) =====================
+from aiohttp import web
+
+async def handle_oauth_callback(request):
+    """ Google 授權完成後，自動跳轉到這裡處理 """
+    code = request.query.get("code")
+    user_id_str = request.query.get("state")
+
+    if code and user_id_str:
+        user_id = int(user_id_str)
+        if drive_manager.exchange_code(user_id, code):
+            # 1. 透過 Telegram 主動發送成功通知給使用者
+            bot_token = require_token()
+            from telegram import Bot
+            bot = Bot(token=bot_token)
+            await bot.send_message(
+                chat_id=user_id,
+                text="🎉 <b>Google Drive 授權成功！</b>\n\n現在你可以直接點擊任何論文分類按鈕，論文就會自動歸檔進你的雲端硬碟囉！",
+                parse_mode="HTML"
+            )
+
+            # 2. 在使用者的瀏覽器顯示漂亮的成功頁面
+            html_success = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>授權成功</title>
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 60px 20px; background: #f0fdf4; color: #166534; }
+                    .card { background: white; max-width: 420px; margin: 0 auto; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+                    h1 { font-size: 24px; margin-bottom: 12px; }
+                    p { color: #4b5563; font-size: 16px; line-height: 1.5; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h1>✅ 授權成功！</h1>
+                    <p>您的 Google Drive 已成功與<b>論文管家</b>綁定。<br><br>現在可以關閉此網頁，回到 Telegram 開始使用了！</p>
+                </div>
+            </body>
+            </html>
+            """
+            return web.Response(text=html_success, content_type="text/html")
+
+    return web.Response(text="❌ 授權失敗，請返回 Telegram 重新嘗試。", status=400)
+
+async def handle_telegram_webhook(request, application):
+    """ 接收 Telegram 的訊息更新 """
+    data = await request.json()
+    update = Update.de_json(data, application.bot)
+    await application.process_update(update)
+    return web.Response(text="OK")
+
 def main():
     application = build_application()
     run_mode = os.getenv("RUN_MODE", "webhook").lower()
@@ -418,19 +471,34 @@ def main():
         application.run_polling(drop_pending_updates=True)
         return
 
-    webhook_base = os.getenv("WEBHOOK_URL", "https://paperfilter-bot.onrender.com")
+    # Webhook 伺服器設定
     port = int(os.environ.get("PORT", 10000))
     token = require_token()
+    webhook_base = os.getenv("WEBHOOK_URL", "https://paperfilter-bot.onrender.com")
 
-    print(f"以 webhook 模式啟動，監聽 0.0.0.0:{port}")
-    application.run_webhook(
-        listen="0.0.0.0",
-        port=port,
-        url_path=token,
-        webhook_url=f"{webhook_base.rstrip('/')}/{token}",
-        drop_pending_updates=True,
-    )
+    # 初始化 Telegram Application
+    async def start_web_app():
+        await application.initialize()
+        await application.start()
+        await application.bot.set_webhook(url=f"{webhook_base.rstrip('/')}/{token}", drop_pending_updates=True)
 
+        # 建立 aiohttp 網頁伺服器
+        server = web.Application()
+        server.router.add_post(f"/{token}", lambda req: handle_telegram_webhook(req, application))
+        server.router.add_get("/oauth2callback", handle_oauth_callback)
+        server.router.add_get("/", lambda req: web.Response(text="PaperFilterBot is Running! 🚀"))
+
+        runner = web.AppRunner(server)
+        await runner.setup()
+        site = web.TCPSite(runner, "0.0.0.0", port)
+        await site.start()
+        print(f"🚀 伺服器已啟動，監聽 0.0.0.0:{port}，支援 Telegram 與 Google OAuth 回呼！")
+
+        # 保持伺服器運行
+        while True:
+            await asyncio.sleep(3600)
+
+    asyncio.run(start_web_app())
 
 if __name__ == "__main__":
     main()
