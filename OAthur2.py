@@ -1,4 +1,4 @@
-"""Google Drive 多用戶 OAuth2 歸檔模組"""
+"""Google Drive 多用戶 1 鍵授權模組"""
 import io
 import json
 import os
@@ -15,7 +15,7 @@ from database import db
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 SKIPPED_KEY = "__skipped__"
 SKIPPED_FOLDER_NAME = "沒興趣 (略過)"
-DELETED_SUFFIX = " (已刪除選項)"
+REDIRECT_URI = "https://paperfilter-bot.onrender.com/oauth2callback"
 
 def _safe_filename(title: str, max_len: int = 80) -> str:
     cleaned = re.sub(r'[<>:"/\\|?*]', "", title).strip()
@@ -23,7 +23,6 @@ def _safe_filename(title: str, max_len: int = 80) -> str:
 
 class DriveOAuthManager:
     def __init__(self):
-        # 讀取 OAuth Client 設定 (可從環境變數或 credentials.json 讀取)
         creds_json = os.getenv("GOOGLE_CLIENT_SECRETS_JSON")
         if creds_json:
             self.client_config = json.loads(creds_json)
@@ -39,9 +38,15 @@ class DriveOAuthManager:
         flow = Flow.from_client_config(
             self.client_config,
             scopes=SCOPES,
-            redirect_uri='urn:ietf:wg:oauth:2.0:oob'
+            redirect_uri=REDIRECT_URI
         )
-        auth_url, _ = flow.authorization_url(prompt='consent')
+        # 將 user_id 放在 state 裡面，Google 授權完會自動帶回來
+        auth_url, _ = flow.authorization_url(
+            access_type='offline',
+            include_granted_scopes='true',
+            prompt='consent',
+            state=str(user_id)
+        )
         return auth_url
 
     def exchange_code(self, user_id: int, code: str) -> bool:
@@ -49,7 +54,7 @@ class DriveOAuthManager:
             flow = Flow.from_client_config(
                 self.client_config,
                 scopes=SCOPES,
-                redirect_uri='urn:ietf:wg:oauth:2.0:oob'
+                redirect_uri=REDIRECT_URI
             )
             flow.fetch_token(code=code)
             db.save_token(user_id, flow.credentials.to_json())
