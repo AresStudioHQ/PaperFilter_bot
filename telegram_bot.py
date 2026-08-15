@@ -17,7 +17,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from telegram_bot.OAthur2 import get_drive, SKIPPED_FOLDER_NAME, SKIPPED_KEY
+from OAthur2 import drive_manager, SKIPPED_FOLDER_NAME, SKIPPED_KEY
 from telegram_bot.paper_search import fetch_paper_by_keyword, extract_arxiv_id
 from message_router import (
     is_chitchat,
@@ -103,7 +103,6 @@ async def archive_paper(
     link: str,
 ) -> str:
     """歸檔到雲端 + 本機備份，回傳給用戶的狀態訊息片段。"""
-    drive = get_drive()
     save_to_folder_local(folder_name, title, link, summary)
 
     if not drive.enabled:
@@ -142,7 +141,6 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def drive_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    drive = get_drive()
     msg = (
         f"<b>☁️ Google Drive 狀態</b>\n\n"
         f"{drive.status_message}\n\n"
@@ -437,17 +435,6 @@ def build_application():
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
     )
     return application
-
-
-def bootstrap_drive():
-    drive = get_drive()
-    if drive.enabled:
-        categories = load_categories()
-        drive.sync_categories(categories)
-        print("Google Drive 資料夾已同步")
-    else:
-        print(drive.status_message)
-
 
 # ===================== 4. 主程式啟動 =====================
 def main():
