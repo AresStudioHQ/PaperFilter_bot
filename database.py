@@ -11,13 +11,21 @@ class Database:
 
     def create_tables(self):
         cursor = self.conn.cursor()
-        # 儲存每位用戶的 Google Drive Token 與個人偏好
+        # 用戶表
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
                 gdrive_token TEXT,
                 positive_keywords TEXT DEFAULT '{}',
                 negative_keywords TEXT DEFAULT '{}'
+            )
+        ''')
+        # 已讀論文表 (避免重複推送)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS seen_papers (
+                user_id INTEGER,
+                paper_id TEXT,
+                PRIMARY KEY (user_id, paper_id)
             )
         ''')
         self.conn.commit()
@@ -37,8 +45,23 @@ class Database:
         ''', (user_id, token_json, token_json))
         self.conn.commit()
 
+    def add_seen_paper(self, user_id: int, paper_id: str):
+        """ 記錄該用戶已看過的論文 ID """
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            INSERT OR IGNORE INTO seen_papers (user_id, paper_id) 
+            VALUES (?, ?)
+        ''', (user_id, paper_id))
+        self.conn.commit()
+
+    def get_seen_papers(self, user_id: int) -> set[str]:
+        """ 取得該用戶看過的所有論文 ID """
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT paper_id FROM seen_papers WHERE user_id = ?", (user_id,))
+        rows = cursor.fetchall()
+        return {r[0] for r in rows}
+
     def update_preference(self, user_id: int, title: str, is_interested: bool):
-        """ 當用戶按資料夾(喜歡)或沒興趣(不喜歡)時，動態學習詞彙 """
         cursor = self.conn.cursor()
         cursor.execute("SELECT positive_keywords, negative_keywords FROM users WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()

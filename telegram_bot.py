@@ -177,9 +177,12 @@ async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def do_paper_search(
     update: Update, context: ContextTypes.DEFAULT_TYPE, user_text: str
 ):
-    """執行論文搜尋並推送結果。"""
-    arxiv_query, display_label, _ = resolve_search_query(user_text)
+    """執行論文搜尋並推送結果（支援跨平台動態去重與偏好）。"""
+    if not update.effective_user or not update.message:
+        return
 
+    user_id = update.effective_user.id
+    arxiv_query, display_label, _ = resolve_search_query(user_text)
     if arxiv_query is None:
         await update.message.reply_text(cn_hint(display_label), parse_mode="HTML")
         return
@@ -189,26 +192,30 @@ async def do_paper_search(
         translate_note = f"（<code>{display_label}</code> → <code>{arxiv_query}</code>）"
 
     await update.message.reply_text(
-        f"🔍 正在搜尋【{display_label}】{translate_note} 的最新論文...",
+        f"🔍 正在為您搜尋【{display_label}】{translate_note} 的最新論文...",
         parse_mode="HTML",
     )
-    seen = load_seen_papers()
+
+    # 從資料庫取得該用戶看過的論文與偏好
+    seen_ids = db.get_seen_papers(user_id)
+    user_bias = db.get_user_bias(user_id)
+
     try:
-        title, summary, link, already_seen = await asyncio.to_thread(
-           fetch_paper_multi_source, arxiv_query, seen
+        title, summary, link, paper_id, already_seen = await asyncio.to_thread(
+            fetch_paper_multi_source, arxiv_query, seen_ids, user_bias
         )
     except Exception as exc:
         print(f"搜尋例外: {exc}", file=sys.stderr)
-        await update.message.reply_text(
-            "⚠️ 搜尋時發生錯誤，請稍後再試。若持續失敗請換個關鍵字。"
-        )
+        await update.message.reply_text("⚠️ 搜尋時發生錯誤，請稍後再試。若持續失敗請換個關鍵字。")
         return
 
     if not title:
-        await update.message.reply_text(
-            f"😅 arXiv 上找不到與【{display_label}】相關的論文，請換個關鍵字試試。"
-        )
+        await update.message.reply_text(f"😅 找不到與【{display_label}】相關的論文，請換個關鍵字試試。")
         return
+
+    # 立刻在資料庫記錄這篇已被該用戶看過（下次輸入同關鍵字就不會重複了！）
+    if paper_id:
+        db.add_seen_paper(user_id, paper_id)
 
     context.user_data["current_title"] = title
     context.user_data["current_summary"] = summary
@@ -304,7 +311,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"✅ 成功新增資料夾：【<b>{new_name}</b>】！", parse_mode="HTML")
         return
 
-    # 4. 改名資料夾
+    # 4. 改名資料夾 (即時同步 Google Drive)
     if user_text.startswith("改名"):
         try:
             content = user_text.replace("改名", "").strip()
@@ -316,14 +323,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if target_key:
                 categories[target_key] = new_name
                 save_categories(categories)
-                await update.message.reply_text(f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！", parse_mode="HTML")
+                
+                # 同步更名雲端資料夾
+                sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
+                cloud_msg = "\n☁️ Google Drive 資料夾已同步更名！" if sync_ok else ""
+                
+                await update.message.reply_text(
+                    f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！{cloud_msg}", 
+                    parse_mode="HTML"
+                )
             else:
                 await update.message.reply_text(f"❌ 找不到名為【{old_name}】的資料夾。")
         except Exception:
             await update.message.reply_text("⚠️ 格式錯誤！範例：<code>改名 量子物理to統計學</code>", parse_mode="HTML")
         return
 
-    # 5. 移除資料夾
+    # 5. 移除資料夾 (即時軟刪除 Google Drive)
     if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
         target_name = user_text.replace("移除", "").replace("刪除資料夾", "").strip()
         categories = load_categories()
@@ -332,11 +347,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if target_key:
             del categories[target_key]
             save_categories(categories)
-            await update.message.reply_text(f"✅ 已將【<b>{target_name}</b>】從選單移除。", parse_mode="HTML")
+            
+            # 同步將雲端資料夾加上 (已刪除選項)
+            sync_ok = drive_manager.mark_folder_deleted(user_id, target_name)
+            cloud_msg = f"\n☁️ 雲端資料夾已標記為【{target_name} (已刪除選項)】" if sync_ok else ""
+            
+            await update.message.reply_text(
+                f"✅ 已將【<b>{target_name}</b>】從選單移除。{cloud_msg}", 
+                parse_mode="HTML"
+            )
         else:
             await update.message.reply_text(f"❌ 找不到名為【{target_name}】的資料夾。")
         return
-
+    
     # 6. 閒聊過濾
     if is_chitchat(user_text):
         await update.message.reply_text(get_chitchat_response(user_text), parse_mode="HTML")

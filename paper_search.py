@@ -400,41 +400,39 @@ def search_arxiv_candidates(words: list[str], max_results=8) -> list[dict]:
             })
     return papers
 
-# 4. 跨平台評分與最強論文選拔引擎
-def fetch_paper_multi_source(user_input: str, seen_raw: set[str], user_bias: tuple = ({}, {})) -> tuple:
+# 4. 跨平台評分與最強論文選拔引擎 (具備嚴格去重機制)
+
+def fetch_paper_multi_source(user_input: str, seen_ids: set[str], user_bias: tuple = ({}, {})) -> tuple:
     pos_bias, neg_bias = user_bias
     words = parse_words(user_input)
     if not words:
-        return None, None, None, False
+        return None, None, None, None, False
 
     all_candidates = []
 
     # 🚀 同時向兩大平台發起檢索
-    pubmed_list = search_pubmed(user_input, max_results=6)
-    arxiv_list = search_arxiv_candidates(words, max_results=6)
+    pubmed_list = search_pubmed(user_input, max_results=10)
+    arxiv_list = search_arxiv_candidates(words, max_results=10)
     raw_list = pubmed_list + arxiv_list
 
     if not raw_list:
-        return None, None, None, False
+        return None, None, None, None, False
 
-    seen_ids = {extract_arxiv_id(s) for s in seen_raw}
-
-    # ⚖️ 統一評分天平 (公平比對)
     for p in raw_list:
         title = p["title"]
         summary = p["summary"]
         text_lower = (title + " " + summary).lower()
 
-        # (1) 關鍵字精準度評分 (0~35 分)
+        # (1) 關鍵字精準度評分
         match_score = 0
         for w in words:
             forms = keyword_forms(w)
             if any(contains_whole_word(title, f) for f in forms):
-                match_score += 25  # 標題命中大幅加分
+                match_score += 25
             elif any(contains_whole_word(summary, f) for f in forms):
-                match_score += 10  # 摘要命中加分
+                match_score += 10
 
-        # (2) 年份新鮮度加分 (0~20 分)
+        # (2) 年份新鮮度加分
         recency_score = calculate_recency_score(p.get("year", "2020"))
 
         # (3) 個人偏好動態加減分
@@ -456,24 +454,28 @@ def fetch_paper_multi_source(user_input: str, seen_raw: set[str], user_bias: tup
             "title": title,
             "summary": summary,
             "link": p["link"],
-            "id": p["id"],
+            "id": str(p["id"]),
             "source": p["source"],
             "year": p["year"]
         })
 
-    # 排序：綜合總分最高者勝出
+    # 依分數排序
     all_candidates.sort(key=lambda x: x["score"], reverse=True)
 
-    # 優先篩選未讀過的新論文
+    # 🔒 嚴格過濾看過的論文
     unseen_candidates = [c for c in all_candidates if c["id"] not in seen_ids]
-    selected = unseen_candidates[0] if unseen_candidates else all_candidates[0]
-    already_seen = selected["id"] in seen_ids
+    
+    if unseen_candidates:
+        selected = unseen_candidates[0]
+        already_seen = False
+    else:
+        # 如果全部都看過了，才重複推薦分數最高的
+        selected = all_candidates[0]
+        already_seen = True
 
     # 調用 GPT-4o-mini 生成地道繁中 2 句摘要
     ai_summary = generate_ai_summary(selected["summary"])
 
-    print(f"🏆 選拔勝出平台: [{selected['source']}] (年份: {selected['year']}, 總分: {selected['score']})", file=sys.stderr)
-
-    return selected["title"], ai_summary, selected["link"], already_seen
+    return selected["title"], ai_summary, selected["link"], selected["id"], already_seen
 
 fetch_paper_by_keyword = fetch_paper_multi_source
