@@ -3,6 +3,7 @@ import json
 import random
 import sys
 import asyncio
+import html
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -207,8 +208,9 @@ async def do_paper_search(
         else ""
     )
     message_text = (
-        f"📚 <b>{title}</b>\n\n{summary}\n\n"
-        f"🔗 <a href='{link}'>閱讀原文</a>\n\n請選擇歸檔資料夾：{seen_note}"
+        f"📚 <b>{html.escape(title)}</b>\n\n{html.escape(summary)}\n\n"
+        f"🔗 <a href='{html.escape(link, quote=True)}'>閱讀原文</a>\n\n"
+        f"請選擇歸檔資料夾：{seen_note}"
     )
     await update.message.reply_text(
         message_text,

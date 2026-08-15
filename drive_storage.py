@@ -103,20 +103,18 @@ class DriveStorage:
         return folder["id"]
 
     def _rename_folder(self, folder_id: str, new_name: str):
-        self._service.files()
-        .update(
+        self._service.files().update(
             fileId=folder_id,
             body={"name": new_name},
             supportsAllDrives=True,
             fields="id",
-        )
-        .execute()
+        ).execute()
 
     def _folder_exists(self, folder_id: str) -> bool:
         try:
-            self._service.files()
-            .get(fileId=folder_id, fields="id", supportsAllDrives=True)
-            .execute()
+            self._service.files().get(
+                fileId=folder_id, fields="id", supportsAllDrives=True
+            ).execute()
             return True
         except HttpError:
             return False
@@ -214,14 +212,12 @@ class DriveStorage:
                 io.BytesIO(note_content.encode("utf-8")),
                 mimetype="text/plain",
             )
-            self._service.files()
-            .create(
+            self._service.files().create(
                 body={"name": f"{safe_name}.txt", "parents": [folder_id]},
                 media_body=media,
                 fields="id",
                 supportsAllDrives=True,
-            )
-            .execute()
+            ).execute()
 
             pdf_url = arxiv_pdf_url(link)
             if pdf_url:
@@ -231,14 +227,12 @@ class DriveStorage:
                         io.BytesIO(response.content),
                         mimetype="application/pdf",
                     )
-                    self._service.files()
-                    .create(
+                    self._service.files().create(
                         body={"name": f"{safe_name}.pdf", "parents": [folder_id]},
                         media_body=pdf_media,
                         fields="id",
                         supportsAllDrives=True,
-                    )
-                    .execute()
+                    ).execute()
 
             return True, folder_name
         except Exception as exc:
