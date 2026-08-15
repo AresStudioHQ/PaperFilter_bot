@@ -436,7 +436,6 @@ def build_application():
 
 # ===================== 4. 主程式啟動 =====================
 def main():
-    bootstrap_drive()
     application = build_application()
     run_mode = os.getenv("RUN_MODE", "webhook").lower()
 
