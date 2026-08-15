@@ -250,7 +250,9 @@ def build_tiered_queries(words: list[str]) -> list[tuple[str, str]]:
     else:
         phrase = " ".join(words)
         tiers.append(("phrase", f'all:"{phrase}"'))
-        tiers.append(("title_abs_and", "+AND+".join(f"(ti:{w} OR abs:{w})" for w in words))
+        tiers.append(
+            ("title_abs_and", "+AND+".join(f"(ti:{w} OR abs:{w})" for w in words))
+        )
 
     return tiers
 
