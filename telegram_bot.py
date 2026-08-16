@@ -291,75 +291,72 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"✅ 成功新增資料夾：【<b>{new_name}</b>】！", parse_mode="HTML")
         return
 
-    # 4. 改名資料夾 (即時同步 Google Drive)
+    # 4. 改名資料夾
     if user_text.startswith("改名"):
         try:
             content = user_text.replace("改名", "", 1).strip()
+            match = re.split(r'\s*(?:to|->|➡️|換成)\s*', content, flags=re.IGNORECASE)
             
-            # 支援多種分隔符號 (to, ->, ➡️, 換成)
-            parts = []
-            for sep in ["to", "->", "➡️", "換成"]:
-                if sep in content:
-                    parts = content.split(sep)
-                    break
-            
-            # 如果使用者沒加空格（例如 生物生態to生物學），我們用正則或字串分割補救
-            if not parts and "to" in content:
-                parts = content.split("to")
-
-            if len(parts) >= 2:
-                old_name, new_name = parts[0].strip(), parts[1].strip()
+            if len(match) >= 2 and match[0] and match[1]:
+                old_name, new_name = match[0].strip(), match[1].strip()
                 
-                current_cats = db.get_user_categories(user_id)
+                raw_cats = db.get_user_categories(user_id)
+                current_cats = list(raw_cats.values()) if isinstance(raw_cats, dict) else list(raw_cats)
+                
                 if old_name in current_cats:
                     db.rename_user_category(user_id, old_name, new_name)
-                    
-                    # 雲端同步 (若有綁定)
                     sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
                     cloud_msg = "\n☁️ Google Drive 資料夾已同步更名！" if sync_ok else ""
                     
                     await update.message.reply_text(
-                        f"✅ 已將【<b>{old_name}</b>】成功改名為【<b>{new_name}</b>】！{cloud_msg}",
+                        f"✅ 已將 <b>{old_name}</b> 成功改名為 <b>{new_name}</b> ！{cloud_msg}",
                         parse_mode="HTML"
                     )
                 else:
                     await update.message.reply_text(
-                        f"❌ 找不到名為【{old_name}】的資料夾。\n💡 提示：請先輸入「我的資料夾」確認目前正確的名稱！",
+                        f"❌ 找不到名為 <b>{old_name}</b> 的資料夾。\n💡 提示：請先輸入 「我的資料夾」 確認目前正確的名稱！",
                         parse_mode="HTML"
                     )
             else:
                 await update.message.reply_text(
-                    "⚠️ 格式錯誤！範例：<code>改名 生物生態to生物學</code>", 
+                    "⚠️ 格式錯誤！正確範例：<code>改名 生物生態to生物學</code>",
                     parse_mode="HTML"
                 )
         except Exception as e:
             print(f"改名例外錯誤: {e}")
             await update.message.reply_text(
-                "⚠️ 格式錯誤！範例：<code>改名 生物生態to生物學</code>", 
+                "⚠️ 格式錯誤！正確範例：<code>改名 生物生態to生物學</code>",
                 parse_mode="HTML"
             )
         return
 
-    # 5. 移除資料夾 (即時軟刪除 Google Drive)
+   # 5. 移除資料夾 (即時軟刪除 Google Drive)
     if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
-        target_name = user_text.replace("移除", "", 1).replace("刪除資料夾", "", 1).strip()
-        current_cats = db.get_user_categories(user_id)
-        
-        if target_name in current_cats:
-            db.delete_user_category(user_id, target_name)
+        try:
+            target_name = user_text.replace("移除", "", 1).replace("刪除資料夾", "", 1).strip()
             
-            # 雲端同步標記
-            sync_ok = drive_manager.mark_folder_deleted(user_id, target_name)
-            cloud_msg = f"\n☁️ 雲端資料夾已同步標記" if sync_ok else ""
+            raw_cats = db.get_user_categories(user_id)
+            current_cats = list(raw_cats.values()) if isinstance(raw_cats, dict) else list(raw_cats)
             
-            # 💡 關鍵：補上這行讓用戶知道成功了！
+            if target_name in current_cats:
+                db.delete_user_category(user_id, target_name)
+                
+                sync_ok = drive_manager.mark_folder_deleted(user_id, target_name)
+                cloud_msg = "\n☁️ 雲端資料夾已同步標記" if sync_ok else ""
+                
+                await update.message.reply_text(
+                    f"✅ 已成功將 <b>{target_name}</b> 從資料夾清單移除！{cloud_msg}",
+                    parse_mode="HTML"
+                )
+            else:
+                await update.message.reply_text(
+                    f"❌ 找不到名為 <b>{target_name}</b> 的資料夾。\n💡 提示：請先輸入 「我的資料夾」 確認現有名稱！",
+                    parse_mode="HTML"
+                )
+        except Exception as e:
+            print(f"移除例外錯誤: {e}")
             await update.message.reply_text(
-                f"✅ 已成功將【<b>{target_name}</b>】從資料夾清單移除！{cloud_msg}",
-                parse_mode="HTML"
-            )
-        else:
-            await update.message.reply_text(
-                f"❌ 找不到名為【{target_name}】的資料夾。\n💡 提示：請先輸入「我的資料夾」確認現有名稱！",
+                "⚠️ 移除發生錯誤，請檢查指令格式。",
                 parse_mode="HTML"
             )
         return
