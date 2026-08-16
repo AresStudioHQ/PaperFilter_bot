@@ -426,14 +426,15 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     if not query or not update.effective_user:
         return
-
     await query.answer()
-
+    
     choice = query.data
     user_id = update.effective_user.id
     title = context.user_data.get("current_title", "未知標題")
     summary = context.user_data.get("current_summary", "")
     link = context.user_data.get("current_link", "#")
+    
+    # 重新載入該用戶的分類字典（例如 {"cat_0": "人工智慧", "cat_1": "生物生態"}）
     categories = load_categories(user_id)
 
     # 1. 檢查論文是否過期
@@ -443,26 +444,26 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 2. 使用者點擊「沒興趣 / 略過」
     if choice == "skip":
-        # 記錄負面偏好（越推越準）
         db.update_preference(user_id, title, is_interested=False)
-        # 存入雲端的略過資料夾
         ok, msg = drive_manager.archive_paper(user_id, SKIPPED_FOLDER_NAME, title, summary, link)
         cloud_hint = "\n☁️ 已同步至 Google Drive【略過】資料夾" if ok else ""
         await query.edit_message_text(f"🗑 已略過並記錄偏好（未來將減少此類推薦）{cloud_hint}")
 
-    # 3. 使用者點擊指定自訂資料夾
+    # 3. 使用者點擊自訂分類按鈕（choice 會是 "cat_0", "cat_1" 等）
     elif choice in categories:
-        folder_name = categories[choice]
-        # 記錄正面偏好（越推越準）
+        folder_name = categories[choice]  # 取得真實的資料夾名稱，例如 "人工智慧"
         db.update_preference(user_id, title, is_interested=True)
-        # 上傳到該使用者的 Google Drive 資料夾
+        
+        # 💡 這行就是核心：自動在 Google Drive 建立資料夾並歸檔
         ok, detail = drive_manager.archive_paper(user_id, folder_name, title, summary, link)
+        
         if ok:
-            await query.edit_message_text(f"✅ 已成功歸檔至你的 Google Drive：【{folder_name}】！")
+            await query.edit_message_text(f"✅ 已成功為您在雲端建立資料夾並完成歸檔：【<b>{folder_name}</b>】！", parse_mode="HTML")
         else:
-            await query.edit_message_text(f"⚠️ 雲端歸檔失敗：{detail}\n👉 若尚未綁定雲端，請打 /start 點連結授權。")
+            await query.edit_message_text(f"⚠️ 雲端歸檔失敗：{detail}\n👉 若尚未綁定雲端，請打 /start 點連結授權。", parse_mode="HTML")
+            
     else:
-        await query.edit_message_text(text="⚠️ 此分類按鈕已不存在。")
+        await query.edit_message_text(text="⚠️ 此分類按鈕已失效或不存在。")
 
 
 def build_application():
