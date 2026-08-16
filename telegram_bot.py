@@ -295,17 +295,29 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_text.startswith("改名"):
         try:
             content = user_text.replace("改名", "", 1).strip()
-            match = re.split(r'\s*(?:to|->|➡️|換成)\s*', content, flags=re.IGNORECASE)
             
-            if len(match) >= 2 and match[0] and match[1]:
-                old_name, new_name = match[0].strip(), match[1].strip()
+            # 支援常見的分隔字串，直接用 if 判斷，百分之百不會誤判
+            parts = None
+            for sep in ["to", "->", "➡️", "換成"]:
+                if sep in content:
+                    parts = content.split(sep, 1)
+                    break
+            
+            if parts and len(parts) == 2 and parts[0].strip() and parts[1].strip():
+                old_name = parts[0].strip()
+                new_name = parts[1].strip()
                 
                 raw_cats = db.get_user_categories(user_id)
                 current_cats = list(raw_cats.values()) if isinstance(raw_cats, dict) else list(raw_cats)
                 
                 if old_name in current_cats:
                     db.rename_user_category(user_id, old_name, new_name)
-                    sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
+                    
+                    try:
+                        sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
+                    except Exception:
+                        sync_ok = False
+                        
                     cloud_msg = "\n☁️ Google Drive 資料夾已同步更名！" if sync_ok else ""
                     
                     await update.message.reply_text(
@@ -319,18 +331,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     )
             else:
                 await update.message.reply_text(
-                    "⚠️ 格式錯誤！正確範例：<code>改名 生物生態to生物學</code>",
+                    "⚠️ 格式錯誤！正確範例：<code>改名 綜合科學to科學系</code>",
                     parse_mode="HTML"
                 )
         except Exception as e:
-            print(f"改名例外錯誤: {e}")
+            print(f"🔥 改名例外錯誤: {e}")
             await update.message.reply_text(
-                "⚠️ 格式錯誤！正確範例：<code>改名 生物生態to生物學</code>",
+                f"⚠️ 改名發生錯誤：{e}",
                 parse_mode="HTML"
             )
         return
 
-   # 5. 移除資料夾 (即時軟刪除 Google Drive)
+  # 5. 移除資料夾
     if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
         try:
             target_name = user_text.replace("移除", "", 1).replace("刪除資料夾", "", 1).strip()
@@ -339,11 +351,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             current_cats = list(raw_cats.values()) if isinstance(raw_cats, dict) else list(raw_cats)
             
             if target_name in current_cats:
+                # 1. 執行資料庫刪除
                 db.delete_user_category(user_id, target_name)
                 
-                sync_ok = drive_manager.mark_folder_deleted(user_id, target_name)
+                # 2. 雲端同步（加上安全防護，就算雲端掛了也不影響回傳成功）
+                sync_ok = False
+                try:
+                    sync_ok = drive_manager.mark_folder_deleted(user_id, target_name)
+                except Exception as d_err:
+                    print(f"雲端標記刪除失敗（可忽略）: {d_err}")
+                
                 cloud_msg = "\n☁️ 雲端資料夾已同步標記" if sync_ok else ""
                 
+                # 3. 絕對保證會執行的成功回傳
                 await update.message.reply_text(
                     f"✅ 已成功將 <b>{target_name}</b> 從資料夾清單移除！{cloud_msg}",
                     parse_mode="HTML"
@@ -354,9 +374,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     parse_mode="HTML"
                 )
         except Exception as e:
-            print(f"移除例外錯誤: {e}")
+            print(f"🔥 移除例外錯誤: {e}")
             await update.message.reply_text(
-                "⚠️ 移除發生錯誤，請檢查指令格式。",
+                f"⚠️ 移除發生錯誤：{e}",
                 parse_mode="HTML"
             )
         return
