@@ -109,6 +109,33 @@ async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(help_text, parse_mode="HTML")
 
+async def handle_callback(update, context):
+    query = update.callback_query
+    await query.answer() # 消除按鈕載入中的轉圈圈狀態
+    
+    data = query.data  # 取得按鈕帶過來的資料，例如 "archive_生物生態"
+    user_id = query.from_user.id
+    
+    # 判斷是否為歸檔按鈕
+    if data.startswith("archive_"):
+        folder_name = data.replace("archive_", "", 1)
+        
+        try:
+            # 1. 這裡呼叫你的雲端建立資料夾與自動歸檔邏輯
+            # 例如：drive_manager.create_folder_and_move(user_id, folder_name)
+            
+            # 2. 修改原本的訊息，顯示已經歸檔成功
+            await query.edit_message_text(
+                text=f"✅ 已成功為您在雲端建立資料夾並完成歸檔：<b>{folder_name}</b>",
+                parse_mode="HTML"
+            )
+        except Exception as e:
+            print(f"🔥 歸檔按鈕執行錯誤: {e}")
+            await query.message.reply_text(
+                f"⚠️ 歸檔失敗：{e}",
+                parse_mode="HTML"
+            )
+
 
 async def drive_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user:
