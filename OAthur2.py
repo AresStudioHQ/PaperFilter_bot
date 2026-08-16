@@ -106,7 +106,7 @@ class DriveOAuthManager:
         )
         return build('drive', 'v3', credentials=creds, cache_discovery=False)
 
-def get_or_create_root_app_folder(self, service) -> str:
+    def get_or_create_root_app_folder(self, service) -> str:
         """ 確保根目錄有 PaperFilterBot 主資料夾 """
         query = "name = 'PaperFilterBot' and mimeType = 'application/vnd.google-apps.folder' and trashed = false and 'root' in parents"
         res = service.files().list(q=query, fields="files(id, name)").execute()
@@ -120,7 +120,7 @@ def get_or_create_root_app_folder(self, service) -> str:
         ).execute()
         return folder['id']
 
-def create_or_get_folder(self, service, folder_name: str) -> str:
+    def create_or_get_folder(self, service, folder_name: str) -> str:
         """ 將所有分類資料夾收納在 PaperFilterBot/ 之下 """
         root_app_id = self.get_or_create_root_app_folder(service)
         
@@ -136,7 +136,7 @@ def create_or_get_folder(self, service, folder_name: str) -> str:
         ).execute()
         return folder['id']
 
-def rename_folder(self, user_id: int, old_name: str, new_name: str) -> bool:
+    def rename_folder(self, user_id: int, old_name: str, new_name: str) -> bool:
         """ 即時同步更名 Google Drive 裡的子資料夾 """
         service = self.get_user_service(user_id)
         if not service:
@@ -155,13 +155,13 @@ def rename_folder(self, user_id: int, old_name: str, new_name: str) -> bool:
             print(f"更名雲端資料夾失敗: {e}", file=sys.stderr)
             return False
 
-def mark_folder_deleted(self, user_id: int, folder_name: str) -> bool:
+    def mark_folder_deleted(self, user_id: int, folder_name: str) -> bool:
         """ 軟刪除：將雲端資料夾更名為 (已刪除選項) """
         new_name = f"{folder_name}{DELETED_SUFFIX}"
         return self.rename_folder(user_id, folder_name, new_name)
 
 
-def archive_paper(self, user_id: int, folder_name: str, title: str, summary: str, link: str) -> tuple[bool, str]:
+    def archive_paper(self, user_id: int, folder_name: str, title: str, summary: str, link: str) -> tuple[bool, str]:
         service = self.get_user_service(user_id)
         if not service:
             return False, "尚未完成 Google 授權"
