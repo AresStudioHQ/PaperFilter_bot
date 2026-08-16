@@ -28,8 +28,12 @@ from message_router import (
 
 # ===================== 1. 基礎設定 =====================
 TOKEN = os.getenv("TELEGRAM_TOKEN")
-SEEN_FILE = "seen_papers.txt"
 CONFIG_FILE = "categories.json"
+
+# 把它貼在原本 CONFIG_FILE = "categories.json" 的下方
+def load_categories(user_id):
+    category_names = db.get_user_categories(user_id)
+    return {f"cat_{i}": name for i, name in enumerate(category_names)}
 
 
 def require_token() -> str:
@@ -39,39 +43,7 @@ def require_token() -> str:
     return TOKEN
 
 
-# ===================== 2. 資料與檔案處理函式 =====================
-def load_categories() -> dict[str, str]:
-    if not os.path.exists(CONFIG_FILE):
-        default = {
-            "cat_1": "生物生態",
-            "cat_2": "人工智慧",
-            "cat_3": "金融市場",
-            "cat_4": "綜合科學",
-        }
-        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-            json.dump(default, f, ensure_ascii=False, indent=4)
-        return default
-    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_categories(categories: dict[str, str]):
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(categories, f, ensure_ascii=False, indent=4)
-
-
-def load_seen_papers() -> set[str]:
-    if not os.path.exists(SEEN_FILE):
-        return set()
-    with open(SEEN_FILE, "r", encoding="utf-8") as f:
-        return {extract_arxiv_id(line) for line in f if line.strip()}
-
-
-def save_seen_paper(link: str):
-    arxiv_id = extract_arxiv_id(link)
-    with open(SEEN_FILE, "a", encoding="utf-8") as f:
-        f.write(arxiv_id + "\n")
-
+# ===================== 2. 資料與檔案處理函式 ===================== 
 
 def save_to_folder_local(folder_name: str, title: str, link: str, summary: str = ""):
     """本機備份（雲端失敗時仍保留紀錄）。"""
@@ -221,7 +193,7 @@ async def do_paper_search(
     context.user_data["current_summary"] = summary
     context.user_data["current_link"] = link
 
-    categories = load_categories()
+    categories = load_categories(user_id)
     seen_note = (
         "\n\n<i>（此領域新論文你已看過不少，這篇是最相關的已讀候選）</i>"
         if already_seen
@@ -245,6 +217,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
         
     user_id = update.effective_user.id
+
+    # --- 新增這段：自動檢查是否為新用戶，若是則初始化分類 ---
+    current_cats = db.get_user_categories(user_id)
+    if not current_cats:
+        default_cats = ["人工智慧", "生物生態", "綜合科學", "人類基因"]
+        for cat in default_cats:
+            db.add_user_category(user_id, cat)
+
     auth_url = drive_manager.get_auth_url(user_id)
     
     welcome_text = (
@@ -282,7 +262,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 2. 說明書與資料夾清單
     if user_text.lower() in ("/help",) or user_text in ["說明書", "功能", "/folders", "我的資料夾"]:
         if user_text in ["/folders", "我的資料夾"]:
-            categories = load_categories()
+            categories = load_categories(user_id)
             folder_list = "\n".join([f"• {name}" for name in categories.values()])
             cloud_hint = "☁️ 雲端同步：已綁定" if is_drive_linked else "☁️ 雲端同步：未授權（請點 /start 綁定）"
             
@@ -304,11 +284,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_text.startswith("新增") or (user_text.startswith("+") and not user_text.startswith("++")):
         new_name = user_text.replace("新增", "").replace("+", "", 1).strip()
         if new_name:
-            categories = load_categories()
+            categories = load_categories(user_id)
             new_id = f"cat_{len(categories) + 1}_{random.randint(100, 999)}"
             categories[new_id] = new_name
-            save_categories(categories)
-            await update.message.reply_text(f"✅ 成功新增資料夾：【<b>{new_name}</b>】！", parse_mode="HTML")
+        db.add_user_category(user_id, new_name)
+        await update.message.reply_text(f"✅ 成功新增資料夾：【<b>{new_name}</b>】！", parse_mode="HTML")
         return
 
     # 4. 改名資料夾 (即時同步 Google Drive)
@@ -317,12 +297,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             content = user_text.replace("改名", "").strip()
             parts = content.split("to") if "to" in content else content.split("->")
             old_name, new_name = parts[0].strip(), parts[1].strip()
-            categories = load_categories()
+            categories = load_categories(user_id)
             target_key = next((k for k, v in categories.items() if v == old_name), None)
             
             if target_key:
                 categories[target_key] = new_name
-                save_categories(categories)
+                db.rename_user_category(user_id, old_name, new_name)
                 
                 # 同步更名雲端資料夾
                 sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
@@ -341,12 +321,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 5. 移除資料夾 (即時軟刪除 Google Drive)
     if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
         target_name = user_text.replace("移除", "").replace("刪除資料夾", "").strip()
-        categories = load_categories()
+        categories = load_categories(user_id)
         target_key = next((k for k, v in categories.items() if v == target_name), None)
         
         if target_key:
             del categories[target_key]
-            save_categories(categories)
+            db.delete_user_category(user_id, target_name)
             
             # 同步將雲端資料夾加上 (已刪除選項)
             sync_ok = drive_manager.mark_folder_deleted(user_id, target_name)
@@ -386,7 +366,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     title = context.user_data.get("current_title", "未知標題")
     summary = context.user_data.get("current_summary", "")
     link = context.user_data.get("current_link", "#")
-    categories = load_categories()
+    categories = load_categories(user_id)
 
     # 1. 檢查論文是否過期
     if link == "#":
