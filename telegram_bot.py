@@ -4,6 +4,11 @@ import random
 import sys
 import asyncio
 import html
+import uuid  # 新增這一行
+
+# 新增這一行
+paper_cache = {}
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -216,16 +221,23 @@ async def do_paper_search(
     if paper_id:
         db.add_seen_paper(user_id, paper_id)
 
-    context.user_data["current_title"] = title
-    context.user_data["current_summary"] = summary
-    context.user_data["current_link"] = link
-
+    # 💡 產生唯一 ID 並存入快取
+    p_id = str(uuid.uuid4())[:8]
+    paper_cache[p_id] = {"title": title, "summary": summary, "link": link}
+    
     categories = load_categories(user_id)
     seen_note = (
         "\n\n<i>（此領域新論文你已看過不少，這篇是最相關的已讀候選）</i>"
         if already_seen
         else ""
     )
+    
+    # 💡 建立帶有 p_id 的按鈕
+    keyboard = []
+    for cid, name in categories.items():
+        keyboard.append([InlineKeyboardButton(name, callback_data=f"{cid}:{p_id}")])
+    keyboard.append([InlineKeyboardButton("❌ 沒興趣", callback_data=f"skip:{p_id}")])
+    
     message_text = (
         f"📚 <b>{html.escape(title)}</b>\n\n{html.escape(summary)}\n\n"
         f"🔗 <a href='{html.escape(link, quote=True)}'>閱讀原文</a>\n\n"
@@ -233,11 +245,11 @@ async def do_paper_search(
     )
     await update.message.reply_text(
         message_text,
-        reply_markup=build_category_keyboard(categories),
+        reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="HTML",
         disable_web_page_preview=True,
     )
-
+      
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user or not update.message:
@@ -424,46 +436,47 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    if not query or not update.effective_user:
-        return
+    if not query or not update.effective_user: return
     await query.answer()
     
-    choice = query.data
-    user_id = update.effective_user.id
-    title = context.user_data.get("current_title", "未知標題")
-    summary = context.user_data.get("current_summary", "")
-    link = context.user_data.get("current_link", "#")
+    # 拆解 callback_data
+    raw_data = query.data
+    if ":" not in raw_data: return
+    choice, p_id = raw_data.split(":", 1)
     
-    # 重新載入該用戶的分類字典（例如 {"cat_0": "人工智慧", "cat_1": "生物生態"}）
+    user_id = update.effective_user.id
+    # 從快取取出資料
+    paper_info = paper_cache.get(p_id, {})
+    title = paper_info.get("title", "未知標題")
+    summary = paper_info.get("summary", "")
+    link = paper_info.get("link", "#")
+    
     categories = load_categories(user_id)
 
-    # 1. 檢查論文是否過期
     if link == "#":
         await query.edit_message_text(text="⚠️ 論文資料已過期，請重新搜尋。")
         return
 
-    # 2. 使用者點擊「沒興趣 / 略過」
+    # 1. 處理略過
     if choice == "skip":
         db.update_preference(user_id, title, is_interested=False)
         ok, msg = drive_manager.archive_paper(user_id, SKIPPED_FOLDER_NAME, title, summary, link)
-        cloud_hint = "\n☁️ 已同步至 Google Drive【略過】資料夾" if ok else ""
-        await query.edit_message_text(f"🗑 已略過並記錄偏好（未來將減少此類推薦）{cloud_hint}")
-
-    # 3. 使用者點擊自訂分類按鈕（choice 會是 "cat_0", "cat_1" 等）
-    elif choice in categories:
-        folder_name = categories[choice]  # 取得真實的資料夾名稱，例如 "人工智慧"
-        db.update_preference(user_id, title, is_interested=True)
+        await query.edit_message_text(f"🗑 已略過：{title}")
+        if p_id in paper_cache: del paper_cache[p_id] # 清理記憶體
         
-        # 💡 這行就是核心：自動在 Google Drive 建立資料夾並歸檔
+    # 2. 處理分類
+    elif choice in categories:
+        folder_name = categories[choice]
+        db.update_preference(user_id, title, is_interested=True)
         ok, detail = drive_manager.archive_paper(user_id, folder_name, title, summary, link)
         
         if ok:
-            await query.edit_message_text(f"✅ 已成功為您在雲端建立資料夾並完成歸檔：【<b>{folder_name}</b>】！", parse_mode="HTML")
+            await query.edit_message_text(f"✅ 已成功歸檔至【<b>{folder_name}</b>】：{title}", parse_mode="HTML")
+            if p_id in paper_cache: del paper_cache[p_id] # 清理記憶體
         else:
-            await query.edit_message_text(f"⚠️ 雲端歸檔失敗：{detail}\n👉 若尚未綁定雲端，請打 /start 點連結授權。", parse_mode="HTML")
-            
+            await query.edit_message_text(f"⚠️ 歸檔失敗：{detail}")
     else:
-        await query.edit_message_text(text="⚠️ 此分類按鈕已失效或不存在。")
+        await query.edit_message_text(text="⚠️ 此按鈕已失效。")
 
 
 def build_application():
