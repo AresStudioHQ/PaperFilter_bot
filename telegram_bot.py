@@ -295,37 +295,45 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_text.startswith("改名"):
         try:
             content = user_text.replace("改名", "").strip()
-            parts = content.split("to") if "to" in content else content.split("->")
-            old_name, new_name = parts[0].strip(), parts[1].strip()
-            categories = load_categories(user_id)
-            target_key = next((k for k, v in categories.items() if v == old_name), None)
-            
-            if target_key:
-                categories[target_key] = new_name
-                db.rename_user_category(user_id, old_name, new_name)
-                
-                # 同步更名雲端資料夾
-                sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
-                cloud_msg = "\n☁️ Google Drive 資料夾已同步更名！" if sync_ok else ""
-                
-                await update.message.reply_text(
-                    f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！{cloud_msg}", 
-                    parse_mode="HTML"
-                )
+            # 支援更多分隔符號 (to, ->, ➡️, 換成)
+            for sep in ["to", "->", "➡️", "換成"]:
+                if sep in content:
+                    parts = content.split(sep)
+                    break
             else:
-                await update.message.reply_text(f"❌ 找不到名為【{old_name}】的資料夾。")
-        except Exception:
-            await update.message.reply_text("⚠️ 格式錯誤！範例：<code>改名 量子物理to統計學</code>", parse_mode="HTML")
+                parts = []
+
+            if len(parts) >= 2:
+                old_name, new_name = parts[0].strip(), parts[1].strip()
+                
+                # 從資料庫檢查該用戶是否有這個分類
+                current_cats = db.get_user_categories(user_id)
+                if old_name in current_cats:
+                    db.rename_user_category(user_id, old_name, new_name)
+                    
+                    # 同步更名雲端資料夾 (如果已綁定)
+                    sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
+                    cloud_msg = "\n☁️ Google Drive 資料夾已同步更名！" if sync_ok else ""
+                    
+                    await update.message.reply_text(
+                        f"✅ 已將【<b>{old_name}</b>】改名為【<b>{new_name}</b>】！{cloud_msg}",
+                        parse_mode="HTML"
+                    )
+                else:
+                    await update.message.reply_text(f"❌ 找不到名為【{old_name}】的資料夾。請先輸入「我的資料夾」確認現有名稱。")
+            else:
+                await update.message.reply_text("⚠️ 格式錯誤！範例：<code>改名 人體工學to人類</code>", parse_mode="HTML")
+        except Exception as e:
+            print(f"改名例外: {e}")
+            await update.message.reply_text("⚠️ 格式錯誤！範例：<code>改名 人體工學to人類</code>", parse_mode="HTML")
         return
 
     # 5. 移除資料夾 (即時軟刪除 Google Drive)
     if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
         target_name = user_text.replace("移除", "").replace("刪除資料夾", "").strip()
-        categories = load_categories(user_id)
-        target_key = next((k for k, v in categories.items() if v == target_name), None)
+        current_cats = db.get_user_categories(user_id)
         
-        if target_key:
-            del categories[target_key]
+        if target_name in current_cats:
             db.delete_user_category(user_id, target_name)
             
             # 同步將雲端資料夾加上 (已刪除選項)
@@ -333,7 +341,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             cloud_msg = f"\n☁️ 雲端資料夾已標記為【{target_name} (已刪除選項)】" if sync_ok else ""
             
             await update.message.reply_text(
-                f"✅ 已將【<b>{target_name}</b>】從選單移除。{cloud_msg}", 
+                f"✅ 已將【<b>{target_name}</b>】從選單移除。{cloud_msg}",
                 parse_mode="HTML"
             )
         else:
