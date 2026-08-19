@@ -4,7 +4,7 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { createHmac } from "crypto";
+import { createHmac, createHash } from "crypto";
 import {
   initTables,
   getProfile,
@@ -55,28 +55,24 @@ function verifyTelegramAuth(data: any): boolean {
   if (!hash) return false;
   const buildCheck = (obj: any) =>
     Object.keys(obj).sort().map((k) => `${k}=${obj[k]}`).join("\n");
-  // 嘗試 4 種組合：key 順序（"WebAppData"→token / token→"WebAppData"）× 是否含 photo_url
-  // 因 Telegram Login Widget 部分版本簽章時不含 photo_url（但 payload 仍帶入）
+  // Login Widget：secret = SHA256(bot_token)；Mini App：secret = HMAC("WebAppData", bot_token)
+  const secrets = [
+    createHash("sha256").update(token).digest(),
+    createHmac("sha256", "WebAppData").update(token).digest(),
+  ];
   const withoutPhoto = { ...rest };
   delete withoutPhoto.photo_url;
-  const tryVerify = (obj: any, keyIsWebAppData: boolean): boolean => {
-    const dcs = buildCheck(obj);
-    const secret = keyIsWebAppData
-      ? createHmac("sha256", "WebAppData").update(token).digest()
-      : createHmac("sha256", token).update("WebAppData").digest();
-    return createHmac("sha256", secret).update(dcs).digest("hex") === hash;
-  };
-  if (
-    tryVerify(rest, true) ||
-    tryVerify(rest, false) ||
-    tryVerify(withoutPhoto, true) ||
-    tryVerify(withoutPhoto, false)
-  ) {
-    if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
-      console.error("⚠️ Telegram 登入 auth_date 過期（auth_date=" + data.auth_date + "）");
-      return false;
+  for (const sec of secrets) {
+    if (
+      createHmac("sha256", sec).update(buildCheck(rest)).digest("hex") === hash ||
+      createHmac("sha256", sec).update(buildCheck(withoutPhoto)).digest("hex") === hash
+    ) {
+      if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
+        console.error("⚠️ Telegram 登入 auth_date 過期（auth_date=" + data.auth_date + "）");
+        return false;
+      }
+      return true;
     }
-    return true;
   }
   console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + "）");
   return false;
