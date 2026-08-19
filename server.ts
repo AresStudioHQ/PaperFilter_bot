@@ -1450,6 +1450,11 @@ async function startServer() {
         const tdcs = Object.keys(td).sort().map((k) => `${k}=${td[k]}`).join("\n");
         const tsec = require("crypto").createHmac("sha256", "WebAppData").update(process.env.TELEGRAM_BOT_TOKEN).digest();
         const th = require("crypto").createHmac("sha256", tsec).update(tdcs).digest("hex");
+        const vsec = require("crypto").createHmac("sha256", "WebAppData").update(process.env.TELEGRAM_BOT_TOKEN).digest();
+        const vh = require("crypto").createHmac("sha256", vsec).update(tdcs).digest("hex");
+        console.log("🔎 自檢 signHash=" + th);
+        console.log("🔎 自檢 verifyHash=" + vh);
+        console.log("🔎 自檢 兩者相同=" + (th === vh) + " ｜ token長度=" + (process.env.TELEGRAM_BOT_TOKEN ? process.env.TELEGRAM_BOT_TOKEN.length : 0) + " ｜ dataCheckString=" + JSON.stringify(tdcs));
         console.log("🔎 自檢簽章驗證結果 = " + verifyTelegramAuth({ ...td, hash: th }) + "（應為 true）");
       } catch (e: any) {
         console.error("⚠️ 自檢失敗：" + e.message);
