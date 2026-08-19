@@ -72,6 +72,18 @@ function verifyTelegramAuth(data: any): boolean {
       const h = createHmac("sha256", sec).update(dcs).digest("hex");
       console.error("   嘗試排除[" + (exclude || "無") + "] hash=" + h + (h === hash ? " ✅符合收到hash" : ""));
     }
+    // 值正規化嘗試
+    const base = { ...rest };
+    const normTries: { label: string; data: any }[] = [];
+    normTries.push({ label: "first_name trim", data: { ...base, first_name: String(base.first_name).trim() } });
+    normTries.push({ label: "photo_url encodeURIComponent", data: { ...base, photo_url: encodeURIComponent(String(base.photo_url)) } });
+    normTries.push({ label: "photo_url no-scheme", data: { ...base, photo_url: String(base.photo_url).replace(/^https?:\/\//, "") } });
+    for (const t of normTries) {
+      const dcs = Object.keys(t.data).sort().map((k) => `${k}=${t.data[k]}`).join("\n");
+      const sec = createHmac("sha256", "WebAppData").update(token).digest();
+      const h = createHmac("sha256", sec).update(dcs).digest("hex");
+      console.error("   嘗試值正規化[" + t.label + "] hash=" + h + (h === hash ? " ✅符合收到hash" : ""));
+    }
     return false;
   }
   if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
