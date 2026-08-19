@@ -1446,7 +1446,7 @@ async function startServer() {
 
       // 自檢：用同一把 token 簽一個假 payload 再驗證，確認算法+token 本身沒問題
       try {
-        const td = { id: "123456789", first_name: "Test", auth_date: "1700000000", username: "selftest" };
+        const td = { id: "123456789", first_name: "Test", auth_date: String(Math.floor(Date.now() / 1000)), username: "selftest" };
         const tdcs = Object.keys(td).sort().map((k) => `${k}=${td[k]}`).join("\n");
         const tsec = require("crypto").createHmac("sha256", "WebAppData").update(process.env.TELEGRAM_BOT_TOKEN).digest();
         const th = require("crypto").createHmac("sha256", tsec).update(tdcs).digest("hex");
