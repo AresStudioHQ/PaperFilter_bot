@@ -60,7 +60,7 @@ function verifyTelegramAuth(data: any): boolean {
   const secret = createHmac("sha256", "WebAppData").update(token).digest();
   const computed = createHmac("sha256", secret).update(dataCheckString).digest("hex");
   if (computed !== hash) {
-    console.error("⚠️ Telegram 登入 hash 不符（token 長度=" + (token ? token.length : 0) + ", hash 長度=" + (hash ? String(hash).length : 0) + "）");
+    console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + ", token 長度=" + (token ? token.length : 0) + ", hash 長度=" + (hash ? String(hash).length : 0) + "）");
     return false;
   }
   if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
