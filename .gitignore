@@ -1,9 +1,20 @@
 # 憑證與本機資料（勿提交到 GitHub）
+.env
 credentials.json
 token.json
+*.token
 folder_drive_ids.json
 seen_papers.txt
 *.json.bak
-.env
-users_data.db
+
+# 建置產物 / 依賴 / 快取
+dist/
+node_modules/
 __pycache__/
+*.pyc
+*.log
+*.cjs.map
+
+# 本機資料庫
+local_fallback.db
+users_data.db
