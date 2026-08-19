@@ -61,6 +61,8 @@ function verifyTelegramAuth(data: any): boolean {
   const computed = createHmac("sha256", secret).update(dataCheckString).digest("hex");
   if (computed !== hash) {
     console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + ", token 長度=" + (token ? token.length : 0) + ", hash 長度=" + (hash ? String(hash).length : 0) + "）");
+    console.error("   收到的 dataCheckString=" + JSON.stringify(dataCheckString));
+    console.error("   計算 hash=" + computed + " ｜ 收到 hash=" + hash);
     return false;
   }
   if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
@@ -1441,6 +1443,17 @@ async function startServer() {
           console.log("🔎 TELEGRAM_BOT_TOKEN 所屬 bot username = " + u + " ｜ 設定的 TELEGRAM_BOT_USERNAME = " + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設)"));
         })
         .catch((e) => console.error("⚠️ getMe 呼叫失敗：" + e.message));
+
+      // 自檢：用同一把 token 簽一個假 payload 再驗證，確認算法+token 本身沒問題
+      try {
+        const td = { id: "123456789", first_name: "Test", auth_date: "1700000000", username: "selftest" };
+        const tdcs = Object.keys(td).sort().map((k) => `${k}=${td[k]}`).join("\n");
+        const tsec = require("crypto").createHmac("sha256", "WebAppData").update(process.env.TELEGRAM_BOT_TOKEN).digest();
+        const th = require("crypto").createHmac("sha256", tsec).update(tdcs).digest("hex");
+        console.log("🔎 自檢簽章驗證結果 = " + verifyTelegramAuth({ ...td, hash: th }) + "（應為 true）");
+      } catch (e: any) {
+        console.error("⚠️ 自檢失敗：" + e.message);
+      }
     }
   });
 }
