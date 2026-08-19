@@ -1433,6 +1433,15 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`PaperFilterBot Headquarters Server running on http://0.0.0.0:${PORT}`);
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      fetch("https://api.telegram.org/bot" + process.env.TELEGRAM_BOT_TOKEN + "/getMe")
+        .then((r) => r.json())
+        .then((j) => {
+          const u = j && j.result ? j.result.username : "(unknown)";
+          console.log("🔎 TELEGRAM_BOT_TOKEN 所屬 bot username = " + u + " ｜ 設定的 TELEGRAM_BOT_USERNAME = " + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設)"));
+        })
+        .catch((e) => console.error("⚠️ getMe 呼叫失敗：" + e.message));
+    }
   });
 }
 
