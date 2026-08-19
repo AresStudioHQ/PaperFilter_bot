@@ -57,41 +57,15 @@ function verifyTelegramAuth(data: any): boolean {
     .sort()
     .map((k) => `${k}=${rest[k]}`)
     .join("\n");
+  // 兩種常見的 key 順序都接受：
+  //   標準：secret = HMAC(key="WebAppData", msg=token)
+  //   部分 Login Widget 版本：secret = HMAC(key=token, msg="WebAppData")
   const secret = createHmac("sha256", "WebAppData").update(token).digest();
   const computed = createHmac("sha256", secret).update(dataCheckString).digest("hex");
-  if (computed !== hash) {
-    console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + ", token 長度=" + (token ? token.length : 0) + ", hash 長度=" + (hash ? String(hash).length : 0) + "）");
-    console.error("   收到的 dataCheckString=" + JSON.stringify(dataCheckString));
-    console.error("   計算 hash=" + computed + " ｜ 收到 hash=" + hash);
-    // 暴力比對：逐一排除欄位，看去掉哪個後能對上 Telegram 的 hash
-    const keys = Object.keys(rest);
-    for (const exclude of [null, ...keys]) {
-      const sub = exclude ? keys.filter((k) => k !== exclude) : keys;
-      const dcs = sub.sort().map((k) => `${k}=${rest[k]}`).join("\n");
-      const sec = createHmac("sha256", "WebAppData").update(token).digest();
-      const h = createHmac("sha256", sec).update(dcs).digest("hex");
-      console.error("   嘗試排除[" + (exclude || "無") + "] hash=" + h + (h === hash ? " ✅符合收到hash" : ""));
-    }
-    // 值正規化嘗試
-    const base = { ...rest };
-    const normTries: { label: string; data: any }[] = [];
-    normTries.push({ label: "first_name trim", data: { ...base, first_name: String(base.first_name).trim() } });
-    normTries.push({ label: "photo_url encodeURIComponent", data: { ...base, photo_url: encodeURIComponent(String(base.photo_url)) } });
-    normTries.push({ label: "photo_url no-scheme", data: { ...base, photo_url: String(base.photo_url).replace(/^https?:\/\//, "") } });
-    normTries.push({ label: "photo_url size 640", data: { ...base, photo_url: String(base.photo_url).replace("/userpic/320/", "/userpic/640/") } });
-    normTries.push({ label: "photo_url size removed", data: { ...base, photo_url: String(base.photo_url).replace("/userpic/320/", "/userpic/") } });
-    for (const t of normTries) {
-      const dcs = Object.keys(t.data).sort().map((k) => `${k}=${t.data[k]}`).join("\n");
-      const sec = createHmac("sha256", "WebAppData").update(token).digest();
-      const h = createHmac("sha256", sec).update(dcs).digest("hex");
-      console.error("   嘗試值正規化[" + t.label + "] hash=" + h + (h === hash ? " ✅符合收到hash" : ""));
-    }
-    // 印出每個欄位的原始位元組，抓隱藏字元
-    for (const k of Object.keys(rest)) {
-      const v = String(rest[k]);
-      console.error("   DEBUG 欄位[" + k + "] len=" + v.length + " JSON=" + JSON.stringify(v));
-    }
-    console.error("   RAW req.body=" + JSON.stringify(data));
+  const revSecret = createHmac("sha256", token).update("WebAppData").digest();
+  const computedRev = createHmac("sha256", revSecret).update(dataCheckString).digest("hex");
+  if (computed !== hash && computedRev !== hash) {
+    console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + "）");
     return false;
   }
   if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
@@ -1464,31 +1438,6 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`PaperFilterBot Headquarters Server running on http://0.0.0.0:${PORT}`);
-    if (process.env.TELEGRAM_BOT_TOKEN) {
-      fetch("https://api.telegram.org/bot" + process.env.TELEGRAM_BOT_TOKEN + "/getMe")
-        .then((r) => r.json())
-        .then((j) => {
-          const u = j && j.result ? j.result.username : "(unknown)";
-          console.log("🔎 TELEGRAM_BOT_TOKEN 所屬 bot username = " + u + " ｜ 設定的 TELEGRAM_BOT_USERNAME = " + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設)"));
-        })
-        .catch((e) => console.error("⚠️ getMe 呼叫失敗：" + e.message));
-
-      // 自檢：用同一把 token 簽一個假 payload 再驗證，確認算法+token 本身沒問題
-      try {
-        const td = { id: "123456789", first_name: "Test", auth_date: String(Math.floor(Date.now() / 1000)), username: "selftest" };
-        const tdcs = Object.keys(td).sort().map((k) => `${k}=${td[k]}`).join("\n");
-        const tsec = require("crypto").createHmac("sha256", "WebAppData").update(process.env.TELEGRAM_BOT_TOKEN).digest();
-        const th = require("crypto").createHmac("sha256", tsec).update(tdcs).digest("hex");
-        const vsec = require("crypto").createHmac("sha256", "WebAppData").update(process.env.TELEGRAM_BOT_TOKEN).digest();
-        const vh = require("crypto").createHmac("sha256", vsec).update(tdcs).digest("hex");
-        console.log("🔎 自檢 signHash=" + th);
-        console.log("🔎 自檢 verifyHash=" + vh);
-        console.log("🔎 自檢 兩者相同=" + (th === vh) + " ｜ token長度=" + (process.env.TELEGRAM_BOT_TOKEN ? process.env.TELEGRAM_BOT_TOKEN.length : 0) + " ｜ dataCheckString=" + JSON.stringify(tdcs));
-        console.log("🔎 自檢簽章驗證結果 = " + verifyTelegramAuth({ ...td, hash: th }) + "（應為 true）");
-      } catch (e: any) {
-        console.error("⚠️ 自檢失敗：" + e.message);
-      }
-    }
   });
 }
 
