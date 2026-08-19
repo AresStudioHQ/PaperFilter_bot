@@ -1210,6 +1210,18 @@ def index():
 def health():
     return "OK", 200
 
+@app.route(f"/{TELEGRAM_TOKEN}", methods=["POST"])
+def telegram_webhook():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        
+        # 把訊息餵給你的機器人邏輯
+        bot.process_new_updates([update])
+        return "OK", 200
+    else:
+        abort(403)
+
 # ===================== 9. 伺服器/本機 Polling 啟動 =====================
 if __name__ == "__main__":
     if WEBHOOK_URL:
