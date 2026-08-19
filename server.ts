@@ -63,6 +63,15 @@ function verifyTelegramAuth(data: any): boolean {
     console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + ", token 長度=" + (token ? token.length : 0) + ", hash 長度=" + (hash ? String(hash).length : 0) + "）");
     console.error("   收到的 dataCheckString=" + JSON.stringify(dataCheckString));
     console.error("   計算 hash=" + computed + " ｜ 收到 hash=" + hash);
+    // 暴力比對：逐一排除欄位，看去掉哪個後能對上 Telegram 的 hash
+    const keys = Object.keys(rest);
+    for (const exclude of [null, ...keys]) {
+      const sub = exclude ? keys.filter((k) => k !== exclude) : keys;
+      const dcs = sub.sort().map((k) => `${k}=${rest[k]}`).join("\n");
+      const sec = createHmac("sha256", "WebAppData").update(token).digest();
+      const h = createHmac("sha256", sec).update(dcs).digest("hex");
+      console.error("   嘗試排除[" + (exclude || "無") + "] hash=" + h + (h === hash ? " ✅符合收到hash" : ""));
+    }
     return false;
   }
   if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
