@@ -5,7 +5,7 @@ import sys
 import urllib.parse
 import os
 import feedparser
-import requests
+import requests; import feedparser
 
 ARXIV_API = "https://export.arxiv.org/api/query"
 USER_AGENT = "PaperFilterBot/1.0 (academic-paper-filter; mailto:paperfilter-bot@example.com)"
@@ -275,7 +275,7 @@ def fetch_feed(search_query: str, max_results: int = 40) -> feedparser.FeedParse
         response.raise_for_status()
         return feedparser.parse(response.content)
     except Exception as exc:
-        print(f"arXiv 請求失敗 ({search_query}): {exc}", file=sys.stderr)
+        print(f"arXiv 請求失敗，查詢: {search_query} 錯誤: {exc}", file=sys.stderr)
         return feedparser.parse("")
 
 

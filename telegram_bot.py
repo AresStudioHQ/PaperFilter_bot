@@ -1,690 +1,762 @@
 import os
-import json
-import random
 import sys
-import asyncio
-import html
-import uuid  # 新增這一行
+import json
+import threading
+import telebot
+from telebot import types
+from flask import Flask, request, abort
+from dotenv import load_dotenv
 
-# 新增這一行
-paper_cache = {}
+load_dotenv()
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    MessageHandler,
-    CallbackQueryHandler,
-    filters,
-    ContextTypes,
-)
-
+import paper_search
+import classifier
+from OAuthur2 import drive_manager
 from database import db
-from OAthur2 import drive_manager, SKIPPED_FOLDER_NAME, SKIPPED_KEY
-from paper_search import fetch_paper_multi_source, extract_arxiv_id
-from message_router import (
-    is_chitchat,
-    get_chitchat_response,
-    is_likely_chat_not_search,
-    resolve_search_query,
-    NOT_A_SEARCH_HINT,
-    cn_hint,
-)
+from i18n import get_text, detect_user_lang, MESSAGES
 
-# ===================== 1. 基礎設定 =====================
-TOKEN = os.getenv("TELEGRAM_TOKEN")
-CONFIG_FILE = "categories.json"
+# ===================== Bot 初始化 =====================
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
+PORT = int(os.getenv("PORT", 10000))
 
-# 把它貼在原本 CONFIG_FILE = "categories.json" 的下方
-def load_categories(user_id):
-    category_names = db.get_user_categories(user_id)
-    return {f"cat_{i}": name for i, name in enumerate(category_names)}
+if not TELEGRAM_TOKEN:
+    print("❌ 缺少 TELEGRAM_TOKEN！", file=sys.stderr)
+    sys.exit(1)
 
+bot = telebot.TeleBot(TELEGRAM_TOKEN, parse_mode="HTML")
+app = Flask(__name__)
 
-def require_token() -> str:
-    if not TOKEN:
-        print("錯誤：請在環境變數設定 TELEGRAM_TOKEN", file=sys.stderr)
-        sys.exit(1)
-    return TOKEN
+# ===================== 工具函數 =====================
 
+def _get_lang(user_id: int, tg_lang_code: str = None) -> str:
+    saved = db.get_user_lang(user_id)
+    if saved:
+        return saved
+    return detect_user_lang(tg_lang_code)
 
-# ===================== 2. 資料與檔案處理函式 ===================== 
+def _t(user_id: int, key: str, tg_lang_code: str = None, **kwargs) -> str:
+    lang = _get_lang(user_id, tg_lang_code)
+    return get_text(lang, key, **kwargs)
 
-def save_to_folder_local(folder_name: str, title: str, link: str, summary: str = ""):
-    """本機備份（雲端失敗時仍保留紀錄）。"""
-    os.makedirs(folder_name, exist_ok=True)
-    file_path = os.path.join(folder_name, "saved_papers.txt")
-    with open(file_path, "a", encoding="utf-8") as f:
-        block = f"標題: {title}\n連結: {link}\n"
-        if summary:
-            block += f"摘要: {summary}\n"
-        block += "-" * 50 + "\n"
-        f.write(block)
+def fetch_user_papers(user_id: int) -> list:
+    """從資料庫取得使用者收藏的論文"""
+    return db.get_user_library(user_id)
 
+def _build_folder_keyboard(user_id: int, paper_id: str, lang: str) -> types.InlineKeyboardMarkup:
+    """建立歸檔資料夾選擇鍵盤"""
+    custom_cats = db.get_user_categories(user_id)
+    default_cats = MESSAGES.get(lang, MESSAGES["en"]).get("default_categories", [
+        "Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"
+    ])
+    categories = custom_cats if custom_cats else default_cats
 
-def build_category_keyboard(categories: dict[str, str]) -> InlineKeyboardMarkup:
-    keyboard = [
-        [InlineKeyboardButton(name, callback_data=cid) for cid, name in categories.items()]
-    ]
-    keyboard.append([InlineKeyboardButton("❌ 沒興趣", callback_data="skip")])
-    return InlineKeyboardMarkup(keyboard)
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    for cat in categories[:8]:
+        markup.add(types.InlineKeyboardButton(
+            f"📁 {cat}",
+            callback_data=f"archive|{paper_id[:40]}|{cat[:30]}"
+        ))
+    markup.add(types.InlineKeyboardButton("⏭ 略過不歸檔", callback_data=f"archive|{paper_id[:40]}|略過"))
+    return markup
 
+def _send_paper_card(chat_id: int, user_id: int, title: str, ai_summary: str,
+                     link: str, paper_id: str, already_seen: bool,
+                     authors: list, raw_summary: str, year: str,
+                     source: str, is_open_access: bool, fingerprint: str,
+                     lang: str):
+    """發送論文卡片訊息"""
+    authors_str = ", ".join(authors[:3]) if authors else "Unknown"
+    if len(authors) > 3:
+        authors_str += f" 等 {len(authors)} 位"
 
-async def archive_paper(
-    folder_key: str,
-    folder_name: str,
-    title: str,
-    summary: str,
-    link: str,
-) -> str:
-    """歸檔到雲端 + 本機備份，回傳給用戶的狀態訊息片段。"""
-    save_to_folder_local(folder_name, title, link, summary)
+    seen_badge = "👁 [已看過]" if already_seen else ""
+    oa_badge = "🟢 OA" if is_open_access else ""
 
-    if not drive.enabled:
-        return "（僅本機備份，雲端尚未設定）"
-
-    ok, detail = drive.archive_paper(folder_key, folder_name, title, summary, link)
-    if ok:
-        return "☁️ 已同步至 Google Drive"
-    return f"⚠️ 雲端同步失敗：{detail}（本機已備份）"
-
-
-# ===================== 3. Telegram 指令與訊息處理 =====================
-async def send_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    help_text = (
-        "<b>🤖 專屬論文管家 - 操作指引</b>\n\n"
-        "<b>🔍 1. 搜尋最新未讀論文</b>\n"
-        "• 輸入英文關鍵字，例如 <code>space</code>\n"
-        "• 部分中文會自動翻譯，例如 <code>太空</code> → space\n"
-        "• 明確搜尋：<code>搜尋 space</code> 或 <code>/search space</code>\n"
-        "• 論文平臺以英文為主，建議優先英文關鍵字\n\n"
-        "<b>💬 關於聊天</b>\n"
-        "• 我是論文工具 Bot，不是 ChatGPT，不能自由閒聊\n"
-        "• 打「你好」會有說明；問句或長句不會被當成搜尋\n\n"
-        "<b>📁 2. 資料夾與分類管理</b>\n"
-        "• 查看目前資料夾：<code>我的資料夾</code>\n"
-        "• 新增資料夾：<code>新增 類別名稱</code>\n"
-        "• 重新命名：<code>改名 舊名稱to新名稱</code>\n"
-        "• 移除資料夾：<code>移除 類別名稱</code>\n"
-        "（資料夾變更會同步至 Google Drive）\n\n"
-        "<b>☁️ 3. 雲端歸檔</b>\n"
-        "• 選擇資料夾 → 論文存入你的 Google Drive\n"
-        "• 點「沒興趣」→ 存入「沒興趣 (略過)」資料夾，日後可找回\n"
-        "• 檢查雲端狀態：<code>/drive</code>"
+    text = (
+        f"📄 <b>{title}</b> {seen_badge}\n\n"
+        f"👥 {authors_str} | 📅 {year} | 🗂 {source} {oa_badge}\n\n"
+        f"🧠 <b>AI 導讀：</b>\n{ai_summary}\n\n"
+        f"🔗 <a href__='{link}'>{_t(user_id, 'read_paper')}</a>"
     )
-    await update.message.reply_text(help_text, parse_mode="HTML")
 
-async def handle_callback(update, context):
-    query = update.callback_query
-    await query.answer() # 消除按鈕載入中的轉圈圈狀態
-    
-    data = query.data  # 取得按鈕帶過來的資料，例如 "archive_生物生態"
-    user_id = query.from_user.id
-    
-    # 判斷是否為歸檔按鈕
-    if data.startswith("archive_"):
-        folder_name = data.replace("archive_", "", 1)
-        
-        try:
-            # 1. 這裡呼叫你的雲端建立資料夾與自動歸檔邏輯
-            # 例如：drive_manager.create_folder_and_move(user_id, folder_name)
-            
-            # 2. 修改原本的訊息，顯示已經歸檔成功
-            await query.edit_message_text(
-                text=f"✅ 已成功為您在雲端建立資料夾並完成歸檔：<b>{folder_name}</b>",
-                parse_mode="HTML"
-            )
-        except Exception as e:
-            print(f"🔥 歸檔按鈕執行錯誤: {e}")
-            await query.message.reply_text(
-                f"⚠️ 歸檔失敗：{e}",
-                parse_mode="HTML"
-            )
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup.add(
+        types.InlineKeyboardButton(_t(user_id, "btn_deep"), callback_data=f"deep|{fingerprint[:40]}"),
+        types.InlineKeyboardButton(_t(user_id, "btn_seen"), callback_data=f"seen|{paper_id[:40]}"),
+    )
+    markup.add(
+        types.InlineKeyboardButton(_t(user_id, "btn_skip"), callback_data=f"skip|{paper_id[:40]}"),
+    )
+    if is_open_access:
+        markup.add(types.InlineKeyboardButton(_t(user_id, "btn_oa"), url=link))
+    else:
+        markup.add(types.InlineKeyboardButton(_t(user_id, "btn_doi"), url=link))
+
+    # 歸檔按鈕
+    markup.add(types.InlineKeyboardButton("☁️ 歸檔到 Google Drive", callback_data=f"choose_folder|{paper_id[:40]}"))
+
+    bot.send_message(chat_id, text, reply_markup=markup, disable_web_page_preview=True)
 
 
-async def drive_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.effective_user:
+# ===================== 指令處理 =====================
+
+@bot.message_handler(commands=['start'])
+def handle_start(message):
+    user_id = message.from_user.id
+    name = message.from_user.first_name or "研究者"
+    lang = _get_lang(user_id, message.from_user.language_code)
+    welcome_text = _t(user_id, "welcome", tg_lang_code=message.from_user.language_code, name=name)
+    bot.reply_to(message, welcome_text)
+
+
+@bot.message_handler(commands=['help'])
+def handle_help(message):
+    user_id = message.from_user.id
+    bot.reply_to(message, _t(user_id, "help", tg_lang_code=message.from_user.language_code))
+
+
+@bot.message_handler(commands=['mode'])
+def handle_mode(message):
+    user_id = message.from_user.id
+    current_mode = db.get_filter_mode(user_id)
+    lang = _get_lang(user_id, message.from_user.language_code)
+
+    mode_names = {
+        "top_tier": _t(user_id, "mode_top"),
+        "smart": _t(user_id, "mode_smart"),
+        "free_only": _t(user_id, "mode_free"),
+    }
+    current_display = mode_names.get(current_mode, current_mode)
+
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    markup.add(
+        types.InlineKeyboardButton(_t(user_id, "mode_top"), callback_data="set_mode|top_tier"),
+        types.InlineKeyboardButton(_t(user_id, "mode_smart"), callback_data="set_mode|smart"),
+        types.InlineKeyboardButton(_t(user_id, "mode_free"), callback_data="set_mode|free_only"),
+    )
+    bot.reply_to(message, _t(user_id, "mode_title", current=current_display), reply_markup=markup)
+
+
+@bot.message_handler(commands=['lang'])
+def handle_lang(message):
+    user_id = message.from_user.id
+    lang = _get_lang(user_id, message.from_user.language_code)
+    lang_names = {"en": "English", "zh_hant": "繁體中文", "zh_hans": "简体中文", "ja": "日本語"}
+    current_display = lang_names.get(lang, lang)
+
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup.add(
+        types.InlineKeyboardButton("🇺🇸 English", callback_data="set_lang|en"),
+        types.InlineKeyboardButton("🇹🇼 繁體中文", callback_data="set_lang|zh_hant"),
+        types.InlineKeyboardButton("🇨🇳 简体中文", callback_data="set_lang|zh_hans"),
+        types.InlineKeyboardButton("🇯🇵 日本語", callback_data="set_lang|ja"),
+    )
+    bot.reply_to(message, _t(user_id, "lang_switch_title", current=current_display), reply_markup=markup)
+
+
+@bot.message_handler(commands=['follow'])
+def handle_follow(message):
+    user_id = message.from_user.id
+    parts = message.text.strip().split(maxsplit=1)
+    if len(parts) < 2:
+        bot.reply_to(message, "請輸入學者名稱，例如：<code>/follow Yann LeCun</code>")
         return
+    author_name = parts[1].strip()
+    db.add_followed_author(user_id, author_name)
+    bot.reply_to(message, _t(user_id, "follow_success", name=author_name))
 
-    user_id = update.effective_user.id
+
+@bot.message_handler(commands=['unfollow'])
+def handle_unfollow(message):
+    user_id = message.from_user.id
+    parts = message.text.strip().split(maxsplit=1)
+    if len(parts) < 2:
+        bot.reply_to(message, "請輸入要取消追蹤的學者名稱。")
+        return
+    author_name = parts[1].strip()
+    success = db.remove_followed_author(user_id, author_name)
+    if success:
+        bot.reply_to(message, _t(user_id, "unfollow_success", name=author_name))
+    else:
+        bot.reply_to(message, _t(user_id, "unfollow_failed", name=author_name))
+
+
+@bot.message_handler(commands=['following'])
+def handle_following(message):
+    user_id = message.from_user.id
+    authors = db.get_followed_authors(user_id)
+    if not authors:
+        bot.reply_to(message, _t(user_id, "no_following"))
+    else:
+        authors_list = "\n".join(f"• <code>{a}</code>" for a in authors)
+        bot.reply_to(message, _t(user_id, "following_list", list=authors_list))
+
+
+@bot.message_handler(commands=['drive'])
+def handle_drive(message):
+    user_id = message.from_user.id
     token = db.get_token(user_id)
-    
     if token:
-        status_text = "✅ 你的 Google Drive 雲端已成功連線！\n（點擊論文分類按鈕即可直接自動歸檔）"
+        bot.reply_to(message, "✅ 您的 Google Drive 已連結！可以直接歸檔論文。")
     else:
         auth_url = drive_manager.get_auth_url(user_id)
-        status_text = (
-            "⚠️ 尚未綁定 Google Drive 雲端！\n\n"
-            f"👉 <a href='{auth_url}'>點我獲取 Google 授權</a>\n"
-            "授權後即可完成綁定。"
-        )
+        if auth_url:
+            markup = types.InlineKeyboardMarkup()
+            markup.add(types.InlineKeyboardButton("🔗 授權 Google Drive", url=auth_url))
+            bot.reply_to(message, "請點擊下方按鈕授權 Google Drive 存取：", reply_markup=markup)
+        else:
+            bot.reply_to(message, "❌ Google OAuth 設定未完成，請聯繫管理員配置 GOOGLE_CLIENT_SECRETS_JSON。")
 
-    msg = (
-        f"<b>☁️ Google Drive 狀態</b>\n\n"
-        f"{status_text}\n\n"
-        f"略過論文資料夾名稱：<code>{SKIPPED_FOLDER_NAME}</code>"
+
+@bot.message_handler(commands=['search'])
+def handle_search_command(message):
+    user_id = message.from_user.id
+    parts = message.text.strip().split(maxsplit=1)
+    if len(parts) < 2:
+        bot.reply_to(message, "請輸入關鍵字，例如：<code>/search CRISPR</code>")
+        return
+    query = parts[1].strip()
+    _do_search(message, user_id, query)
+
+
+@bot.message_handler(commands=['deep'])
+def handle_deep_command(message):
+    user_id = message.from_user.id
+    bot.reply_to(message, "請先搜尋論文，再點擊論文卡片下方的 [🔍 深度導讀] 按鈕。")
+
+
+@bot.message_handler(commands=['review'])
+def handle_review(message):
+    user_id = message.from_user.id
+    allowed, err_msg = db.check_quota(user_id, "litreview")
+    if not allowed:
+        bot.reply_to(message, f"⚠️ {err_msg}")
+        return
+    papers = fetch_user_papers(user_id)
+    if not papers:
+        bot.reply_to(message, "您尚未收藏任何論文。請先搜尋並歸檔論文後再使用。")
+        return
+    bot.reply_to(message, f"🧠 正在為您的 {len(papers)} 篇論文生成文獻綜述，請稍候...")
+    review = paper_search.generate_literature_review(user_id, papers)
+    db.increment_usage(user_id, "litreview")
+    # Telegram 訊息限制 4096 字元
+    if len(review) > 4000:
+        for i in range(0, len(review), 4000):
+            bot.send_message(message.chat.id, review[i:i+4000])
+    else:
+        bot.send_message(message.chat.id, review)
+
+
+@bot.message_handler(commands=['gap'])
+def handle_gap(message):
+    user_id = message.from_user.id
+    allowed, err_msg = db.check_quota(user_id, "gap_analysis")
+    if not allowed:
+        bot.reply_to(message, f"⚠️ {err_msg}")
+        return
+    papers = fetch_user_papers(user_id)
+    if not papers:
+        bot.reply_to(message, "您尚未收藏任何論文。請先搜尋並歸檔論文後再使用。")
+        return
+    bot.reply_to(message, f"🔍 正在分析 {len(papers)} 篇論文的研究缺口，請稍候...")
+    gaps = paper_search.analyze_research_gaps(user_id, papers)
+    db.increment_usage(user_id, "gap_analysis")
+    if len(gaps) > 4000:
+        for i in range(0, len(gaps), 4000):
+            bot.send_message(message.chat.id, gaps[i:i+4000])
+    else:
+        bot.send_message(message.chat.id, gaps)
+
+
+@bot.message_handler(commands=['trend'])
+def handle_trend(message):
+    user_id = message.from_user.id
+    parts = message.text.strip().split(maxsplit=1)
+    topic = parts[1].strip() if len(parts) > 1 else "machine learning"
+    bot.reply_to(message, f"📈 正在分析「{topic}」的研究趨勢，請稍候...")
+    trends = paper_search.analyze_research_trends(user_id, topic)
+    year_dist = trends.get("year_distribution", {})
+    year_str = "  ".join(f"{y}年:{c}篇" for y, c in sorted(year_dist.items(), reverse=True)[:5])
+    ai_analysis = trends.get("ai_analysis", "")
+    result = (
+        f"📊 <b>「{topic}」研究趨勢分析</b>\n\n"
+        f"📚 找到相關論文：{trends.get('total_papers_found', 0)} 篇\n"
+        f"📅 發表年份分佈：{year_str}\n\n"
     )
-    await update.message.reply_text(msg, parse_mode="HTML")
+    if ai_analysis:
+        result += f"🤖 <b>AI 趨勢解析：</b>\n{ai_analysis}"
+    bot.send_message(message.chat.id, result)
 
-async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/search fly — 明確觸發論文搜尋。"""
-    if not context.args:
-        await update.message.reply_text(
-            "請輸入關鍵字，例如：<code>/search fly</code>",
-            parse_mode="HTML",
-        )
+
+@bot.message_handler(commands=['export'])
+def handle_export(message):
+    user_id = message.from_user.id
+    allowed, err_msg = db.check_quota(user_id, "export")
+    if not allowed:
+        bot.reply_to(message, f"⚠️ {err_msg}")
         return
-    query_text = " ".join(context.args)
-    await do_paper_search(update, context, query_text)
-
-
-async def do_paper_search(
-    update: Update, context: ContextTypes.DEFAULT_TYPE, user_text: str
-):
-    """執行論文搜尋並推送結果（支援跨平台動態去重與偏好）。"""
-    if not update.effective_user or not update.message:
+    papers = fetch_user_papers(user_id)
+    if not papers:
+        bot.reply_to(message, "您尚未收藏任何論文。")
         return
-
-    user_id = update.effective_user.id
-    arxiv_query, display_label, _ = resolve_search_query(user_text)
-    if arxiv_query is None:
-        await update.message.reply_text(cn_hint(display_label), parse_mode="HTML")
-        return
-
-    translate_note = ""
-    if arxiv_query.lower() != display_label.lower() and display_label != arxiv_query:
-        translate_note = f"（<code>{display_label}</code> → <code>{arxiv_query}</code>）"
-
-    await update.message.reply_text(
-        f"🔍 正在為您搜尋【{display_label}】{translate_note} 的最新論文...",
-        parse_mode="HTML",
+    markup = types.InlineKeyboardMarkup(row_width=3)
+    markup.add(
+        types.InlineKeyboardButton("📄 BibTeX", callback_data="export_fmt|BibTeX"),
+        types.InlineKeyboardButton("📋 RIS", callback_data="export_fmt|RIS"),
+        types.InlineKeyboardButton("📊 CSV", callback_data="export_fmt|CSV"),
     )
+    bot.reply_to(message, f"您共有 {len(papers)} 篇論文，請選擇匯出格式：", reply_markup=markup)
 
-    # 從資料庫取得該用戶看過的論文與偏好
-    seen_ids = db.get_seen_papers(user_id)
-    user_bias = db.get_user_bias(user_id)
+
+# ===================== 文字訊息處理 =====================
+
+@bot.message_handler(func=lambda m: True, content_types=['text'])
+def handle_text(message):
+    user_id = message.from_user.id
+    text = message.text.strip()
+    lang = _get_lang(user_id, message.from_user.language_code)
+
+    # 新增資料夾
+    if text.startswith("新增 ") or text.startswith("Add ") or text.startswith("追加 "):
+        folder_name = text.split(" ", 1)[1].strip() if " " in text else ""
+        if folder_name:
+            db.add_user_category(user_id, folder_name)
+            bot.reply_to(message, _t(user_id, "folder_added", name=folder_name))
+        return
+
+    # 改名資料夾
+    if (" -> " in text or " → " in text) and (text.startswith("改名 ") or text.startswith("Rename ")):
+        sep = " -> " if " -> " in text else " → "
+        parts_raw = text.split(" ", 1)
+        if len(parts_raw) > 1:
+            rename_part = parts_raw[1]
+            if sep in rename_part:
+                old_name, new_name = rename_part.split(sep, 1)
+                old_name = old_name.strip()
+                new_name = new_name.strip()
+                db.rename_user_category(user_id, old_name, new_name)
+                drive_manager.rename_folder(user_id, old_name, new_name)
+                bot.reply_to(message, _t(user_id, "folder_renamed", old=old_name, new=new_name))
+        return
+
+    # 刪除資料夾
+    if text.startswith("刪除 ") or text.startswith("Delete ") or text.startswith("削除 "):
+        folder_name = text.split(" ", 1)[1].strip() if " " in text else ""
+        cats = db.get_user_categories(user_id)
+        if folder_name in cats:
+            db.delete_user_category(user_id, folder_name)
+            drive_manager.mark_folder_deleted(user_id, folder_name)
+            bot.reply_to(message, _t(user_id, "folder_deleted", name=folder_name))
+        else:
+            bot.reply_to(message, _t(user_id, "folder_not_found", name=folder_name))
+        return
+
+    # 查詢資料夾
+    if text in ("我的資料夾", "My folders", "マイフォルダ", "我的文件夹"):
+        cats = db.get_user_categories(user_id)
+        default_cats = MESSAGES.get(lang, MESSAGES["en"]).get("default_categories", [])
+        all_cats = cats if cats else default_cats
+        if all_cats:
+            cats_list = "\n".join(f"• {c}" for c in all_cats)
+            bot.reply_to(message, _t(user_id, "my_folders", list=cats_list))
+        else:
+            bot.reply_to(message, _t(user_id, "no_custom_folders"))
+        return
+
+    # 閒聊判斷
+    if classifier.is_chitchat(text):
+        bot.reply_to(message, classifier.get_chitchat_response(text))
+        return
+
+    if classifier.is_likely_chat_not_search(text):
+        bot.reply_to(message, classifier.NOT_A_SEARCH_HINT)
+        return
+
+    # 解析搜尋關鍵字
+    query, raw, explicit = classifier.resolve_search_query(text)
+
+    if query is None:
+        if classifier.CJK_RE.search(raw):
+            bot.reply_to(message, classifier.cn_hint(raw))
+        else:
+            bot.reply_to(message, classifier.NOT_A_SEARCH_HINT)
+        return
+
+    _do_search(message, user_id, query)
+
+
+def _do_search(message, user_id: int, query: str):
+    """執行論文搜尋並發送結果"""
+    lang = _get_lang(user_id, message.from_user.language_code)
+
+    # 配額檢查
+    allowed, err_msg = db.check_quota(user_id, "search")
+    if not allowed:
+        bot.reply_to(message, f"⚠️ {err_msg}")
+        return
+
+    loading_msg = bot.reply_to(message, _t(user_id, "search_intro", query=query))
 
     try:
-        title, summary, link, paper_id, already_seen = await asyncio.to_thread(
-            fetch_paper_multi_source, arxiv_query, seen_ids, user_bias
+        seen_ids = db.get_seen_papers(user_id)
+        bias = db.get_user_bias(user_id)
+        user_bias = (bias.get("positive", {}), bias.get("negative", {}))
+        followed_authors = db.get_followed_authors(user_id)
+        filter_mode = db.get_filter_mode(user_id)
+
+        result = paper_search.fetch_paper_multi_source(
+            user_input=query,
+            seen_ids=seen_ids,
+            user_bias=user_bias,
+            followed_authors=followed_authors,
+            filter_mode=filter_mode
         )
-    except Exception as exc:
-        print(f"搜尋例外: {exc}", file=sys.stderr)
-        await update.message.reply_text("⚠️ 搜尋時發生錯誤，請稍後再試。若持續失敗請換個關鍵字。")
-        return
 
-    if not title:
-        await update.message.reply_text(f"😅 找不到與【{display_label}】相關的論文，請換個關鍵字試試。")
-        return
+        title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint = result
 
-    # 立刻在資料庫記錄這篇已被該用戶看過（下次輸入同關鍵字就不會重複了！）
-    if paper_id:
-        db.add_seen_paper(user_id, paper_id)
-
-    # 💡 產生唯一 ID 並存入快取
-    p_id = str(uuid.uuid4())[:8]
-    paper_cache[p_id] = {"title": title, "summary": summary, "link": link}
-    
-    categories = load_categories(user_id)
-    seen_note = (
-        "\n\n<i>（此領域新論文你已看過不少，這篇是最相關的已讀候選）</i>"
-        if already_seen
-        else ""
-    )
-    
-    # 💡 建立帶有 p_id 的按鈕
-    keyboard = []
-    for cid, name in categories.items():
-        keyboard.append([InlineKeyboardButton(name, callback_data=f"{cid}:{p_id}")])
-    keyboard.append([InlineKeyboardButton("❌ 沒興趣", callback_data=f"skip:{p_id}")])
-    
-    message_text = (
-        f"📚 <b>{html.escape(title)}</b>\n\n{html.escape(summary)}\n\n"
-        f"🔗 <a href='{html.escape(link, quote=True)}'>閱讀原文</a>\n\n"
-        f"請選擇歸檔資料夾：{seen_note}"
-    )
-    await update.message.reply_text(
-        message_text,
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="HTML",
-        disable_web_page_preview=True,
-    )
-      
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.effective_user or not update.message:
-        return
-        
-    user_id = update.effective_user.id
-
-    # --- 新增這段：自動檢查是否為新用戶，若是則初始化分類 ---
-    current_cats = db.get_user_categories(user_id)
-    if not current_cats:
-        default_cats = ["人工智慧", "生物生態", "綜合科學", "人類基因"]
-        for cat in default_cats:
-            db.add_user_category(user_id, cat)
-
-    auth_url = drive_manager.get_auth_url(user_id)
-    
-    welcome_text = (
-        "👋 歡迎使用<b>論文管家</b>！\n\n"
-        "若要將論文自動歸檔進你的 Google 雲端硬碟：\n"
-        "1. 請點擊下方按鈕獲取授權\n"
-        "2. 授權後即可完成綁定！\n\n"
-        "或直接輸入關鍵字開始搜尋！"
-    )
-    
-    # 使用 Telegram 互動式網址按鈕（保證直接跳出瀏覽器開啟）
-    keyboard = []
-    if auth_url and auth_url != "#":
-        keyboard.append([InlineKeyboardButton("🔗 點我開啟 Google 授權頁面", url=auth_url)])
-    
-    reply_markup = InlineKeyboardMarkup(keyboard) if keyboard else None
-    await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode="HTML")
-    await send_help(update, context)
-
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text or not update.effective_user:
-        return
-
-    user_text = update.message.text.strip()
-    user_id = update.effective_user.id
-    is_drive_linked = bool(db.get_token(user_id))
-
-    # 1. 判斷是否為 Google OAuth 授權碼
-    if len(user_text) > 30 and " " not in user_text:
-        if drive_manager.exchange_code(user_id, user_text):
-            await update.message.reply_text("✅ Google Drive 授權成功！以後按按鈕即可直接歸檔進你的雲端。")
+        if not title:
+            bot.edit_message_text(
+                _t(user_id, "not_found", query=query),
+                chat_id=loading_msg.chat.id,
+                message_id=loading_msg.message_id
+            )
             return
 
-    # 2. 說明書與資料夾清單
-    if user_text.lower() in ("/help",) or user_text in ["說明書", "功能", "/folders", "我的資料夾"]:
-        if user_text in ["/folders", "我的資料夾"]:
-            categories = load_categories(user_id)
-            folder_list = "\n".join([f"• {name}" for name in categories.values()])
-            cloud_hint = "☁️ 雲端同步：已綁定" if is_drive_linked else "☁️ 雲端同步：未授權（請點 /start 綁定）"
-            
-            help_msg = (
-                f"📁 <b>目前的資料夾清單</b>：\n{folder_list}\n\n"
-                f"{cloud_hint}\n"
-                f"略過歸檔至：<code>{SKIPPED_FOLDER_NAME}</code>\n\n"
-                "🛠 <b>管理指令</b>：\n"
-                "• 新增：<code>新增 名稱</code>\n"
-                "• 改名：<code>改名 舊名稱to新名稱</code>\n"
-                "• 移除：<code>移除 名稱</code>"
-            )
-            await update.message.reply_text(help_msg, parse_mode="HTML")
-        else:
-            await send_help(update, context)
-        return
+        db.increment_usage(user_id, "search")
 
-    # 3. 新增資料夾
-    if user_text.startswith("新增") or (user_text.startswith("+") and not user_text.startswith("++")):
-        new_name = user_text.replace("新增", "").replace("+", "", 1).strip()
-        if new_name:
-            categories = load_categories(user_id)
-            new_id = f"cat_{len(categories) + 1}_{random.randint(100, 999)}"
-            categories[new_id] = new_name
-        db.add_user_category(user_id, new_name)
-        await update.message.reply_text(f"✅ 成功新增資料夾：【<b>{new_name}</b>】！", parse_mode="HTML")
-        return
-
-    # 4. 改名資料夾
-    if user_text.startswith("改名"):
         try:
-            content = user_text.replace("改名", "", 1).strip()
-            
-            # 支援常見的分隔字串，直接用 if 判斷，百分之百不會誤判
-            parts = None
-            for sep in ["to", "->", "➡️", "換成"]:
-                if sep in content:
-                    parts = content.split(sep, 1)
-                    break
-            
-            if parts and len(parts) == 2 and parts[0].strip() and parts[1].strip():
-                old_name = parts[0].strip()
-                new_name = parts[1].strip()
-                
-                raw_cats = db.get_user_categories(user_id)
-                current_cats = list(raw_cats.values()) if isinstance(raw_cats, dict) else list(raw_cats)
-                
-                if old_name in current_cats:
-                    db.rename_user_category(user_id, old_name, new_name)
-                    
-                    try:
-                        sync_ok = drive_manager.rename_folder(user_id, old_name, new_name)
-                    except Exception:
-                        sync_ok = False
-                        
-                    cloud_msg = "\n☁️ Google Drive 資料夾已同步更名！" if sync_ok else ""
-                    
-                    await update.message.reply_text(
-                        f"✅ 已將 <b>{old_name}</b> 成功改名為 <b>{new_name}</b> ！{cloud_msg}",
-                        parse_mode="HTML"
-                    )
+            bot.delete_message(loading_msg.chat.id, loading_msg.message_id)
+        except Exception:
+            pass
+
+        _send_paper_card(
+            chat_id=message.chat.id,
+            user_id=user_id,
+            title=title,
+            ai_summary=ai_summary,
+            link=link,
+            paper_id=paper_id,
+            already_seen=already_seen,
+            authors=authors,
+            raw_summary=raw_summary,
+            year=year,
+            source=source,
+            is_open_access=is_open_access,
+            fingerprint=fingerprint,
+            lang=lang
+        )
+
+    except Exception as e:
+        print(f"搜尋錯誤: {e}", file=sys.stderr)
+        try:
+            bot.edit_message_text(
+                _t(user_id, "search_error"),
+                chat_id=loading_msg.chat.id,
+                message_id=loading_msg.message_id
+            )
+        except Exception:
+            bot.reply_to(message, _t(user_id, "search_error"))
+
+
+# ===================== Callback 處理 =====================
+
+@bot.callback_query_handler(func=lambda call: True)
+def handle_callback(call):
+    user_id = call.from_user.id
+    data = call.data
+
+    try:
+        # 設定語言
+        if data.startswith("set_lang|"):
+            lang_code = data.split("|", 1)[1]
+            db.set_user_lang(user_id, lang_code)
+            lang_names = {"en": "English", "zh_hant": "繁體中文", "zh_hans": "简体中文", "ja": "日本語"}
+            bot.answer_callback_query(call.id, f"✅ 語言已切換為 {lang_names.get(lang_code, lang_code)}")
+            bot.edit_message_text(
+                _t(user_id, "lang_switched"),
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id
+            )
+            return
+
+        # 設定模式
+        if data.startswith("set_mode|"):
+            mode = data.split("|", 1)[1]
+            db.set_filter_mode(user_id, mode)
+            mode_names = {
+                "top_tier": _t(user_id, "mode_top"),
+                "smart": _t(user_id, "mode_smart"),
+                "free_only": _t(user_id, "mode_free"),
+            }
+            mode_display = mode_names.get(mode, mode)
+            bot.answer_callback_query(call.id, f"✅ 已切換為 {mode_display}")
+            bot.edit_message_text(
+                _t(user_id, "mode_switched", mode=mode_display),
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id
+            )
+            return
+
+        # 深度導讀
+        if data.startswith("deep|"):
+            fingerprint = data.split("|", 1)[1]
+            allowed, err_msg = db.check_quota(user_id, "deep")
+            if not allowed:
+                bot.answer_callback_query(call.id, f"⚠️ {err_msg}", show_alert=True)
+                return
+
+            bot.answer_callback_query(call.id, _t(user_id, "deep_processing"))
+            bot.send_message(call.message.chat.id, _t(user_id, "deep_processing"))
+
+            # 從快取或論文庫取得資訊
+            cached = db.get_cached_ai(fingerprint) if fingerprint else None
+            if cached and cached[1]:
+                deep_report = cached[1]
+                bibtex_str = cached[2] or ""
+            else:
+                # 從論文庫搜尋
+                papers = db.get_user_library(user_id)
+                paper = next((p for p in papers if p.get("fingerprint") == fingerprint), None)
+                if not paper:
+                    bot.send_message(call.message.chat.id, "❌ 找不到論文資料，請重新搜尋。")
+                    return
+                deep_report = paper_search.generate_deep_analysis(
+                    title=paper.get("title", ""),
+                    text=paper.get("summary", ""),
+                    fingerprint=fingerprint
+                )
+                bibtex_str = paper.get("bibtex", "") or paper_search.generate_bibtex_str(
+                    title=paper.get("title", ""),
+                    authors=paper.get("authors", []),
+                    year=paper.get("year", ""),
+                    link=paper.get("link", ""),
+                    source=paper.get("source", "")
+                )
+
+            db.increment_usage(user_id, "deep")
+
+            # 發送深度報告
+            report_msg = f"{_t(user_id, 'deep_header')}\n\n{deep_report}"
+            if len(report_msg) > 4000:
+                for i in range(0, len(report_msg), 4000):
+                    bot.send_message(call.message.chat.id, report_msg[i:i+4000])
+            else:
+                bot.send_message(call.message.chat.id, report_msg)
+
+            # 發送 BibTeX
+            if bibtex_str:
+                bot.send_message(
+                    call.message.chat.id,
+                    f"{_t(user_id, 'bibtex_header')}\n<pre>{bibtex_str}</pre>"
+                )
+            return
+
+        # 標記已看
+        if data.startswith("seen|"):
+            paper_id = data.split("|", 1)[1]
+            db.add_seen_paper(user_id, paper_id)
+            # 更新偏好 (正向)
+            papers = db.get_user_library(user_id)
+            paper = next((p for p in papers if p.get("id") == paper_id or p.get("fingerprint") == paper_id), None)
+            if paper:
+                keywords = paper_search.parse_words(paper.get("title", ""))[:5]
+                db.update_user_bias(user_id, keywords, is_positive=True)
+                title_display = paper.get("title", paper_id)
+            else:
+                title_display = paper_id
+            bot.answer_callback_query(call.id, "👁 已標記為已讀")
+            bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+            bot.send_message(call.message.chat.id, _t(user_id, "mark_seen", title=title_display[:100]))
+            return
+
+        # 略過
+        if data.startswith("skip|"):
+            paper_id = data.split("|", 1)[1]
+            db.add_seen_paper(user_id, paper_id)
+            papers = db.get_user_library(user_id)
+            paper = next((p for p in papers if p.get("id") == paper_id or p.get("fingerprint") == paper_id), None)
+            if paper:
+                keywords = paper_search.parse_words(paper.get("title", ""))[:5]
+                db.update_user_bias(user_id, keywords, is_positive=False)
+                title_display = paper.get("title", paper_id)
+            else:
+                title_display = paper_id
+            bot.answer_callback_query(call.id, "❌ 已略過")
+            bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+            bot.send_message(call.message.chat.id, _t(user_id, "mark_skip", title=title_display[:100]))
+            return
+
+        # 選擇歸檔資料夾
+        if data.startswith("choose_folder|"):
+            paper_id = data.split("|", 1)[1]
+            lang = _get_lang(user_id, call.from_user.language_code)
+            markup = _build_folder_keyboard(user_id, paper_id, lang)
+            bot.answer_callback_query(call.id)
+            bot.send_message(call.message.chat.id, "📁 請選擇要歸檔的資料夾：", reply_markup=markup)
+            return
+
+        # 執行歸檔
+        if data.startswith("archive|"):
+            parts = data.split("|")
+            if len(parts) < 3:
+                bot.answer_callback_query(call.id, _t(user_id, "invalid_button"), show_alert=True)
+                return
+
+            paper_id = parts[1]
+            folder_name = parts[2]
+
+            if folder_name == "略過":
+                bot.answer_callback_query(call.id, "⏭ 已略過歸檔")
+                bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+                return
+
+            # 找論文資料
+            papers = db.get_user_library(user_id)
+            paper = next((p for p in papers if str(p.get("id", ""))[:40] == paper_id or str(p.get("fingerprint", ""))[:40] == paper_id), None)
+
+            if not paper:
+                bot.answer_callback_query(call.id, "❌ 找不到論文資料", show_alert=True)
+                return
+
+            bot.answer_callback_query(call.id, f"☁️ 歸檔中...")
+
+            # 生成 BibTeX
+            bibtex_str = paper.get("bibtex", "") or paper_search.generate_bibtex_str(
+                title=paper.get("title", ""),
+                authors=paper.get("authors", []),
+                year=paper.get("year", ""),
+                link=paper.get("link", ""),
+                source=paper.get("source", "")
+            )
+
+            # 同步 BibTeX 到資料庫
+            if bibtex_str and not paper.get("bibtex"):
+                paper["bibtex"] = bibtex_str
+                db.add_paper_to_library(user_id, paper)
+
+            success, result = drive_manager.archive_paper(
+                user_id=user_id,
+                folder_name=folder_name,
+                title=paper.get("title", ""),
+                summary=paper.get("summary", ""),
+                link=paper.get("link", ""),
+                bibtex=bibtex_str
+            )
+
+            if success:
+                bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+                bot.send_message(
+                    call.message.chat.id,
+                    _t(user_id, "archive_success", folder=folder_name, title=paper.get("title", "")[:80])
+                )
+            else:
+                if "尚未完成 Google 授權" in result:
+                    auth_url = drive_manager.get_auth_url(user_id)
+                    if auth_url:
+                        markup = types.InlineKeyboardMarkup()
+                        markup.add(types.InlineKeyboardButton("🔗 授權 Google Drive", url=auth_url))
+                        bot.send_message(call.message.chat.id, "請先授權 Google Drive：", reply_markup=markup)
+                    else:
+                        bot.send_message(call.message.chat.id, "❌ Google OAuth 未設定。")
                 else:
-                    await update.message.reply_text(
-                        f"❌ 找不到名為 <b>{old_name}</b> 的資料夾。\n💡 提示：請先輸入 「我的資料夾」 確認目前正確的名稱！",
-                        parse_mode="HTML"
-                    )
-            else:
-                await update.message.reply_text(
-                    "⚠️ 格式錯誤！正確範例：<code>改名 綜合科學to科學系</code>",
-                    parse_mode="HTML"
-                )
-        except Exception as e:
-            print(f"🔥 改名例外錯誤: {e}")
-            await update.message.reply_text(
-                f"⚠️ 改名發生錯誤：{e}",
-                parse_mode="HTML"
-            )
-        return
+                    bot.send_message(call.message.chat.id, _t(user_id, "archive_failed", detail=result))
+            return
 
-  # 5. 移除資料夾
-    if user_text.startswith("移除") or user_text.startswith("刪除資料夾"):
+        # 匯出格式選擇
+        if data.startswith("export_fmt|"):
+            fmt = data.split("|", 1)[1]
+            papers = fetch_user_papers(user_id)
+            if not papers:
+                bot.answer_callback_query(call.id, "沒有論文可匯出", show_alert=True)
+                return
+
+            bot.answer_callback_query(call.id, f"📄 正在生成 {fmt} 格式...")
+            export_content = paper_search.export_papers(papers, fmt)
+            db.increment_usage(user_id, "export")
+
+            if len(export_content) > 4000:
+                # 分段發送
+                bot.send_message(call.message.chat.id, f"📄 <b>{fmt} 匯出結果</b>（共 {len(papers)} 篇）：")
+                for i in range(0, len(export_content), 3800):
+                    bot.send_message(call.message.chat.id, f"<pre>{export_content[i:i+3800]}</pre>")
+            else:
+                bot.send_message(call.message.chat.id, f"📄 <b>{fmt} 匯出結果</b>：\n\n<pre>{export_content}</pre>")
+            return
+
+        bot.answer_callback_query(call.id, _t(user_id, "invalid_button"))
+
+    except Exception as e:
+        print(f"Callback 錯誤: {e}", file=sys.stderr)
         try:
-            target_name = user_text.replace("移除", "", 1).replace("刪除資料夾", "", 1).strip()
-            
-            raw_cats = db.get_user_categories(user_id)
-            current_cats = list(raw_cats.values()) if isinstance(raw_cats, dict) else list(raw_cats)
-            
-            if target_name in current_cats:
-                # 1. 執行資料庫刪除
-                db.delete_user_category(user_id, target_name)
-                
-                # 2. 雲端同步（加上安全防護，就算雲端掛了也不影響回傳成功）
-                sync_ok = False
-                try:
-                    sync_ok = drive_manager.mark_folder_deleted(user_id, target_name)
-                except Exception as d_err:
-                    print(f"雲端標記刪除失敗（可忽略）: {d_err}")
-                
-                cloud_msg = "\n☁️ 雲端資料夾已同步標記" if sync_ok else ""
-                
-                # 3. 絕對保證會執行的成功回傳
-                await update.message.reply_text(
-                    f"✅ 已成功將 <b>{target_name}</b> 從資料夾清單移除！{cloud_msg}",
-                    parse_mode="HTML"
-                )
-            else:
-                await update.message.reply_text(
-                    f"❌ 找不到名為 <b>{target_name}</b> 的資料夾。\n💡 提示：請先輸入 「我的資料夾」 確認現有名稱！",
-                    parse_mode="HTML"
-                )
-        except Exception as e:
-            print(f"🔥 移除例外錯誤: {e}")
-            await update.message.reply_text(
-                f"⚠️ 移除發生錯誤：{e}",
-                parse_mode="HTML"
-            )
-        return
-    
-    # 6. 閒聊過濾
-    if is_chitchat(user_text):
-        await update.message.reply_text(get_chitchat_response(user_text), parse_mode="HTML")
-        return
-
-    # 7. 長句防呆
-    if is_likely_chat_not_search(user_text):
-        await update.message.reply_text(NOT_A_SEARCH_HINT, parse_mode="HTML")
-        return
-
-    # 8. 執行論文搜尋
-    await do_paper_search(update, context, user_text)
+            bot.answer_callback_query(call.id, "⚠️ 發生錯誤，請稍後再試。")
+        except Exception:
+            pass
 
 
-async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    if not query or not update.effective_user: return
-    await query.answer()
-    
-    # 拆解 callback_data
-    raw_data = query.data
-    if ":" not in raw_data: return
-    choice, p_id = raw_data.split(":", 1)
-    
-    user_id = update.effective_user.id
-    # 從快取取出資料
-    paper_info = paper_cache.get(p_id, {})
-    title = paper_info.get("title", "未知標題")
-    summary = paper_info.get("summary", "")
-    link = paper_info.get("link", "#")
-    
-    categories = load_categories(user_id)
+# ===================== OAuth2 回呼 =====================
 
-    if link == "#":
-        await query.edit_message_text(text="⚠️ 論文資料已過期，請重新搜尋。")
-        return
+@app.route("/oauth2callback")
+def oauth2callback():
+    code = request.args.get("code")
+    state = request.args.get("state")  # user_id
+    error = request.args.get("error")
 
-    # 1. 處理略過
-    if choice == "skip":
-        db.update_preference(user_id, title, is_interested=False)
-        ok, msg = drive_manager.archive_paper(user_id, SKIPPED_FOLDER_NAME, title, summary, link)
-        await query.edit_message_text(f"🗑 已略過：{title}")
-        if p_id in paper_cache: del paper_cache[p_id] # 清理記憶體
-        
-    # 2. 處理分類
-    elif choice in categories:
-        folder_name = categories[choice]
-        db.update_preference(user_id, title, is_interested=True)
-        ok, detail = drive_manager.archive_paper(user_id, folder_name, title, summary, link)
-        
-        if ok:
-            await query.edit_message_text(f"✅ 已成功歸檔至【<b>{folder_name}</b>】：{title}", parse_mode="HTML")
-            if p_id in paper_cache: del paper_cache[p_id] # 清理記憶體
-        else:
-            await query.edit_message_text(f"⚠️ 歸檔失敗：{detail}")
+    if error:
+        return f"<h3>授權失敗：{error}</h3>", 400
+    if not code or not state:
+        return "<h3>缺少必要參數</h3>", 400
+
+    try:
+        user_id = int(state)
+    except ValueError:
+        return "<h3>無效的 state 參數</h3>", 400
+
+    success = drive_manager.exchange_code(user_id, code)
+    if success:
+        try:
+            bot.send_message(user_id, "✅ Google Drive 授權成功！現在可以歸檔論文了。")
+        except Exception:
+            pass
+        return "<h3>✅ Google Drive 授權成功！請回到 Telegram 繼續使用。</h3>"
     else:
-        await query.edit_message_text(text="⚠️ 此按鈕已失效。")
+        return "<h3>❌ 授權失敗，請重試。</h3>", 500
 
 
-def build_application():
-    token = require_token()
-    application = ApplicationBuilder().token(token).build()
+# ===================== Webhook / Polling 啟動 =====================
 
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", send_help))
-    application.add_handler(CommandHandler("drive", drive_status))
-    application.add_handler(CommandHandler("search", search_command))
-    application.add_handler(CallbackQueryHandler(handle_callback))
-    application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
-    )
-    return application
+@app.route(f"/{TELEGRAM_TOKEN}", methods=["POST"])
+def webhook():
+    if request.headers.get("content-type") == "application/json":
+        json_string = request.get_data().decode("utf-8")
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return "OK", 200
+    abort(403)
 
-# ===================== 4. 主程式啟動 (支援自動網頁授權回傳) =====================
-from aiohttp import web
 
-async def handle_oauth_callback(request):
-    """ Google 授權完成後，自動跳轉到這裡處理並顯示全螢幕自適應精美字卡 """
-    code = request.query.get("code")
-    user_id_str = request.query.get("state")
+@app.route("/")
+def index():
+    return "PaperFilterBot is running! 🤖", 200
 
-    if code and user_id_str:
-        user_id = int(user_id_str)
-        if drive_manager.exchange_code(user_id, code):
-            # 1. 透過 Telegram 發送訊息
-            try:
-                bot_token = require_token()
-                from telegram import Bot
-                bot = Bot(token=bot_token)
-                await bot.send_message(
-                    chat_id=user_id,
-                    text="🎉 <b>Google Drive 授權成功！</b>\n\n現在你可以直接點擊任何論文分類按鈕，論文就會自動歸檔進你的雲端硬碟囉！",
-                    parse_mode="HTML"
-                )
-            except Exception:
-                pass
 
-            # 2. 全螢幕垂直水平完美置中、大字體綠色成功卡片
-            html_success = """
-            <!DOCTYPE html>
-            <html lang="zh-TW">
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                <title>授權成功 - 論文管家</title>
-                <style>
-                    * { box-sizing: border-box; margin: 0; padding: 0; }
-                    body {
-                        min-height: 100vh;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-                        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-                        padding: 24px;
-                    }
-                    .card {
-                        background: rgba(255, 255, 255, 0.95);
-                        backdrop-filter: blur(10px);
-                        width: 100%;
-                        max-width: 520px;
-                        padding: 48px 36px;
-                        border-radius: 28px;
-                        box-shadow: 0 20px 40px rgba(22, 101, 52, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-                        text-align: center;
-                        border: 1px solid rgba(255, 255, 255, 0.8);
-                    }
-                    .icon {
-                        font-size: 72px;
-                        line-height: 1;
-                        margin-bottom: 24px;
-                        display: inline-block;
-                    }
-                    h1 {
-                        font-size: 30px;
-                        font-weight: 800;
-                        color: #166534;
-                        margin-bottom: 16px;
-                        letter-spacing: -0.5px;
-                    }
-                    p {
-                        font-size: 19px;
-                        line-height: 1.6;
-                        color: #374151;
-                        margin-bottom: 32px;
-                    }
-                    .badge {
-                        display: inline-block;
-                        background: #dcfce7;
-                        color: #15803d;
-                        padding: 8px 18px;
-                        border-radius: 999px;
-                        font-size: 15px;
-                        font-weight: 600;
-                        margin-bottom: 24px;
-                    }
-                    .hint {
-                        font-size: 16px;
-                        color: #6b7280;
-                        border-top: 1px dashed #e5e7eb;
-                        padding-top: 20px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="card">
-                    <div class="icon">🎉</div>
-                    <div class="badge">已成功連線至 Google Drive</div>
-                    <h1>授權成功！</h1>
-                    <p>您的雲端硬碟已成功與 <b>論文管家</b> 綁定。<br>現在每次點擊分類，系統將自動為您極速歸檔！</p>
-                    <div class="hint">👉 您現在可以關閉此分頁，回到 Telegram 開始使用了。</div>
-                </div>
-            </body>
-            </html>
-            """
-            return web.Response(text=html_success, content_type="text/html")
+@app.route("/health")
+def health():
+    return "OK", 200
 
-    # 失敗時的置中紅色卡片
-    html_failed = """
-    <!DOCTYPE html>
-    <html lang="zh-TW">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>授權未完成</title>
-        <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body {
-                min-height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                padding: 24px;
-            }
-            .card {
-                background: white;
-                width: 100%;
-                max-width: 500px;
-                padding: 44px 32px;
-                border-radius: 24px;
-                box-shadow: 0 20px 40px rgba(159, 18, 57, 0.08);
-                text-align: center;
-            }
-            .icon { font-size: 64px; margin-bottom: 20px; }
-            h1 { font-size: 26px; color: #9f1239; margin-bottom: 12px; }
-            p { font-size: 17px; line-height: 1.6; color: #4b5563; }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <div class="icon">⚠️</div>
-            <h1>授權未完成</h1>
-            <p>無法取得 Google 授權憑證。<br>請回到 Telegram 對話框重新點擊授權連結！</p>
-        </div>
-    </body>
-    </html>
-    """
-    return web.Response(text=html_failed, content_type="text/html", status=400)
-
-async def handle_telegram_webhook(request, application):
-    """ 接收 Telegram 的訊息更新 """
-    data = await request.json()
-    update = Update.de_json(data, application.bot)
-    await application.process_update(update)
-    return web.Response(text="OK")
-
-def main():
-    application = build_application()
-    run_mode = os.getenv("RUN_MODE", "webhook").lower()
-
-    if run_mode == "polling":
-        print("以 polling 模式啟動（適合本機開發）")
-        application.run_polling(drop_pending_updates=True)
-        return
-
-    # Webhook 伺服器設定
-    port = int(os.environ.get("PORT", 10000))
-    token = require_token()
-    webhook_base = os.getenv("WEBHOOK_URL", "https://paperfilter-bot.onrender.com")
-
-    # 初始化 Telegram Application
-    async def start_web_app():
-        await application.initialize()
-        await application.start()
-        await application.bot.set_webhook(url=f"{webhook_base.rstrip('/')}/{token}", drop_pending_updates=True)
-
-        # 建立 aiohttp 網頁伺服器
-        server = web.Application()
-        server.router.add_post(f"/{token}", lambda req: handle_telegram_webhook(req, application))
-        server.router.add_get("/oauth2callback", handle_oauth_callback)
-        server.router.add_get("/", lambda req: web.Response(text="PaperFilterBot is Running! 🚀"))
-
-        runner = web.AppRunner(server)
-        await runner.setup()
-        site = web.TCPSite(runner, "0.0.0.0", port)
-        await site.start()
-        print(f"🚀 伺服器已啟動，監聽 0.0.0.0:{port}，支援 Telegram 與 Google OAuth 回呼！")
-
-        # 保持伺服器運行
-        while True:
-            await asyncio.sleep(3600)
-
-    asyncio.run(start_web_app())
 
 if __name__ == "__main__":
-    main()
+    if WEBHOOK_URL:
+        # Webhook 模式（雲端部署）
+        webhook_url = f"{WEBHOOK_URL.rstrip('/')}/{TELEGRAM_TOKEN}"
+        bot.remove_webhook()
+        import time
+        time.sleep(1)
+        bot.set_webhook(url=webhook_url)
+        print(f"✅ Webhook 模式啟動：{webhook_url}", file=sys.stderr)
+        app.run(host="0.0.0.0", port=PORT)
+    else:
+        # Polling 模式（本機測試）
+        print("✅ Polling 模式啟動（本機測試）...", file=sys.stderr)
+        bot.remove_webhook()
+        bot.infinity_polling(timeout=20, long_polling_timeout=15)

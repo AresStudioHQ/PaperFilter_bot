@@ -1,9 +1,3 @@
-python-telegram-bot[webhooks]>=21.0
-feedparser
-requests
-google-api-python-client
-google-auth
-google-auth-oauthlib
-biopython
-openai
-aiohttp
+pyTelegramBotAPI
+Flask
+python-dotenv
