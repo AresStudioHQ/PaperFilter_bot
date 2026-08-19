@@ -78,12 +78,20 @@ function verifyTelegramAuth(data: any): boolean {
     normTries.push({ label: "first_name trim", data: { ...base, first_name: String(base.first_name).trim() } });
     normTries.push({ label: "photo_url encodeURIComponent", data: { ...base, photo_url: encodeURIComponent(String(base.photo_url)) } });
     normTries.push({ label: "photo_url no-scheme", data: { ...base, photo_url: String(base.photo_url).replace(/^https?:\/\//, "") } });
+    normTries.push({ label: "photo_url size 640", data: { ...base, photo_url: String(base.photo_url).replace("/userpic/320/", "/userpic/640/") } });
+    normTries.push({ label: "photo_url size removed", data: { ...base, photo_url: String(base.photo_url).replace("/userpic/320/", "/userpic/") } });
     for (const t of normTries) {
       const dcs = Object.keys(t.data).sort().map((k) => `${k}=${t.data[k]}`).join("\n");
       const sec = createHmac("sha256", "WebAppData").update(token).digest();
       const h = createHmac("sha256", sec).update(dcs).digest("hex");
       console.error("   嘗試值正規化[" + t.label + "] hash=" + h + (h === hash ? " ✅符合收到hash" : ""));
     }
+    // 印出每個欄位的原始位元組，抓隱藏字元
+    for (const k of Object.keys(rest)) {
+      const v = String(rest[k]);
+      console.error("   DEBUG 欄位[" + k + "] len=" + v.length + " JSON=" + JSON.stringify(v));
+    }
+    console.error("   RAW req.body=" + JSON.stringify(data));
     return false;
   }
   if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
