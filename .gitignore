@@ -1,6 +1,0 @@
-# 憑證與本機資料（勿提交到 GitHub）
-credentials.json
-token.json
-folder_drive_ids.json
-seen_papers.txt
-*.json.bak
