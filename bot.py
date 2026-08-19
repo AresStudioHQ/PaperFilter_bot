@@ -32,33 +32,33 @@ except ImportError:
 MESSAGES = {
     "zh_hant": {
         "welcome": (
-            "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n"
-            "🔬 <b>核心科研特權</b>：\n"
-            "• 4 大官方學術庫交叉檢索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
-            "• 💡 4 維 AI 深度導讀（研究動機、核心方法、關鍵結論、技術限制）\n"
-            "• 💬 跨論文 RAG 智慧問答（<code>/chat [問題]</code>）\n"
-            "• ☁️ Google Drive 雙軌自動歸檔 + <code>references.bib</code> 即時生成\n"
-            "• 💎 Pro 跨論文對比矩陣與文獻綜述草稿\n\n"
+            "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\\n\\n"
+            "🔬 <b>核心科研特權</b>：\\n"
+            "• 4 大官方學術庫交叉檢索 (arXiv / PubMed / Semantic Scholar / CrossRef)\\n"
+            "• 💡 4 維 AI 深度導讀（研究動機、核心方法、關鍵結論、技術限制）\\n"
+            "• 💬 跨論文 RAG 智慧問答（<code>/chat [問題]</code>）\\n"
+            "• ☁️ Google Drive 雙軌自動歸檔 + <code>references.bib</code> 即時生成\\n"
+            "• 💎 Pro 跨論文對比矩陣與文獻綜述草稿\\n\\n"
             "👇 請選擇下方快捷功能，或直接在聊天室發送<b>論文關鍵字</b>進行檢索："
         ),
         "help": (
-            "📖 <b>PaperFilterBot 全指令導覽</b>\n\n"
-            "🔍 <b>論文檢索</b>：直接在聊天室發送關鍵字（例如：<code>LLM Agent</code>）\n"
-            "💬 <b>/chat [問題]</b> - 跨收藏論文 RAG 智慧問答與對比\n"
-            "📚 <b>/my</b> - 查看我的文獻庫、分類資料夾與 Drive 狀態\n"
-            "🔗 <b>/bind</b> - 取得 6 位數同步代碼，綁定電腦科研大總部\n"
-            "💎 <b>/pro</b> - 查看 Pro 權限狀態與高級科研工具\n"
-            "📂 <b>/following</b> - 管理追蹤學者與關鍵字\n"
-            "➕ <b>/follow [學者]</b> - 追蹤頂級學者最新著作\n"
-            "➖ <b>/unfollow [學者]</b> - 取消追蹤學者\n"
-            "📑 <b>/review [主題]</b> - AI 一鍵生成多篇論文文獻綜述\n"
-            "🔍 <b>/gap</b> - 自動分析目前收藏文獻的研究盲點與缺口\n"
-            "📈 <b>/trend [領域]</b> - 分析領域近年發表年份與 AI 趨勢\n"
-            "📋 <b>/export</b> - 匯出收藏文獻為 BibTeX / RIS / CSV\n"
-            "⚙️ <b>/mode</b> - 切換論文過濾模式（頂刊 / 智慧 / OA 免費）\n"
-            "🌐 <b>/lang</b> - 切換多國語言\n"
-            "📊 <b>/reports</b> - 產生個人文獻綜述歷史報告\n"
-            "☁️ <b>/drive</b> - 連結或檢查 Google Drive 雲端同步狀態\n"
+            "📖 <b>PaperFilterBot 全指令導覽</b>\\n\\n"
+            "🔍 <b>論文檢索</b>：直接在聊天室發送關鍵字（例如：<code>LLM Agent</code>）\\n"
+            "💬 <b>/chat [問題]</b> - 跨收藏論文 RAG 智慧問答與對比\\n"
+            "📚 <b>/my</b> - 查看我的文獻庫、分類資料夾與 Drive 狀態\\n"
+            "🔗 <b>/bind</b> - 取得 6 位數同步代碼，綁定電腦科研大總部\\n"
+            "💎 <b>/pro</b> - 查看 Pro 權限狀態與高級科研工具\\n"
+            "📂 <b>/following</b> - 管理追蹤學者與關鍵字\\n"
+            "➕ <b>/follow [學者]</b> - 追蹤頂級學者最新著作\\n"
+            "➖ <b>/unfollow [學者]</b> - 取消追蹤學者\\n"
+            "📑 <b>/review [主題]</b> - AI 一鍵生成多篇論文文獻綜述\\n"
+            "🔍 <b>/gap</b> - 自動分析目前收藏文獻的研究盲點與缺口\\n"
+            "📈 <b>/trend [領域]</b> - 分析領域近年發表年份與 AI 趨勢\\n"
+            "📋 <b>/export</b> - 匯出收藏文獻為 BibTeX / RIS / CSV\\n"
+            "⚙️ <b>/mode</b> - 切換論文過濾模式（頂刊 / 智慧 / OA 免費）\\n"
+            "🌐 <b>/lang</b> - 切換多國語言\\n"
+            "📊 <b>/reports</b> - 產生個人文獻綜述歷史報告\\n"
+            "☁️ <b>/drive</b> - 連結或檢查 Google Drive 雲端同步狀態\\n"
             "💻 <b>/web</b> - 取得電腦端科研大總部網址"
         ),
         "btn_search": "🔍 檢索論文",
@@ -94,44 +94,44 @@ MESSAGES = {
         "folder_renamed": "📁 資料夾已改名：【{old}】➡️【{new}】",
         "folder_deleted": "🗑 已刪除資料夾：【{name}】",
         "folder_not_found": "❌ 找不到指定資料夾：【{name}】",
-        "my_folders": "📁 <b>您的自訂歸檔資料夾：</b>\n\n{list}",
+        "my_folders": "📁 <b>您的自訂歸檔資料夾：</b>\\n\\n{list}",
         "no_custom_folders": "📂 目前尚無自訂資料夾，可直接輸入「新增 資料夾名稱」建立。",
         "follow_success": "✅ 已成功追蹤學者：<b>{name}</b>",
         "unfollow_success": "✅ 已取消追蹤學者：<b>{name}</b>",
         "unfollow_failed": "❌ 取消追蹤失敗，您可能未曾追蹤過此學者。",
         "no_following": "您目前尚未追蹤任何學者，可使用 <code>/follow 學者姓名</code> 進行追蹤。",
-        "following_list": "👥 <b>您追蹤的學者名單：</b>\n\n{list}",
+        "following_list": "👥 <b>您追蹤的學者名單：</b>\\n\\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
     },
     "zh_hans": {
         "welcome": (
-            "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n"
-            "🔬 <b>核心科研特权</b>：\n"
-            "• 4 大官方学术库交叉检索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
-            "• 💡 4 维 AI 深度导读（研究动机、核心方法、关键结论、技术限制）\n"
-            "• 💬 跨论文 RAG 智能问答（<code>/chat [问题]</code>）\n"
-            "• ☁️ Google Drive 双轨自动归档 + <code>references.bib</code> 实时生成\n"
-            "• 💎 Pro 跨论文对比矩阵与文献综述草稿\n\n"
+            "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\\n\\n"
+            "🔬 <b>核心科研特权</b>：\\n"
+            "• 4 大官方学术库交叉检索 (arXiv / PubMed / Semantic Scholar / CrossRef)\\n"
+            "• 💡 4 维 AI 深度导读（研究动机、核心方法、关键结论、技术限制）\\n"
+            "• 💬 跨论文 RAG 智能问答（<code>/chat [问题]</code>）\\n"
+            "• ☁️ Google Drive 双轨自动归档 + <code>references.bib</code> 实时生成\\n"
+            "• 💎 Pro 跨论文对比矩阵与文献综述草稿\\n\\n"
             "👇 请选择下方快捷功能，或直接在聊天室发送<b>论文关键词</b>进行检索："
         ),
         "help": (
-            "📖 <b>PaperFilterBot 全指令导览</b>\n\n"
-            "🔍 <b>论文检索</b>：直接在聊天室发送关键词（例如：<code>LLM Agent</code>）\n"
-            "💬 <b>/chat [问题]</b> - 跨收藏论文 RAG 智能问答与对比\n"
-            "📚 <b>/my</b> - 查看我的文献库、分类文件夹与 Drive 状态\n"
-            "🔗 <b>/bind</b> - 获取 6 位数同步代码，绑定电脑科研大总部\n"
-            "💎 <b>/pro</b> - 查看 Pro 权限状态与高级科研工具\n"
-            "📂 <b>/following</b> - 管理追踪学者与关键词\n"
-            "➕ <b>/follow [学者]</b> - 追踪顶级学者最新著作\n"
-            "➖ <b>/unfollow [学者]</b> - 取消追踪学者\n"
-            "📑 <b>/review [主题]</b> - AI 一键生成多篇论文文献综述\n"
-            "🔍 <b>/gap</b> - 自动分析目前收藏文献的研究盲点与缺口\n"
-            "📈 <b>/trend [领域]</b> - 分析领域近年发表年份与 AI 趋势\n"
-            "📋 <b>/export</b> - 导出收藏文献为 BibTeX / RIS / CSV\n"
-            "⚙️ <b>/mode</b> - 切换论文过滤模式（顶刊 / 智能 / OA 免费）\n"
-            "🌐 <b>/lang</b> - 切换多国语言\n"
-            "📊 <b>/reports</b> - 生成个人文献综述历史报告\n"
-            "☁️ <b>/drive</b> - 链接或检查 Google Drive 云端同步状态\n"
+            "📖 <b>PaperFilterBot 全指令导览</b>\\n\\n"
+            "🔍 <b>论文检索</b>：直接在聊天室发送关键词（例如：<code>LLM Agent</code>）\\n"
+            "💬 <b>/chat [问题]</b> - 跨收藏论文 RAG 智能问答与对比\\n"
+            "📚 <b>/my</b> - 查看我的文献库、分类文件夹与 Drive 状态\\n"
+            "🔗 <b>/bind</b> - 获取 6 位数同步代码，绑定电脑科研大总部\\n"
+            "💎 <b>/pro</b> - 查看 Pro 权限状态与高级科研工具\\n"
+            "📂 <b>/following</b> - 管理追踪学者与关键词\\n"
+            "➕ <b>/follow [学者]</b> - 追踪顶级学者最新著作\\n"
+            "➖ <b>/unfollow [学者]</b> - 取消追踪学者\\n"
+            "📑 <b>/review [主题]</b> - AI 一键生成多篇论文文献综述\\n"
+            "🔍 <b>/gap</b> - 自动分析目前收藏文献的研究盲点与缺口\\n"
+            "📈 <b>/trend [领域]</b> - 分析领域近年发表年份与 AI 趋势\\n"
+            "📋 <b>/export</b> - 导出收藏文献为 BibTeX / RIS / CSV\\n"
+            "⚙️ <b>/mode</b> - 切换论文过滤模式（顶刊 / 智能 / OA 免费）\\n"
+            "🌐 <b>/lang</b> - 切换多国语言\\n"
+            "📊 <b>/reports</b> - 生成个人文献综述历史报告\\n"
+            "☁️ <b>/drive</b> - 链接或检查 Google Drive 云端同步状态\\n"
             "💻 <b>/web</b> - 获取电脑端科研大总部网址"
         ),
         "btn_search": "🔍 检索论文",
@@ -167,44 +167,44 @@ MESSAGES = {
         "folder_renamed": "📁 文件夹已改名：【{old}】➡️【{new}】",
         "folder_deleted": "🗑 已删除文件夹：【{name}】",
         "folder_not_found": "❌ 找不到指定文件夹：【{name}】",
-        "my_folders": "📁 <b>您的自定义归档文件夹：</b>\n\n{list}",
+        "my_folders": "📁 <b>您的自定义归档文件夹：</b>\\n\\n{list}",
         "no_custom_folders": "📂 目前尚无自定义文件夹，可直接输入「新增 文件夹名称」建立。",
         "follow_success": "✅ 已成功追踪学者：<b>{name}</b>",
         "unfollow_success": "✅ 已取消追踪学者：<b>{name}</b>",
         "unfollow_failed": "❌ 取消追踪失败，您可能未曾追踪过此学者。",
         "no_following": "您目前尚未追踪任何学者，可使用 <code>/follow 学者姓名</code> 进行追踪。",
-        "following_list": "👥 <b>您追踪的学者名单：</b>\n\n{list}",
+        "following_list": "👥 <b>您追踪的学者名单：</b>\\n\\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
     },
     "en": {
         "welcome": (
-            "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n"
-            "🔬 <b>Core Features</b>:\n"
-            "• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\n"
-            "• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n"
-            "• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\n"
-            "• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\n"
-            "• 💎 Pro: Cross-paper RAG Q&A, Comparison Matrix, and Literature Synthesis\n\n"
+            "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\\n\\n"
+            "🔬 <b>Core Features</b>:\\n"
+            "• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\\n"
+            "• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\\n"
+            "• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\\n"
+            "• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\\n"
+            "• 💎 Pro: Cross-paper RAG Q&A, Comparison Matrix, and Literature Synthesis\\n\\n"
             "👇 Choose a shortcut below or send <b>keywords</b> directly to search:"
         ),
         "help": (
-            "📖 <b>PaperFilterBot Command Suite</b>\n\n"
-            "🔍 <b>Search</b>: Send keywords directly (e.g. <code>Quantum Computing</code>)\n"
-            "💬 <b>/chat [Question]</b> - Cross-paper RAG Q&A and Synthesis\n"
-            "📚 <b>/my</b> - View your library, custom folders & Drive sync\n"
-            "🔗 <b>/bind</b> - Generate 6-digit sync code for Web HQ\n"
-            "💎 <b>/pro</b> - Check Pro subscription & advanced tools\n"
-            "📂 <b>/following</b> - Manage followed authors & topics\n"
-            "➕ <b>/follow [Author]</b> - Track researcher publications\n"
-            "➖ <b>/unfollow [Author]</b> - Untrack researcher\n"
-            "📑 <b>/review [Topic]</b> - AI Literature Synthesis Review Draft\n"
-            "🔍 <b>/gap</b> - Discover research gaps across your library\n"
-            "📈 <b>/trend [Field]</b> - Publication year trends & AI analysis\n"
-            "📋 <b>/export</b> - Export library to BibTeX / RIS / CSV\n"
-            "⚙️ <b>/mode</b> - Toggle filter criteria (Top-Tier / Smart / OA Only)\n"
-            "🌐 <b>/lang</b> - Switch interface language\n"
-            "📊 <b>/reports</b> - View synthesis report history\n"
-            "☁️ <b>/drive</b> - Check Google Drive sync link\n"
+            "📖 <b>PaperFilterBot Command Suite</b>\\n\\n"
+            "🔍 <b>Search</b>: Send keywords directly (e.g. <code>Quantum Computing</code>)\\n"
+            "💬 <b>/chat [Question]</b> - Cross-paper RAG Q&A and Synthesis\\n"
+            "📚 <b>/my</b> - View your library, custom folders & Drive sync\\n"
+            "🔗 <b>/bind</b> - Generate 6-digit sync code for Web HQ\\n"
+            "💎 <b>/pro</b> - Check Pro subscription & advanced tools\\n"
+            "📂 <b>/following</b> - Manage followed authors & topics\\n"
+            "➕ <b>/follow [Author]</b> - Track researcher publications\\n"
+            "➖ <b>/unfollow [Author]</b> - Untrack researcher\\n"
+            "📑 <b>/review [Topic]</b> - AI Literature Synthesis Review Draft\\n"
+            "🔍 <b>/gap</b> - Discover research gaps across your library\\n"
+            "📈 <b>/trend [Field]</b> - Publication year trends & AI analysis\\n"
+            "📋 <b>/export</b> - Export library to BibTeX / RIS / CSV\\n"
+            "⚙️ <b>/mode</b> - Toggle filter criteria (Top-Tier / Smart / OA Only)\\n"
+            "🌐 <b>/lang</b> - Switch interface language\\n"
+            "📊 <b>/reports</b> - View synthesis report history\\n"
+            "☁️ <b>/drive</b> - Check Google Drive sync link\\n"
             "💻 <b>/web</b> - Open Web Research HQ"
         ),
         "btn_search": "🔍 Search Papers",
@@ -240,44 +240,44 @@ MESSAGES = {
         "folder_renamed": "📁 Renamed folder: [{old}] ➡️ [{new}]",
         "folder_deleted": "🗑 Deleted folder: [{name}]",
         "folder_not_found": "❌ Folder not found: [{name}]",
-        "my_folders": "📁 <b>Your custom archive folders:</b>\n\n{list}",
+        "my_folders": "📁 <b>Your custom archive folders:</b>\\n\\n{list}",
         "no_custom_folders": "📂 No custom folders yet. Type 'Add FolderName' to create one.",
         "follow_success": "✅ Now tracking author: <b>{name}</b>",
         "unfollow_success": "✅ Unfollowed author: <b>{name}</b>",
         "unfollow_failed": "❌ Untrack failed: Author not found.",
         "no_following": "You are not tracking any authors yet. Use <code>/follow AuthorName</code>.",
-        "following_list": "👥 <b>Followed Authors:</b>\n\n{list}",
+        "following_list": "👥 <b>Followed Authors:</b>\\n\\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
     },
     "ja": {
         "welcome": (
-            "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot 研究総本部</b>へようこそ！\n\n"
-            "🔬 <b>主な機能</b>：\n"
-            "• 4大学術リポジトリ横断検索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
-            "• 💡 4次元AI詳細解説（動機・手法・結論・限界）\n"
-            "• 💬 論文横断RAG質問（<code>/chat [質問]</code>）\n"
-            "• ☁️ Google Drive自動保存 & <code>references.bib</code> 同期\n"
-            "• 💎 Pro: 論文横断RAG質問・比較マトリックス・文献レビュー草案\n\n"
+            "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot 研究総本部</b>へようこそ！\\n\\n"
+            "🔬 <b>主な機能</b>：\\n"
+            "• 4大学術リポジトリ横断検索 (arXiv / PubMed / Semantic Scholar / CrossRef)\\n"
+            "• 💡 4次元AI詳細解説（動機・手法・結論・限界）\\n"
+            "• 💬 論文横断RAG質問（<code>/chat [質問]</code>）\\n"
+            "• ☁️ Google Drive自動保存 & <code>references.bib</code> 同期\\n"
+            "• 💎 Pro: 論文横断RAG質問・比較マトリックス・文献レビュー草案\\n\\n"
             "👇 以下のメニューを選択するか、<b>キーワード</b>を直接送信して検索してください："
         ),
         "help": (
-            "📖 <b>PaperFilterBot コマンド一覧</b>\n\n"
-            "🔍 <b>論文検索</b>：キーワードを直接送信（例：<code>Diffusion Models</code>）\n"
-            "💬 <b>/chat [質問]</b> - 収集論文横断RAGスマートQ&A\n"
-            "📚 <b>/my</b> - 文献ライブラリ・フォルダ・Drive連携状態を確認\n"
-            "🔗 <b>/bind</b> - Web総本部連携用の6桁コードを発行\n"
-            "💎 <b>/pro</b> - Proプラン状態と高度な機能を確認\n"
-            "📂 <b>/following</b> - フォロー中のキーワードとフォルダ管理\n"
-            "➕ <b>/follow [著者名]</b> - 研究者の最新論文を追跡\n"
-            "➖ <b>/unfollow [著者名]</b> - 追跡解除\n"
-            "📑 <b>/review [テーマ]</b> - AI文献レビュー草案を作成\n"
-            "🔍 <b>/gap</b> - 収集済み文献から研究ギャップを自動抽出\n"
-            "📈 <b>/trend [分野]</b> - 分野別トレンド＆年別推移分析\n"
-            "📋 <b>/export</b> - BibTeX / RIS / CSVで文献エクスポート\n"
-            "⚙️ <b>/mode</b> - 要約モードの切り替え\n"
-            "🌐 <b>/lang</b> - 言語設定の変更\n"
-            "📊 <b>/reports</b> - 読書レポートと閲覧履歴\n"
-            "☁️ <b>/drive</b> - Google Drive連携確認\n"
+            "📖 <b>PaperFilterBot コマンド一覧</b>\\n\\n"
+            "🔍 <b>論文検索</b>：キーワードを直接送信（例：<code>Diffusion Models</code>）\\n"
+            "💬 <b>/chat [質問]</b> - 収集論文横断RAGスマートQ&A\\n"
+            "📚 <b>/my</b> - 文献ライブラリ・フォルダ・Drive連携状態を確認\\n"
+            "🔗 <b>/bind</b> - Web総本部連携用の6桁コードを発行\\n"
+            "💎 <b>/pro</b> - Proプラン状態と高度な機能を確認\\n"
+            "📂 <b>/following</b> - フォロー中のキーワードとフォルダ管理\\n"
+            "➕ <b>/follow [著者名]</b> - 研究者の最新論文を追跡\\n"
+            "➖ <b>/unfollow [著者名]</b> - 追跡解除\\n"
+            "📑 <b>/review [テーマ]</b> - AI文献レビュー草案を作成\\n"
+            "🔍 <b>/gap</b> - 収集済み文献から研究ギャップを自動抽出\\n"
+            "📈 <b>/trend [分野]</b> - 分野別トレンド＆年別推移分析\\n"
+            "📋 <b>/export</b> - BibTeX / RIS / CSVで文献エクスポート\\n"
+            "⚙️ <b>/mode</b> - 要約モードの切り替え\\n"
+            "🌐 <b>/lang</b> - 言語設定の変更\\n"
+            "📊 <b>/reports</b> - 読書レポートと閲覧履歴\\n"
+            "☁️ <b>/drive</b> - Google Drive連携確認\\n"
             "💻 <b>/web</b> - Web研究総本部のURLを取得"
         ),
         "btn_search": "🔍 論文検索",
@@ -313,13 +313,13 @@ MESSAGES = {
         "folder_renamed": "📁 フォルダ名を変更しました: 【{old}】➡️【{new}】",
         "folder_deleted": "🗑 フォルダを削除しました: 【{name}】",
         "folder_not_found": "❌ 指定のフォルダが見つかりません: 【{name}】",
-        "my_folders": "📁 <b>カスタムフォルダ一覧：</b>\n\n{list}",
+        "my_folders": "📁 <b>カスタムフォルダ一覧：</b>\\n\\n{list}",
         "no_custom_folders": "📂 フォルダがありません。「追加 フォルダ名」で作成できます。",
         "follow_success": "✅ 著者をフォローしました: <b>{name}</b>",
         "unfollow_success": "✅ 著者のフォローを解除しました: <b>{name}</b>",
         "unfollow_failed": "❌ フォロー解除失敗：著者が存在しません。",
         "no_following": "現在フォロー中の著者はいません。<code>/follow 著者名</code> で追加できます。",
-        "following_list": "👥 <b>フォロー中著者一覧：</b>\n\n{list}",
+        "following_list": "👥 <b>フォロー中著者一覧：</b>\\n\\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
     }
 }
@@ -384,7 +384,7 @@ app = Flask(__name__)
 def make_main_menu(user_id):
     lang = _get_lang(user_id)
     t = lambda k: MESSAGES.get(lang, MESSAGES["zh_hant"]).get(k, k)
-    
+
     markup = InlineKeyboardMarkup(row_width=2)
     markup.add(
         InlineKeyboardButton(t("btn_search"), switch_inline_query_current_chat=""),
@@ -415,15 +415,12 @@ def _build_folder_keyboard(user_id: int, paper_id: str, lang: str) -> types.Inli
     return markup
 
 # ===================== 4. 指令系統 =====================
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start', 'welcome'])
 def handle_start(message):
     user_id = message.from_user.id
-    welcome_text = (
-        f"👋 <b>歡迎使用 PaperFilterBot 學術智慧雷達！</b>\n\n"
-        f"我是您的科研助理，已為您串接 <b>arXiv、PubMed、Semantic Scholar、CrossRef</b> 4 大學術庫與 Google Drive。\n\n"
-        f"💡 <b>直接發送關鍵字</b>即可檢索論文，或輸入 <code>/help</code> 查看全部指令。"
-    )
-    
+    name = message.from_user.first_name or "Researcher"
+    welcome_text = _t(user_id, "welcome", name=name)
+
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
         types.InlineKeyboardButton("🔍 熱門：Transformer", callback_data="search_kw|Transformer"),
@@ -438,34 +435,19 @@ def handle_start(message):
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="HTML")
 
-@bot.message_handler(commands=['help'])
+@bot.message_handler(commands=['help', 'h', 'guide'])
 def handle_help(message):
-    help_text = (
-        "📖 <b>PaperFilterBot 完整科研指令指南</b>\n\n"
-        "🔹 <b>基礎操作</b>\n"
-        "• 直接發送關鍵字：搜尋 4 大庫最新權威文獻（如 <code>Transformer</code>、<code>CRISPR</code>）\n"
-        "• <code>/my</code>：查看我的文獻庫統計、資料夾與 Drive 歸檔狀態\n"
-        "• <code>/chat [問題]</code>：跨收藏論文 RAG 智慧問答與深度對比\n"
-        "• <code>/bind</code> 或 <code>/web</code>：取得電腦科研大總部 6 位數同步碼\n"
-        "• <code>/export</code>：匯出收藏論文為 BibTeX / RIS / CSV\n"
-        "• <code>/trend [主題]</code>：分析研究熱點趨勢\n\n"
-        "🔹 <b>進階科研功能</b>\n"
-        "• <code>/review</code>：針對當前收藏論文一鍵產出結構化文獻綜述\n"
-        "• <code>/gap</code>：分析現有文獻的研究缺口與瓶頸\n"
-        "• <code>/pro</code>：查看 Pro 專業版特權狀態與升級\n"
-        "• <code>/mode</code>：切換過濾偏好（頂刊權威 / 智慧平衡 / 開源免費）\n"
-        "• <code>/lang</code>：切換 4 國介面語言"
-    )
-    
+    user_id = message.from_user.id
+    help_text = _t(user_id, "help")
+
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
         types.InlineKeyboardButton("🔗 綁定電腦端", callback_data="cmd_bind"),
         types.InlineKeyboardButton("👑 查看 Pro 特權", callback_data="cmd_pro")
     )
-    
     bot.send_message(message.chat.id, help_text, reply_markup=markup, parse_mode="HTML")
 
-@bot.message_handler(commands=['my'])
+@bot.message_handler(commands=['my', 'library'])
 def handle_my_command(message):
     """查看我的文獻庫、分類資料夾與 Google Drive 狀態"""
     user_id = message.from_user.id
@@ -476,23 +458,22 @@ def handle_my_command(message):
     cats_str = "、".join(categories) if categories else "預設分類"
     tier = db.get_user_tier(user_id).get("tier", "free")
     tier_badge = "👑 Pro 尊榮版" if tier == "pro" else "⚪ 免費體驗版"
-
     text = (
-        f"📚 <b>您的個人科研文獻庫總覽</b>\n\n"
-        f"👤 會員等級：{tier_badge}\n"
-        f"☁️ Google Drive 狀態：{drive_status}\n"
-        f"📑 收藏論文數量：共 <b>{len(papers)}</b> 篇\n"
-        f"📁 自訂資料夾：{cats_str}\n\n"
+        f"📚 <b>您的個人科研文獻庫總覽</b>\\n\\n"
+        f"👤 會員等級：{tier_badge}\\n"
+        f"☁️ Google Drive 狀態：{drive_status}\\n"
+        f"📑 收藏論文數量：共 <b>{len(papers)}</b> 篇\\n"
+        f"📁 自訂資料夾：{cats_str}\\n\\n"
     )
-    
+
     if papers:
-        text += "<b>🕒 最近收藏文獻（最新 3 篇）：</b>\n"
+        text += "<b>🕒 最近收藏文獻（最新 3 篇）：</b>\\n"
         for i, p in enumerate(papers[:3], 1):
-            text += f"{i}. <b>{p.get('title', '')[:55]}</b> ({p.get('year', 'N/A')})\n"
-        text += "\n💡 提示：使用 <code>/chat 您的研究問題</code> 可跨文獻向 AI 提問；使用 <code>/export</code> 可批次匯出引用格式。"
+            text += f"{i}. <b>{p.get('title', '')[:55]}</b> ({p.get('year', 'N/A')})\\n"
+        text += "\\n💡 提示：使用 <code>/chat 您的研究問題</code> 可跨文獻向 AI 提問；使用 <code>/export</code> 可批次匯出引用格式。"
     else:
-        text += "您目前尚未收藏任何論文。\n搜尋論文後點擊卡片下方的【☁️ 歸檔到雲端】即可將論文加入文獻庫！"
-        
+        text += "您目前尚未收藏任何論文。\\n搜尋論文後點擊卡片下方的【☁️ 歸檔到雲端】即可將論文加入文獻庫！"
+
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
         types.InlineKeyboardButton("📄 匯出文獻庫", callback_data="cmd_export"),
@@ -508,32 +489,31 @@ def handle_chat_command(message):
     if len(parts) < 2:
         bot.reply_to(
             message,
-            "💡 <b>跨文獻 RAG 智慧問答</b>\n\n"
-            "請在指令後附帶您的研究問題，例如：\n"
-            "• <code>/chat 這些論文在模型架構與實驗指標上有何具體差異？</code>\n"
+            "💡 <b>跨文獻 RAG 智慧問答</b>\\n\\n"
+            "請在指令後附帶您的研究問題，例如：\\n"
+            "• <code>/chat 這些論文在模型架構與實驗指標上有何具體差異？</code>\\n"
             "• <code>/chat 哪一篇論文的方法最適合應用在低延遲或邊緣運算設備？</code>",
             parse_mode="HTML"
         )
         return
-    
+
     query = parts[1].strip()
     papers = db.get_user_library(user_id)
     if not papers:
         bot.reply_to(message, "📂 您目前文獻庫中沒有論文。請先搜尋並點擊【☁️ 歸檔到雲端】收藏幾篇論文後再來提問！")
         return
-        
+
     loading_msg = bot.reply_to(message, f"🧠 <b>AI 正在跨 {len(papers)} 篇文獻進行深入關聯檢索與分析，請稍候...</b>", parse_mode="HTML")
-    
     answer = search_engine.chat_with_user_library(user_id, query, papers)
-    
+
     try:
         bot.delete_message(loading_msg.chat.id, loading_msg.message_id)
     except Exception:
         pass
-        
-    header = f"💬 <b>跨論文解答報告</b>\n❓ <i>問題：{query}</i>\n\n"
+
+    header = f"💬 <b>跨論文解答報告</b>\\n❓ <i>問題：{query}</i>\\n\\n"
     full_response = header + answer
-    
+
     if len(full_response) > 4000:
         for i in range(0, len(full_response), 4000):
             bot.send_message(message.chat.id, full_response[i:i+4000], parse_mode="HTML")
@@ -545,9 +525,9 @@ def handle_bind_command(message):
     user_id = message.from_user.id
     code = db.generate_sync_code(user_id)
     text = (
-        f"🔗 <b>電腦科研大總部同步帳號綁定</b>\n\n"
-        f"您的專屬 6 位數同步碼為：<code>{code}</code>\n\n"
-        f"💻 請在電腦瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\n"
+        f"🔗 <b>電腦科研大總部同步帳號綁定</b>\\n\\n"
+        f"您的專屬 6 位數同步碼為：<code>{code}</code>\\n\\n"
+        f"💻 請在電腦瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\\n"
         f"綁定後，您在 Telegram 的所有標記（看過/略過/歸檔/筆記）將與電腦端全功能儀表板雙向同步！"
     )
     bot.reply_to(message, text, parse_mode="HTML")
@@ -559,15 +539,15 @@ def handle_pro_command(message):
     tier = tier_info.get("tier", "free")
     tier_badge = "🟢 <b>已是 Pro 尊榮會員</b>" if tier == "pro" else "⚪ 免費體驗版"
     text = (
-        f"👑 <b>PaperFilterBot Pro 科研專業版 (NT$ 500 / 月價值)</b>\n\n"
-        f"當前狀態：{tier_badge}\n\n"
-        f"🌟 <b>Pro 專屬特權</b>：\n"
-        f"1. 💬 <b>AI 全庫跨論文問答 (<code>/chat [問題]</code>)</b>：頂級推理模型 + 附帶文獻精確引用依據\n"
-        f"2. 🔬 <b>高階全文拆解導讀</b>：深層解析方法論、實驗指標與限制（非僅摘要翻譯）\n"
-        f"3. 📊 <b>多篇論文橫向結構化對比矩陣</b>（痛點/方法/指標/限制）\n"
-        f"4. 📑 <b>一鍵產出完整綜述論文草稿 (<code>/review</code>)</b>\n"
-        f"5. ⏰ <b>每週一 Telegram 頂刊早報自動推播 (Digest)</b>\n"
-        f"6. 🚀 <b>無限次 AI 深度導讀與高優先級 CrossRef 禮貌通道</b>\n\n"
+        f"👑 <b>PaperFilterBot Pro 科研專業版 (NT$ 500 / 月價值)</b>\\n\\n"
+        f"當前狀態：{tier_badge}\\n\\n"
+        f"🌟 <b>Pro 專屬特權</b>：\\n"
+        f"1. 💬 <b>AI 全庫跨論文問答 (<code>/chat [問題]</code>)</b>：頂級推理模型 + 附帶文獻精確引用依據\\n"
+        f"2. 🔬 <b>高階全文拆解導讀</b>：深層解析方法論、實驗指標與限制（非僅摘要翻譯）\\n"
+        f"3. 📊 <b>多篇論文橫向結構化對比矩陣</b>（痛點/方法/指標/限制）\\n"
+        f"4. 📑 <b>一鍵產出完整綜述論文草稿 (<code>/review</code>)</b>\\n"
+        f"5. ⏰ <b>每週一 Telegram 頂刊早報自動推播 (Digest)</b>\\n"
+        f"6. 🚀 <b>無限次 AI 深度導讀與高優先級 CrossRef 禮貌通道</b>\\n\\n"
         f"可在電腦科研大總部一鍵升級或管理訂閱！"
     )
     bot.reply_to(message, text, parse_mode="HTML")
@@ -579,10 +559,10 @@ def handle_reports_command(message):
     if not reports:
         bot.reply_to(message, "📝 您目前尚無生成的文獻綜述報告。可使用 <code>/review 主題</code> 立即生成！")
         return
-    text = f"📑 <b>您生成的學術綜述報告清單（共 {len(reports)} 份）：</b>\n\n"
+    text = f"📑 <b>您生成的學術綜述報告清單（共 {len(reports)} 份）：</b>\\n\\n"
     for r in reports[:5]:
-        text += f"• <b>{r.get('topic', '綜合綜述')}</b> ({str(r.get('created_at', ''))[:10]})\n"
-    text += "\n可在電腦端科研大總部查看全文與匯出 Markdown/PDF！"
+        text += f"• <b>{r.get('topic', '綜合綜述')}</b> ({str(r.get('created_at', ''))[:10]})\\n"
+    text += "\\n可在電腦端科研大總部查看全文與匯出 Markdown/PDF！"
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['mode'])
@@ -603,7 +583,7 @@ def handle_mode(message):
     )
     bot.reply_to(message, _t(user_id, "mode_title", current=current_display), reply_markup=markup)
 
-@bot.message_handler(commands=['lang'])
+@bot.message_handler(commands=['lang', 'language'])
 def handle_lang(message):
     user_id = message.from_user.id
     lang = _get_lang(user_id, message.from_user.language_code)
@@ -618,7 +598,7 @@ def handle_lang(message):
     )
     bot.reply_to(message, _t(user_id, "lang_switch_title", current=current_display), reply_markup=markup)
 
-@bot.message_handler(commands=['follow'])
+@bot.message_handler(commands=['follow', 'track'])
 def handle_follow(message):
     user_id = message.from_user.id
     parts = message.text.strip().split(maxsplit=1)
@@ -629,7 +609,7 @@ def handle_follow(message):
     db.add_followed_author(user_id, author_name)
     bot.reply_to(message, _t(user_id, "follow_success", name=author_name))
 
-@bot.message_handler(commands=['unfollow'])
+@bot.message_handler(commands=['unfollow', 'untrack'])
 def handle_unfollow(message):
     user_id = message.from_user.id
     parts = message.text.strip().split(maxsplit=1)
@@ -643,15 +623,27 @@ def handle_unfollow(message):
     else:
         bot.reply_to(message, _t(user_id, "unfollow_failed", name=author_name))
 
-@bot.message_handler(commands=['following'])
+@bot.message_handler(commands=['following', 'authors'])
 def handle_following(message):
     user_id = message.from_user.id
     authors = db.get_followed_authors(user_id)
     if not authors:
         bot.reply_to(message, _t(user_id, "no_following"))
     else:
-        authors_list = "\n".join(f"• <code>{a}</code>" for a in authors)
+        authors_list = "\\n".join(f"• <code>{a}</code>" for a in authors)
         bot.reply_to(message, _t(user_id, "following_list", list=authors_list))
+
+@bot.message_handler(commands=['folders', 'myfolders', 'categories', 'cats'])
+def handle_folders_command(message):
+    user_id = message.from_user.id
+    cats = db.get_user_categories(user_id)
+    default_cats = MESSAGES.get(_get_lang(user_id), MESSAGES["en"]).get("default_categories", [])
+    all_cats = cats if cats else default_cats
+    if all_cats:
+        cats_list = "\\n".join(f"• {c}" for c in all_cats)
+        bot.reply_to(message, _t(user_id, "my_folders", list=cats_list), parse_mode="HTML")
+    else:
+        bot.reply_to(message, _t(user_id, "no_custom_folders"))
 
 @bot.message_handler(commands=['drive'])
 def handle_drive(message):
@@ -729,12 +721,12 @@ def handle_trend(message):
     year_str = " ".join(f"{y}年:{c}篇" for y, c in sorted(year_dist.items(), reverse=True)[:5])
     ai_analysis = trends.get("ai_analysis", "")
     result = (
-        f"📊 <b>「{topic}」研究趨勢分析</b>\n\n"
-        f"📚 找到相關論文：{trends.get('total_papers_found', 0)} 篇\n"
-        f"📅 發表年份分佈：{year_str}\n\n"
+        f"📊 <b>「{topic}」研究趨勢分析</b>\\n\\n"
+        f"📚 找到相關論文：{trends.get('total_papers_found', 0)} 篇\\n"
+        f"📅 發表年份分佈：{year_str}\\n\\n"
     )
     if ai_analysis:
-        result += f"🤖 <b>AI 趨勢解析：</b>\n{ai_analysis}"
+        result += f"🤖 <b>AI 趨勢解析：</b>\\n{ai_analysis}"
     bot.send_message(message.chat.id, result, parse_mode="HTML")
 
 @bot.message_handler(commands=['export'])
@@ -763,14 +755,12 @@ def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, alread
         authors_str += f" 等 {len(authors)} 位"
     seen_badge = "👁 [已看過]" if already_seen else ""
     oa_badge = "🟢 OA" if is_open_access else ""
-
     text = (
-        f"📄 <b>{title}</b> {seen_badge}\n\n"
-        f"👥 {authors_str} | 📅 {year} | 🗂 {source} {oa_badge}\n\n"
-        f"🧠 <b>AI 導讀：</b>\n{ai_summary}\n\n"
+        f"📄 <b>{title}</b> {seen_badge}\\n\\n"
+        f"👥 {authors_str} | 📅 {year} | 🗂 {source} {oa_badge}\\n\\n"
+        f"🧠 <b>AI 導讀：</b>\\n{ai_summary}\\n\\n"
         f"🔗 <a href='{link}'>{_t(user_id, 'read_paper')}</a>"
     )
-
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
         types.InlineKeyboardButton(_t(user_id, "btn_deep"), callback_data=f"deep|{fingerprint[:40]}"),
@@ -784,7 +774,6 @@ def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, alread
         markup.add(types.InlineKeyboardButton(_t(user_id, "btn_oa"), url=link))
     else:
         markup.add(types.InlineKeyboardButton(_t(user_id, "btn_doi"), url=link))
-
     bot.send_message(chat_id, text, reply_markup=markup, disable_web_page_preview=True)
 
 def _do_search(message, user_id: int, query: str):
@@ -793,7 +782,6 @@ def _do_search(message, user_id: int, query: str):
     if not allowed:
         bot.reply_to(message, f"⚠️ {err_msg}")
         return
-
     loading_msg = bot.reply_to(message, _t(user_id, "searching", query=query))
     try:
         seen_ids = db.get_seen_papers(user_id)
@@ -801,7 +789,6 @@ def _do_search(message, user_id: int, query: str):
         user_bias = (bias.get("positive", {}), bias.get("negative", {}))
         followed_authors = db.get_followed_authors(user_id)
         filter_mode = db.get_filter_mode(user_id)
-
         result = search_engine.fetch_paper_multi_source(
             user_input=query,
             seen_ids=seen_ids,
@@ -810,17 +797,14 @@ def _do_search(message, user_id: int, query: str):
             filter_mode=filter_mode
         )
         title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint = result
-
         if not title:
             bot.edit_message_text(_t(user_id, "not_found", query=query), chat_id=loading_msg.chat.id, message_id=loading_msg.message_id)
             return
-
         db.increment_usage(user_id, "search")
         try:
             bot.delete_message(loading_msg.chat.id, loading_msg.message_id)
         except Exception:
             pass
-
         _send_paper_card(
             chat_id=message.chat.id,
             user_id=user_id,
@@ -844,99 +828,121 @@ def _do_search(message, user_id: int, query: str):
         except Exception:
             bot.reply_to(message, _t(user_id, "search_error"))
 
-# ===================== 6. 聊天室自然語言與資料夾管理 =====================
+# ===================== 6. 聊天室自然語言與 4 語言資料夾/追蹤管理 =====================
 @bot.message_handler(func=lambda m: True, content_types=['text'])
 def handle_text(message):
     user_id = message.from_user.id
     text = message.text.strip()
+    lower = text.lower()
     lang = _get_lang(user_id, message.from_user.language_code)
 
-    # 1. 新增資料夾
-    if text.startswith("新增 ") or text.startswith("Add ") or text.startswith("追加 "):
-        folder_name = text.split(" ", 1)[1].strip() if " " in text else ""
-        if folder_name:
-            db.add_user_category(user_id, folder_name)
-            bot.reply_to(message, _t(user_id, "folder_added", name=folder_name))
-            return
+    # 1. 查詢資料夾清單 (支援 4 國語言)
+    folder_triggers = [
+        "我的資料夾", "我的文件夹", "資料夾", "文件夹",
+        "my folders", "folders", "categories", "show folders", "list folders",
+        "マイフォルダ", "フォルダ一覧", "フォルダ", "/folders", "/categories"
+    ]
+    if lower in folder_triggers:
+        return handle_folders_command(message)
 
-    # 2. 改名資料夾
-    if (" -> " in text or " → " in text) and (text.startswith("改名 ") or text.startswith("Rename ")):
-        sep = " -> " if " -> " in text else " → "
-        parts_raw = text.split(" ", 1)
-        if len(parts_raw) > 1:
-            rename_part = parts_raw[1]
-            if sep in rename_part:
-                old_name, new_name = rename_part.split(sep, 1)
-                old_name, new_name = old_name.strip(), new_name.strip()
+    # 2. 新增資料夾 (支援 4 國語言前綴)
+    add_prefixes = ["新增 ", "建立 ", "添加 ", "新建 ", "add folder ", "create folder ", "add ", "追加 ", "作成 "]
+    for pfx in add_prefixes:
+        if lower.startswith(pfx.lower()):
+            folder_name = text[len(pfx):].strip()
+            if folder_name:
+                db.add_user_category(user_id, folder_name)
+                bot.reply_to(message, _t(user_id, "folder_added", name=folder_name))
+                return
+
+    # 3. 改名資料夾 (支援 4 國語言前綴與各種分隔符)
+    rename_prefixes = ["改名 ", "重命名 ", "rename folder ", "rename ", "変更 ", "名前変更 "]
+    for pfx in rename_prefixes:
+        if lower.startswith(pfx.lower()):
+            sub = text[len(pfx):].strip()
+            parts = []
+            for sep in ["->", "→", " to ", " に "]:
+                if sep in sub:
+                    parts = sub.split(sep, 1)
+                    break
+            if len(parts) == 2:
+                old_name, new_name = parts[0].strip(), parts[1].strip()
                 db.rename_user_category(user_id, old_name, new_name)
                 drive_manager.rename_folder(user_id, old_name, new_name)
                 bot.reply_to(message, _t(user_id, "folder_renamed", old=old_name, new=new_name))
                 return
 
-    # 3. 刪除資料夾
-    if text.startswith("刪除 ") or text.startswith("Delete ") or text.startswith("削除 "):
-        folder_name = text.split(" ", 1)[1].strip() if " " in text else ""
-        cats = db.get_user_categories(user_id)
-        if folder_name in cats:
-            db.delete_user_category(user_id, folder_name)
-            drive_manager.mark_folder_deleted(user_id, folder_name)
-            bot.reply_to(message, _t(user_id, "folder_deleted", name=folder_name))
-        else:
-            bot.reply_to(message, _t(user_id, "folder_not_found", name=folder_name))
-        return
+    # 4. 刪除資料夾 (支援 4 國語言前綴)
+    delete_prefixes = ["刪除 ", "移除 ", "删除 ", "delete folder ", "remove folder ", "delete ", "remove ", "削除 ", "消去 "]
+    for pfx in delete_prefixes:
+        if lower.startswith(pfx.lower()):
+            folder_name = text[len(pfx):].strip()
+            cats = db.get_user_categories(user_id)
+            if folder_name in cats:
+                db.delete_user_category(user_id, folder_name)
+                drive_manager.mark_folder_deleted(user_id, folder_name)
+                bot.reply_to(message, _t(user_id, "folder_deleted", name=folder_name))
+            else:
+                bot.reply_to(message, _t(user_id, "folder_not_found", name=folder_name))
+            return
 
-    # 4. 查詢資料夾清單
-    if text in ("我的資料夾", "My folders", "マイフォルダ", "我的文件夹"):
-        cats = db.get_user_categories(user_id)
-        default_cats = MESSAGES.get(lang, MESSAGES["en"]).get("default_categories", [])
-        all_cats = cats if cats else default_cats
-        if all_cats:
-            cats_list = "\n".join(f"• {c}" for c in all_cats)
-            bot.reply_to(message, _t(user_id, "my_folders", list=cats_list), parse_mode="HTML")
-        else:
-            bot.reply_to(message, _t(user_id, "no_custom_folders"))
-        return
+    # 5. 追蹤學者 (支援 4 國語言前綴)
+    follow_prefixes = ["追蹤 ", "關注 ", "追踪 ", "关注 ", "follow ", "track ", "フォロー "]
+    for pfx in follow_prefixes:
+        if lower.startswith(pfx.lower()):
+            author_name = text[len(pfx):].strip()
+            if author_name:
+                db.add_followed_author(user_id, author_name)
+                bot.reply_to(message, _t(user_id, "follow_success", name=author_name))
+                return
 
-    # 5. 一般關鍵字 -> 自動觸發跨庫檢索
+    # 6. 取消追蹤學者 (支援 4 國語言前綴)
+    unfollow_prefixes = ["取消追蹤 ", "取消追踪 ", "unfollow ", "untrack ", "フォロー解除 "]
+    for pfx in unfollow_prefixes:
+        if lower.startswith(pfx.lower()):
+            author_name = text[len(pfx):].strip()
+            if author_name:
+                success = db.remove_followed_author(user_id, author_name)
+                if success:
+                    bot.reply_to(message, _t(user_id, "unfollow_success", name=author_name))
+                else:
+                    bot.reply_to(message, _t(user_id, "unfollow_failed", name=author_name))
+                return
+
+    # 7. 一般關鍵字 -> 自動觸發跨庫檢索
     _do_search(message, user_id, text)
 
-# ===================== 7. Callback 按鈕互動（修復獨立縮排） =====================
+# ===================== 7. Callback 按鈕互動 =====================
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback_query(call):
     data = call.data
     user_id = call.from_user.id
-    
+
     # 快捷導航按鈕
     if data == "cmd_help":
         bot.answer_callback_query(call.id)
         handle_help(call.message)
         return
-
     if data == "cmd_pro":
         bot.answer_callback_query(call.id)
         handle_pro_command(call.message)
         return
-
     if data in ("cmd_bind", "cmd_web"):
         bot.answer_callback_query(call.id)
         handle_bind_command(call.message)
         return
-
     if data == "cmd_lang":
         bot.answer_callback_query(call.id)
         handle_lang(call.message)
         return
-
     if data == "cmd_drive":
         bot.answer_callback_query(call.id)
         handle_drive(call.message)
         return
-
     if data == "cmd_export":
         bot.answer_callback_query(call.id)
         handle_export(call.message)
         return
-
     if data.startswith("search_kw|"):
         kw = data.split("|", 1)[1]
         bot.answer_callback_query(call.id)
@@ -971,7 +977,6 @@ def handle_callback_query(call):
             return
         bot.answer_callback_query(call.id, _t(user_id, "deep_processing"))
         bot.send_message(call.message.chat.id, _t(user_id, "deep_processing"))
-
         cached = db.get_cached_ai(fingerprint) if fingerprint else None
         if cached and cached[1]:
             deep_report = cached[1]
@@ -995,16 +1000,14 @@ def handle_callback_query(call):
                 source=paper.get("source", "")
             )
         db.increment_usage(user_id, "deep")
-
-        report_msg = f"{_t(user_id, 'deep_header')}\n\n{deep_report}"
+        report_msg = f"{_t(user_id, 'deep_header')}\\n\\n{deep_report}"
         if len(report_msg) > 4000:
             for i in range(0, len(report_msg), 4000):
                 bot.send_message(call.message.chat.id, report_msg[i:i+4000], parse_mode="HTML")
         else:
             bot.send_message(call.message.chat.id, report_msg, parse_mode="HTML")
-
         if bibtex_str:
-            bot.send_message(call.message.chat.id, f"{_t(user_id, 'bibtex_header')}\n<pre>{bibtex_str}</pre>", parse_mode="HTML")
+            bot.send_message(call.message.chat.id, f"{_t(user_id, 'bibtex_header')}\\n<pre>{bibtex_str}</pre>", parse_mode="HTML")
         return
 
     # 標記已看
@@ -1075,10 +1078,8 @@ def handle_callback_query(call):
         papers = db.get_user_library(user_id)
         paper = next((p for p in papers if str(p.get("id", ""))[:40] == paper_id or str(p.get("fingerprint", ""))[:40] == paper_id), None)
         if not paper:
-            # 建立基礎存檔
             paper = {"id": paper_id, "title": "學術論文", "summary": "", "link": "", "authors": [], "year": "2024", "category": folder_name}
             db.add_paper_to_library(user_id, paper)
-
         bot.answer_callback_query(call.id, "☁️ 歸檔中...")
         bibtex_str = paper.get("bibtex", "") or search_engine.generate_bibtex_str(
             title=paper.get("title", ""),
@@ -1134,7 +1135,7 @@ def handle_callback_query(call):
             for i in range(0, len(export_content), 3800):
                 bot.send_message(call.message.chat.id, f"<pre>{export_content[i:i+3800]}</pre>", parse_mode="HTML")
         else:
-            bot.send_message(call.message.chat.id, f"📄 <b>{fmt} 匯出結果</b> (共 {len(papers)} 篇) ：\n\n<pre>{export_content}</pre>", parse_mode="HTML")
+            bot.send_message(call.message.chat.id, f"📄 <b>{fmt} 匯出結果</b> (共 {len(papers)} 篇) ：\\n\\n<pre>{export_content}</pre>", parse_mode="HTML")
         return
 
 # ===================== 8. 科研大總部 Web REST API =====================
@@ -1215,8 +1216,6 @@ def telegram_webhook():
     if request.headers.get('content-type') == 'application/json':
         json_string = request.get_data().decode('utf-8')
         update = telebot.types.Update.de_json(json_string)
-        
-        # 把訊息餵給你的機器人邏輯
         bot.process_new_updates([update])
         return "OK", 200
     else:
