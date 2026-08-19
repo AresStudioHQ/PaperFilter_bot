@@ -1,3 +1,10 @@
 pyTelegramBotAPI
 Flask
 python-dotenv
+feedparser
+requests
+biopython
+openai
+google-auth-oauthlib
+google-auth
+google-api-python-client
