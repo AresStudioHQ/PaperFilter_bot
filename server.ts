@@ -59,8 +59,14 @@ function verifyTelegramAuth(data: any): boolean {
     .join("\n");
   const secret = createHmac("sha256", "WebAppData").update(token).digest();
   const computed = createHmac("sha256", secret).update(dataCheckString).digest("hex");
-  if (computed !== hash) return false;
-  if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) return false;
+  if (computed !== hash) {
+    console.error("⚠️ Telegram 登入 hash 不符（token 長度=" + (token ? token.length : 0) + ", hash 長度=" + (hash ? String(hash).length : 0) + "）");
+    return false;
+  }
+  if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
+    console.error("⚠️ Telegram 登入 auth_date 過期（auth_date=" + data.auth_date + "）");
+    return false;
+  }
   return true;
 }
 
