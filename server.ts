@@ -53,26 +53,33 @@ function verifyTelegramAuth(data: any): boolean {
   }
   const { hash, ...rest } = data;
   if (!hash) return false;
-  const dataCheckString = Object.keys(rest)
-    .sort()
-    .map((k) => `${k}=${rest[k]}`)
-    .join("\n");
-  // 兩種常見的 key 順序都接受：
-  //   標準：secret = HMAC(key="WebAppData", msg=token)
-  //   部分 Login Widget 版本：secret = HMAC(key=token, msg="WebAppData")
-  const secret = createHmac("sha256", "WebAppData").update(token).digest();
-  const computed = createHmac("sha256", secret).update(dataCheckString).digest("hex");
-  const revSecret = createHmac("sha256", token).update("WebAppData").digest();
-  const computedRev = createHmac("sha256", revSecret).update(dataCheckString).digest("hex");
-  if (computed !== hash && computedRev !== hash) {
-    console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + "）");
-    return false;
+  const buildCheck = (obj: any) =>
+    Object.keys(obj).sort().map((k) => `${k}=${obj[k]}`).join("\n");
+  // 嘗試 4 種組合：key 順序（"WebAppData"→token / token→"WebAppData"）× 是否含 photo_url
+  // 因 Telegram Login Widget 部分版本簽章時不含 photo_url（但 payload 仍帶入）
+  const withoutPhoto = { ...rest };
+  delete withoutPhoto.photo_url;
+  const tryVerify = (obj: any, keyIsWebAppData: boolean): boolean => {
+    const dcs = buildCheck(obj);
+    const secret = keyIsWebAppData
+      ? createHmac("sha256", "WebAppData").update(token).digest()
+      : createHmac("sha256", token).update("WebAppData").digest();
+    return createHmac("sha256", secret).update(dcs).digest("hex") === hash;
+  };
+  if (
+    tryVerify(rest, true) ||
+    tryVerify(rest, false) ||
+    tryVerify(withoutPhoto, true) ||
+    tryVerify(withoutPhoto, false)
+  ) {
+    if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
+      console.error("⚠️ Telegram 登入 auth_date 過期（auth_date=" + data.auth_date + "）");
+      return false;
+    }
+    return true;
   }
-  if (Math.floor(Date.now() / 1000) - Number(data.auth_date) > 86400) {
-    console.error("⚠️ Telegram 登入 auth_date 過期（auth_date=" + data.auth_date + "）");
-    return false;
-  }
-  return true;
+  console.error("⚠️ Telegram 登入 hash 不符（configured bot_username=" + (process.env.TELEGRAM_BOT_USERNAME || "PaperFilterBot(預設未設定)") + "）");
+  return false;
 }
 
 // 登入保護：除公開路徑外，所有 /api 都必須帶有效的 uid cookie
