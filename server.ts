@@ -91,7 +91,7 @@ app.use("/api", (req, res, next) => {
   if (PUBLIC_PATHS.has(req.path)) return next();
   const uid = getUid(req);
   if (!uid) return res.status(401).json({ success: false, error: "請先登入", loginRequired: true });
-  setUserContext(uid, () => next());
+  return setUserContext(uid, async () => { await next(); });
 });
 
 // ================= In-memory (demo-only) state =================
