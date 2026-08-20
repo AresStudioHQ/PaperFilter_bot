@@ -7,7 +7,6 @@ import { CitationGraph } from './components/CitationGraph';
 import { ProFeaturesHub } from './components/ProFeaturesHub';
 import { TrendsSection } from './components/TrendsSection';
 import { BotSimulator } from './components/BotSimulator';
-import { SourceCodeViewer } from './components/SourceCodeViewer';
 import { DeepModal } from './components/DeepModal';
 import { TelegramBindingModal } from './components/TelegramBindingModal';
 import { Paper, UserProfile, FilterMode, HistoryRecord } from './types';
@@ -427,9 +426,6 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'source' && (
-          <SourceCodeViewer />
-        )}
       </main>
 
       <DeepModal

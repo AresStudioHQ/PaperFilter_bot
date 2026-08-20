@@ -28,38 +28,43 @@ except ImportError:
         def mark_folder_deleted(self, *args): pass
     drive_manager = DummyDriveManager()
 
+# 追蹤用戶首次使用功能
+_user_first_use = set()
+# 追蹤用戶對話模式（{user_id: True}）
+_chat_mode_users = {}
+
 # ===================== 1. 完整 4 國語系文字辭典 =====================
 MESSAGES = {
     "zh_hant": {
         "welcome": (
-            "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\\n\\n"
-            "🔬 <b>核心科研特權</b>：\\n"
-            "• 4 大官方學術庫交叉檢索 (arXiv / PubMed / Semantic Scholar / CrossRef)\\n"
-            "• 💡 4 維 AI 深度導讀（研究動機、核心方法、關鍵結論、技術限制）\\n"
-            "• 💬 跨論文 RAG 智慧問答（<code>/chat [問題]</code>）\\n"
-            "• ☁️ Google Drive 雙軌自動歸檔 + <code>references.bib</code> 即時生成\\n"
-            "• 💎 Pro 跨論文對比矩陣與文獻綜述草稿\\n\\n"
+            "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n"
+            "🔬 <b>核心科研特權</b>：\n"
+            "• 4 大官方學術庫交叉檢索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
+            "• 💡 4 維 AI 深度導讀（研究動機、核心方法、關鍵結論、技術限制）\n"
+            "• 💬 跨論文 RAG 智慧問答（<code>/chat [問題]</code>）\n"
+            "• ☁️ Google Drive 雙軌自動歸檔 + <code>references.bib</code> 即時生成\n\n"
             "👇 請選擇下方快捷功能，或直接在聊天室發送<b>論文關鍵字</b>進行檢索："
         ),
         "help": (
-            "📖 <b>PaperFilterBot 全指令導覽</b>\\n\\n"
-            "🔍 <b>論文檢索</b>：直接在聊天室發送關鍵字（例如：<code>LLM Agent</code>）\\n"
-            "💬 <b>/chat [問題]</b> - 跨收藏論文 RAG 智慧問答與對比\\n"
-            "📚 <b>/my</b> - 查看我的文獻庫、分類資料夾與 Drive 狀態\\n"
-            "🔗 <b>/bind</b> - 取得 6 位數同步代碼，綁定電腦科研大總部\\n"
-            "💎 <b>/pro</b> - 查看 Pro 權限狀態與高級科研工具\\n"
-            "📂 <b>/following</b> - 管理追蹤學者與關鍵字\\n"
-            "➕ <b>/follow [學者]</b> - 追蹤頂級學者最新著作\\n"
-            "➖ <b>/unfollow [學者]</b> - 取消追蹤學者\\n"
-            "📑 <b>/review [主題]</b> - AI 一鍵生成多篇論文文獻綜述\\n"
-            "🔍 <b>/gap</b> - 自動分析目前收藏文獻的研究盲點與缺口\\n"
-            "📈 <b>/trend [領域]</b> - 分析領域近年發表年份與 AI 趨勢\\n"
-            "📋 <b>/export</b> - 匯出收藏文獻為 BibTeX / RIS / CSV\\n"
-            "⚙️ <b>/mode</b> - 切換論文過濾模式（頂刊 / 智慧 / OA 免費）\\n"
-            "🌐 <b>/lang</b> - 切換多國語言\\n"
-            "📊 <b>/reports</b> - 產生個人文獻綜述歷史報告\\n"
-            "☁️ <b>/drive</b> - 連結或檢查 Google Drive 雲端同步狀態\\n"
-            "💻 <b>/web</b> - 取得電腦端科研大總部網址"
+            "📖 <b>PaperFilterBot 全指令導覽</b>\n\n"
+            "🔍 <b>論文檢索</b>：直接在聊天室發送關鍵字（例如：LLM Agent）\n"
+            "💬 <b>/chat</b> - 切換跨文獻問答模式（進入後直接輸入問題）\n"
+            "📚 <b>/my</b> - 查看我的文獻庫、分類資料夾與 Drive 狀態\n"
+            "🔗 <b>/bind</b> - 取得 6 位數同步代碼，綁定電腦科研大總部\n"
+            "💎 <b>/pro</b> - 查看方案比較與升級資訊\n"
+            "📂 <b>/following</b> - 管理追蹤學者與關鍵字\n"
+            "➕ <b>/follow [學者]</b> - 追蹤頂級學者最新著作\n"
+            "➖ <b>/unfollow [學者]</b> - 取消追蹤學者\n"
+            "📑 <b>/review [主題]</b> - AI 一鍵生成多篇論文文獻綜述\n"
+            "🔍 <b>/gap</b> - 自動分析目前收藏文獻的研究盲點與缺口\n"
+            "📈 <b>/trend [領域]</b> - 分析領域近年發表年份與 AI 趨勢\n"
+            "📋 <b>/export</b> - 匯出收藏文獻為 BibTeX / RIS / CSV\n"
+            "⚙️ <b>/mode</b> - 切換論文過濾模式（頂刊 / 智慧 / OA 免費）\n"
+            "🌐 <b>/lang</b> - 切換多國語言\n"
+            "📊 <b>/reports</b> - 產生個人文獻綜述歷史報告\n"
+            "☁️ <b>/drive</b> - 連結或檢查 Google Drive 雲端同步狀態\n"
+            "💻 <b>/web</b> - 取得電腦端科研大總部網址\n\n"
+            "💡 提示：直接輸入關鍵字即可搜尋論文！"
         ),
         "btn_search": "🔍 檢索論文",
         "btn_web": "💻 開啟科研大總部",
@@ -94,45 +99,117 @@ MESSAGES = {
         "folder_renamed": "📁 資料夾已改名：【{old}】➡️【{new}】",
         "folder_deleted": "🗑 已刪除資料夾：【{name}】",
         "folder_not_found": "❌ 找不到指定資料夾：【{name}】",
-        "my_folders": "📁 <b>您的自訂歸檔資料夾：</b>\\n\\n{list}",
+        "my_folders": "📁 <b>您的自訂歸檔資料夾：</b>\n\n{list}",
         "no_custom_folders": "📂 目前尚無自訂資料夾，可直接輸入「新增 資料夾名稱」建立。",
         "follow_success": "✅ 已成功追蹤學者：<b>{name}</b>",
         "unfollow_success": "✅ 已取消追蹤學者：<b>{name}</b>",
         "unfollow_failed": "❌ 取消追蹤失敗，您可能未曾追蹤過此學者。",
         "no_following": "您目前尚未追蹤任何學者，可使用 <code>/follow 學者姓名</code> 進行追蹤。",
-        "following_list": "👥 <b>您追蹤的學者名單：</b>\\n\\n{list}",
-        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
+        "following_list": "👥 <b>您追蹤的學者名單：</b>\n\n{list}",
+        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
+        "tier_free": "免費版",
+        "tier_basic": "Basic 方案",
+        "tier_standard": "Standard 方案",
+        "tier_premium": "Premium 方案",
+        "tier_ultra": "Ultra 方案",
+        "tier_price": "NT${price}/月",
+        "tier_search_daily": "{count} 次搜尋/日",
+        "tier_deep_daily": "{count} 次深度導讀/日",
+        "tier_chat": "跨文獻問答",
+        "tier_review": "文獻綜述",
+        "tier_gap": "研究缺口",
+        "tier_drive": "Google Drive 歸檔",
+        "tier_drive_limit": "{count} 篇/月",
+        "tier_drive_unlimited": "無限",
+        "tier_follow": "追蹤學者",
+        "tier_folder": "自訂資料夾",
+        "tier_export": "匯出功能",
+        "tier_report": "AI 分析報告",
+        "tier_report_none": "無",
+        "tier_report_monthly": "每月 1 份",
+        "tier_report_weekly": "每週 1 份",
+        "tier_report_daily": "每日 1 份",
+        "tier_ads": "網頁端廣告",
+        "tier_ads_none": "無廣告",
+        "tier_ads_show": "有廣告",
+        "tier_unlock": "解鎖",
+        "tier_locked": "需升級",
+        "tier_current": "目前方案",
+        "tier_upgrade": "升級方案",
+        "upgrade_title": "🔒 此功能需要升級方案",
+        "upgrade_current_tier": "您目前的方案",
+        "upgrade_compare": "方案比較",
+        "upgrade_btn": "查看升級方案",
+        "upgrade_drive_limited": "本月 Drive 額度已用完，下個月自動同步",
+        "tier_plan_comparison": "📊 方案比較",
+        "tier_basic_price": "Basic - NT$150/月",
+        "tier_standard_price": "Standard - NT$299/月",
+        "tier_premium_price": "Premium - NT$499/月",
+        "tier_ultra_price": "Ultra - NT$999/月",
+        "pro_text": (
+            "📊 <b>PaperFilterBot 方案比較</b>\n\n"
+            "👤 您目前方案：{tier}\n\n"
+            "🟢 <b>Free 免費版</b> — NT$0/月\n"
+            "• 搜尋：10 次/日\n"
+            "• 深度導讀：1 次/日\n"
+            "• Drive：5 篇/月\n"
+            "• 廣告：有\n\n"
+            "🔵 <b>Basic</b> — NT$150/月\n"
+            "• 搜尋：30 次/日\n"
+            "• 深度導讀：5 次/日\n"
+            "• /chat 跨文獻問答：10 次/月\n"
+            "• Drive：30 篇/月\n"
+            "• 無廣告\n\n"
+            "🟣 <b>Standard</b> — NT$299/月\n"
+            "• 搜尋：100 次/日\n"
+            "• 深度導讀：15 次/日\n"
+            "• /review 文獻綜述 + /gap 研究缺口\n"
+            "• Drive：100 篇/月\n"
+            "• 每月 AI 分析報告\n\n"
+            "🟡 <b>Premium</b> — NT$499/月\n"
+            "• 搜尋：200 次/日\n"
+            "• 深度導讀：30 次/日\n"
+            "• 所有功能大幅增加\n"
+            "• Drive：無限\n"
+            "• 每週 AI 分析報告\n\n"
+            "🔴 <b>Ultra</b> — NT$999/月\n"
+            "• 搜尋：500 次/日\n"
+            "• 深度導讀：50 次/日\n"
+            "• 所有功能無限\n"
+            "• 每日 AI 分析報告\n\n"
+            "💡 可在電腦科研大總部一鍵升級！"
+        ),
     },
     "zh_hans": {
         "welcome": (
-            "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\\n\\n"
-            "🔬 <b>核心科研特权</b>：\\n"
-            "• 4 大官方学术库交叉检索 (arXiv / PubMed / Semantic Scholar / CrossRef)\\n"
-            "• 💡 4 维 AI 深度导读（研究动机、核心方法、关键结论、技术限制）\\n"
-            "• 💬 跨论文 RAG 智能问答（<code>/chat [问题]</code>）\\n"
-            "• ☁️ Google Drive 双轨自动归档 + <code>references.bib</code> 实时生成\\n"
-            "• 💎 Pro 跨论文对比矩阵与文献综述草稿\\n\\n"
+            "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n"
+            "🔬 <b>核心科研特权</b>：\n"
+            "• 4 大官方学术库交叉检索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
+            "• 💡 4 维 AI 深度导读（研究动机、核心方法、关键结论、技术限制）\n"
+            "• 💬 跨论文 RAG 智能问答（<code>/chat [问题]</code>）\n"
+            "• ☁️ Google Drive 双轨自动归档 + <code>references.bib</code> 实时生成\n\n"
             "👇 请选择下方快捷功能，或直接在聊天室发送<b>论文关键词</b>进行检索："
         ),
         "help": (
-            "📖 <b>PaperFilterBot 全指令导览</b>\\n\\n"
-            "🔍 <b>论文检索</b>：直接在聊天室发送关键词（例如：<code>LLM Agent</code>）\\n"
-            "💬 <b>/chat [问题]</b> - 跨收藏论文 RAG 智能问答与对比\\n"
-            "📚 <b>/my</b> - 查看我的文献库、分类文件夹与 Drive 状态\\n"
-            "🔗 <b>/bind</b> - 获取 6 位数同步代码，绑定电脑科研大总部\\n"
-            "💎 <b>/pro</b> - 查看 Pro 权限状态与高级科研工具\\n"
-            "📂 <b>/following</b> - 管理追踪学者与关键词\\n"
-            "➕ <b>/follow [学者]</b> - 追踪顶级学者最新著作\\n"
-            "➖ <b>/unfollow [学者]</b> - 取消追踪学者\\n"
-            "📑 <b>/review [主题]</b> - AI 一键生成多篇论文文献综述\\n"
-            "🔍 <b>/gap</b> - 自动分析目前收藏文献的研究盲点与缺口\\n"
-            "📈 <b>/trend [领域]</b> - 分析领域近年发表年份与 AI 趋势\\n"
-            "📋 <b>/export</b> - 导出收藏文献为 BibTeX / RIS / CSV\\n"
-            "⚙️ <b>/mode</b> - 切换论文过滤模式（顶刊 / 智能 / OA 免费）\\n"
-            "🌐 <b>/lang</b> - 切换多国语言\\n"
-            "📊 <b>/reports</b> - 生成个人文献综述历史报告\\n"
-            "☁️ <b>/drive</b> - 链接或检查 Google Drive 云端同步状态\\n"
-            "💻 <b>/web</b> - 获取电脑端科研大总部网址"
+            "📖 <b>PaperFilterBot 全指令导览</b>\n\n"
+            "🔍 <b>论文检索</b>：直接在聊天室发送关键词（例如：LLM Agent）\n"
+            "💬 <b>/chat</b> - 切换跨文献问答模式（进入后直接输入问题）\n"
+            "📚 <b>/my</b> - 查看我的文献库、分类文件夹与 Drive 状态\n"
+            "🔗 <b>/bind</b> - 获取 6 位数同步代码，绑定电脑科研大总部\n"
+            "💎 <b>/pro</b> - 查看方案比较与升级信息\n"
+            "📂 <b>/following</b> - 管理追踪学者与关键词\n"
+            "➕ <b>/follow [学者]</b> - 追踪顶级学者最新著作\n"
+            "➖ <b>/unfollow [学者]</b> - 取消追踪学者\n"
+            "📑 <b>/review [主题]</b> - AI 一键生成多篇论文文献综述\n"
+            "🔍 <b>/gap</b> - 自动分析目前收藏文献的研究盲点与缺口\n"
+            "📈 <b>/trend [领域]</b> - 分析领域近年发表年份与 AI 趋势\n"
+            "📋 <b>/export</b> - 导出收藏文献为 BibTeX / RIS / CSV\n"
+            "⚙️ <b>/mode</b> - 切换论文过滤模式（顶刊 / 智能 / OA 免费）\n"
+            "🌐 <b>/lang</b> - 切换多国语言\n"
+            "📊 <b>/reports</b> - 生成个人文献综述历史报告\n"
+            "☁️ <b>/drive</b> - 链接或检查 Google Drive 云端同步状态\n"
+            "💻 <b>/web</b> - 获取电脑端科研大总部网址\n\n"
+            "💡 提示：直接输入关键词即可搜寻论文！"
         ),
         "btn_search": "🔍 检索论文",
         "btn_web": "💻 开启科研大总部",
@@ -167,45 +244,117 @@ MESSAGES = {
         "folder_renamed": "📁 文件夹已改名：【{old}】➡️【{new}】",
         "folder_deleted": "🗑 已删除文件夹：【{name}】",
         "folder_not_found": "❌ 找不到指定文件夹：【{name}】",
-        "my_folders": "📁 <b>您的自定义归档文件夹：</b>\\n\\n{list}",
+        "my_folders": "📁 <b>您的自定义归档文件夹：</b>\n\n{list}",
         "no_custom_folders": "📂 目前尚无自定义文件夹，可直接输入「新增 文件夹名称」建立。",
         "follow_success": "✅ 已成功追踪学者：<b>{name}</b>",
         "unfollow_success": "✅ 已取消追踪学者：<b>{name}</b>",
         "unfollow_failed": "❌ 取消追踪失败，您可能未曾追踪过此学者。",
         "no_following": "您目前尚未追踪任何学者，可使用 <code>/follow 学者姓名</code> 进行追踪。",
-        "following_list": "👥 <b>您追踪的学者名单：</b>\\n\\n{list}",
-        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
+        "following_list": "👥 <b>您追踪的学者名单：</b>\n\n{list}",
+        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
+        "tier_free": "免费版",
+        "tier_basic": "Basic 方案",
+        "tier_standard": "Standard 方案",
+        "tier_premium": "Premium 方案",
+        "tier_ultra": "Ultra 方案",
+        "tier_price": "NT${price}/月",
+        "tier_search_daily": "{count} 次搜索/日",
+        "tier_deep_daily": "{count} 次深度导读/日",
+        "tier_chat": "跨文献问答",
+        "tier_review": "文献综述",
+        "tier_gap": "研究缺口",
+        "tier_drive": "Google Drive 归档",
+        "tier_drive_limit": "{count} 篇/月",
+        "tier_drive_unlimited": "无限",
+        "tier_follow": "追踪学者",
+        "tier_folder": "自定义文件夹",
+        "tier_export": "导出功能",
+        "tier_report": "AI 分析报告",
+        "tier_report_none": "无",
+        "tier_report_monthly": "每月 1 份",
+        "tier_report_weekly": "每周 1 份",
+        "tier_report_daily": "每日 1 份",
+        "tier_ads": "网页端广告",
+        "tier_ads_none": "无广告",
+        "tier_ads_show": "有广告",
+        "tier_unlock": "解锁",
+        "tier_locked": "需升级",
+        "tier_current": "当前方案",
+        "tier_upgrade": "升级方案",
+        "upgrade_title": "🔒 此功能需要升级方案",
+        "upgrade_current_tier": "您当前的方案",
+        "upgrade_compare": "方案比较",
+        "upgrade_btn": "查看升级方案",
+        "upgrade_drive_limited": "本月 Drive 额度已用完，下个月自动同步",
+        "tier_plan_comparison": "📊 方案比较",
+        "tier_basic_price": "Basic - NT$150/月",
+        "tier_standard_price": "Standard - NT$299/月",
+        "tier_premium_price": "Premium - NT$499/月",
+        "tier_ultra_price": "Ultra - NT$999/月",
+        "pro_text": (
+            "📊 <b>PaperFilterBot 方案比较</b>\n\n"
+            "👤 您目前方案：{tier}\n\n"
+            "🟢 <b>Free 免费版</b> — NT$0/月\n"
+            "• 搜索：10 次/日\n"
+            "• 深度导读：1 次/日\n"
+            "• Drive：5 篇/月\n"
+            "• 广告：有\n\n"
+            "🔵 <b>Basic</b> — NT$150/月\n"
+            "• 搜索：30 次/日\n"
+            "• 深度导读：5 次/日\n"
+            "• /chat 跨文献问答：10 次/月\n"
+            "• Drive：30 篇/月\n"
+            "• 无广告\n\n"
+            "🟣 <b>Standard</b> — NT$299/月\n"
+            "• 搜索：100 次/日\n"
+            "• 深度导读：15 次/日\n"
+            "• /review 文献综述 + /gap 研究缺口\n"
+            "• Drive：100 篇/月\n"
+            "• 每月 AI 分析报告\n\n"
+            "🟡 <b>Premium</b> — NT$499/月\n"
+            "• 搜索：200 次/日\n"
+            "• 深度导读：30 次/日\n"
+            "• 所有功能大幅增加\n"
+            "• Drive：无限\n"
+            "• 每周 AI 分析报告\n\n"
+            "🔴 <b>Ultra</b> — NT$999/月\n"
+            "• 搜索：500 次/日\n"
+            "• 深度导读：50 次/日\n"
+            "• 所有功能无限\n"
+            "• 每日 AI 分析报告\n\n"
+            "💡 可在电脑科研大总部一键升级！"
+        ),
     },
     "en": {
         "welcome": (
-            "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\\n\\n"
-            "🔬 <b>Core Features</b>:\\n"
-            "• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\\n"
-            "• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\\n"
-            "• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\\n"
-            "• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\\n"
-            "• 💎 Pro: Cross-paper RAG Q&A, Comparison Matrix, and Literature Synthesis\\n\\n"
+            "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n"
+            "🔬 <b>Core Features</b>:\n"
+            "• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\n"
+            "• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n"
+            "• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\n"
+            "• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\n\n"
             "👇 Choose a shortcut below or send <b>keywords</b> directly to search:"
         ),
         "help": (
-            "📖 <b>PaperFilterBot Command Suite</b>\\n\\n"
-            "🔍 <b>Search</b>: Send keywords directly (e.g. <code>Quantum Computing</code>)\\n"
-            "💬 <b>/chat [Question]</b> - Cross-paper RAG Q&A and Synthesis\\n"
-            "📚 <b>/my</b> - View your library, custom folders & Drive sync\\n"
-            "🔗 <b>/bind</b> - Generate 6-digit sync code for Web HQ\\n"
-            "💎 <b>/pro</b> - Check Pro subscription & advanced tools\\n"
-            "📂 <b>/following</b> - Manage followed authors & topics\\n"
-            "➕ <b>/follow [Author]</b> - Track researcher publications\\n"
-            "➖ <b>/unfollow [Author]</b> - Untrack researcher\\n"
-            "📑 <b>/review [Topic]</b> - AI Literature Synthesis Review Draft\\n"
-            "🔍 <b>/gap</b> - Discover research gaps across your library\\n"
-            "📈 <b>/trend [Field]</b> - Publication year trends & AI analysis\\n"
-            "📋 <b>/export</b> - Export library to BibTeX / RIS / CSV\\n"
-            "⚙️ <b>/mode</b> - Toggle filter criteria (Top-Tier / Smart / OA Only)\\n"
-            "🌐 <b>/lang</b> - Switch interface language\\n"
-            "📊 <b>/reports</b> - View synthesis report history\\n"
-            "☁️ <b>/drive</b> - Check Google Drive sync link\\n"
-            "💻 <b>/web</b> - Open Web Research HQ"
+            "📖 <b>PaperFilterBot Command Suite</b>\n\n"
+            "🔍 <b>Search</b>: Send keywords directly (e.g. LLM Agent)\n"
+            "💬 <b>/chat</b> - Toggle cross-paper Q&A mode (type questions directly)\n"
+            "📚 <b>/my</b> - View your library, custom folders & Drive sync\n"
+            "🔗 <b>/bind</b> - Generate 6-digit sync code for Web HQ\n"
+            "💎 <b>/pro</b> - View plan comparison & upgrade info\n"
+            "📂 <b>/following</b> - Manage followed authors & topics\n"
+            "➕ <b>/follow [Author]</b> - Track researcher publications\n"
+            "➖ <b>/unfollow [Author]</b> - Untrack researcher\n"
+            "📑 <b>/review [Topic]</b> - AI Literature Synthesis Review Draft\n"
+            "🔍 <b>/gap</b> - Discover research gaps across your library\n"
+            "📈 <b>/trend [Field]</b> - Publication year trends & AI analysis\n"
+            "📋 <b>/export</b> - Export library to BibTeX / RIS / CSV\n"
+            "⚙️ <b>/mode</b> - Toggle filter criteria (Top-Tier / Smart / OA Only)\n"
+            "🌐 <b>/lang</b> - Switch interface language\n"
+            "📊 <b>/reports</b> - View synthesis report history\n"
+            "☁️ <b>/drive</b> - Check Google Drive sync link\n"
+            "💻 <b>/web</b> - Open Web Research HQ\n\n"
+            "💡 Tip: Just type keywords to search papers!"
         ),
         "btn_search": "🔍 Search Papers",
         "btn_web": "💻 Web Research HQ",
@@ -240,45 +389,117 @@ MESSAGES = {
         "folder_renamed": "📁 Renamed folder: [{old}] ➡️ [{new}]",
         "folder_deleted": "🗑 Deleted folder: [{name}]",
         "folder_not_found": "❌ Folder not found: [{name}]",
-        "my_folders": "📁 <b>Your custom archive folders:</b>\\n\\n{list}",
+        "my_folders": "📁 <b>Your custom archive folders:</b>\n\n{list}",
         "no_custom_folders": "📂 No custom folders yet. Type 'Add FolderName' to create one.",
         "follow_success": "✅ Now tracking author: <b>{name}</b>",
         "unfollow_success": "✅ Unfollowed author: <b>{name}</b>",
         "unfollow_failed": "❌ Untrack failed: Author not found.",
         "no_following": "You are not tracking any authors yet. Use <code>/follow AuthorName</code>.",
-        "following_list": "👥 <b>Followed Authors:</b>\\n\\n{list}",
-        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
+        "following_list": "👥 <b>Followed Authors:</b>\n\n{list}",
+        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
+        "tier_free": "Free",
+        "tier_basic": "Basic Plan",
+        "tier_standard": "Standard Plan",
+        "tier_premium": "Premium Plan",
+        "tier_ultra": "Ultra Plan",
+        "tier_price": "NT${price}/mo",
+        "tier_search_daily": "{count} searches/day",
+        "tier_deep_daily": "{count} deep reads/day",
+        "tier_chat": "Cross-Paper Q&A",
+        "tier_review": "Literature Review",
+        "tier_gap": "Research Gap",
+        "tier_drive": "Google Drive Archive",
+        "tier_drive_limit": "{count} papers/mo",
+        "tier_drive_unlimited": "Unlimited",
+        "tier_follow": "Follow Scholars",
+        "tier_folder": "Custom Folders",
+        "tier_export": "Export Features",
+        "tier_report": "AI Analysis Report",
+        "tier_report_none": "None",
+        "tier_report_monthly": "Monthly 1 report",
+        "tier_report_weekly": "Weekly 1 report",
+        "tier_report_daily": "Daily 1 report",
+        "tier_ads": "Web Ads",
+        "tier_ads_none": "Ad-Free",
+        "tier_ads_show": "With Ads",
+        "tier_unlock": "Unlock",
+        "tier_locked": "Upgrade Required",
+        "tier_current": "Current Plan",
+        "tier_upgrade": "Upgrade Plan",
+        "upgrade_title": "🔒 This feature requires a plan upgrade",
+        "upgrade_current_tier": "Your current plan",
+        "upgrade_compare": "Compare Plans",
+        "upgrade_btn": "View Upgrade Plans",
+        "upgrade_drive_limited": "Monthly Drive quota exhausted. Auto-sync next month.",
+        "tier_plan_comparison": "📊 Plan Comparison",
+        "tier_basic_price": "Basic - NT$150/mo",
+        "tier_standard_price": "Standard - NT$299/mo",
+        "tier_premium_price": "Premium - NT$499/mo",
+        "tier_ultra_price": "Ultra - NT$999/mo",
+        "pro_text": (
+            "📊 <b>PaperFilterBot Plan Comparison</b>\n\n"
+            "👤 Your current plan: {tier}\n\n"
+            "🟢 <b>Free</b> — NT$0/mo\n"
+            "• Search: 10/day\n"
+            "• Deep Reading: 1/day\n"
+            "• Drive: 5 papers/mo\n"
+            "• Ads: Yes\n\n"
+            "🔵 <b>Basic</b> — NT$150/mo\n"
+            "• Search: 30/day\n"
+            "• Deep Reading: 5/day\n"
+            "• /chat Cross-paper Q&A: 10/mo\n"
+            "• Drive: 30 papers/mo\n"
+            "• Ad-Free\n\n"
+            "🟣 <b>Standard</b> — NT$299/mo\n"
+            "• Search: 100/day\n"
+            "• Deep Reading: 15/day\n"
+            "• /review Literature Review + /gap Research Gap\n"
+            "• Drive: 100 papers/mo\n"
+            "• Monthly AI Report\n\n"
+            "🟡 <b>Premium</b> — NT$499/mo\n"
+            "• Search: 200/day\n"
+            "• Deep Reading: 30/day\n"
+            "• All features boosted\n"
+            "• Drive: Unlimited\n"
+            "• Weekly AI Report\n\n"
+            "🔴 <b>Ultra</b> — NT$999/mo\n"
+            "• Search: 500/day\n"
+            "• Deep Reading: 50/day\n"
+            "• All features unlimited\n"
+            "• Daily AI Report\n\n"
+            "💡 Upgrade now at Web Research HQ!"
+        ),
     },
     "ja": {
         "welcome": (
-            "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot 研究総本部</b>へようこそ！\\n\\n"
-            "🔬 <b>主な機能</b>：\\n"
-            "• 4大学術リポジトリ横断検索 (arXiv / PubMed / Semantic Scholar / CrossRef)\\n"
-            "• 💡 4次元AI詳細解説（動機・手法・結論・限界）\\n"
-            "• 💬 論文横断RAG質問（<code>/chat [質問]</code>）\\n"
-            "• ☁️ Google Drive自動保存 & <code>references.bib</code> 同期\\n"
-            "• 💎 Pro: 論文横断RAG質問・比較マトリックス・文献レビュー草案\\n\\n"
+            "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot 研究総本部</b>へようこそ！\n\n"
+            "🔬 <b>主な機能</b>：\n"
+            "• 4大学術リポジトリ横断検索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
+            "• 💡 4次元AI詳細解説（動機・手法・結論・限界）\n"
+            "• 💬 論文横断RAG質問（<code>/chat [質問]</code>）\n"
+            "• ☁️ Google Drive自動保存 & <code>references.bib</code> 同期\n\n"
             "👇 以下のメニューを選択するか、<b>キーワード</b>を直接送信して検索してください："
         ),
         "help": (
-            "📖 <b>PaperFilterBot コマンド一覧</b>\\n\\n"
-            "🔍 <b>論文検索</b>：キーワードを直接送信（例：<code>Diffusion Models</code>）\\n"
-            "💬 <b>/chat [質問]</b> - 収集論文横断RAGスマートQ&A\\n"
-            "📚 <b>/my</b> - 文献ライブラリ・フォルダ・Drive連携状態を確認\\n"
-            "🔗 <b>/bind</b> - Web総本部連携用の6桁コードを発行\\n"
-            "💎 <b>/pro</b> - Proプラン状態と高度な機能を確認\\n"
-            "📂 <b>/following</b> - フォロー中のキーワードとフォルダ管理\\n"
-            "➕ <b>/follow [著者名]</b> - 研究者の最新論文を追跡\\n"
-            "➖ <b>/unfollow [著者名]</b> - 追跡解除\\n"
-            "📑 <b>/review [テーマ]</b> - AI文献レビュー草案を作成\\n"
-            "🔍 <b>/gap</b> - 収集済み文献から研究ギャップを自動抽出\\n"
-            "📈 <b>/trend [分野]</b> - 分野別トレンド＆年別推移分析\\n"
-            "📋 <b>/export</b> - BibTeX / RIS / CSVで文献エクスポート\\n"
-            "⚙️ <b>/mode</b> - 要約モードの切り替え\\n"
-            "🌐 <b>/lang</b> - 言語設定の変更\\n"
-            "📊 <b>/reports</b> - 読書レポートと閲覧履歴\\n"
-            "☁️ <b>/drive</b> - Google Drive連携確認\\n"
-            "💻 <b>/web</b> - Web研究総本部のURLを取得"
+            "📖 <b>PaperFilterBot コマンド一覧</b>\n\n"
+            "🔍 <b>論文検索</b>：キーワードを直接送信（例：LLM Agent）\n"
+            "💬 <b>/chat</b> - 論文横断Q&Aモード切替（直接質問入力）\n"
+            "📚 <b>/my</b> - 文献ライブラリ・フォルダ・Drive連携状態を確認\n"
+            "🔗 <b>/bind</b> - Web総本部連携用の6桁コードを発行\n"
+            "💎 <b>/pro</b> - プラン比較とアップグレード情報\n"
+            "📂 <b>/following</b> - フォロー中のキーワードとフォルダ管理\n"
+            "➕ <b>/follow [著者名]</b> - 研究者の最新論文を追跡\n"
+            "➖ <b>/unfollow [著者名]</b> - 追跡解除\n"
+            "📑 <b>/review [テーマ]</b> - AI文献レビュー草案を作成\n"
+            "🔍 <b>/gap</b> - 収集済み文献から研究ギャップを自動抽出\n"
+            "📈 <b>/trend [分野]</b> - 分野別トレンド＆年別推移分析\n"
+            "📋 <b>/export</b> - BibTeX / RIS / CSVで文献エクスポート\n"
+            "⚙️ <b>/mode</b> - 要約モードの切り替え\n"
+            "🌐 <b>/lang</b> - 言語設定の変更\n"
+            "📊 <b>/reports</b> - 読書レポートと閲覧履歴\n"
+            "☁️ <b>/drive</b> - Google Drive連携確認\n"
+            "💻 <b>/web</b> - Web研究総本部のURLを取得\n\n"
+            "💡 ヒント：キーワードを入力するだけで論文を検索できます！"
         ),
         "btn_search": "🔍 論文検索",
         "btn_web": "💻 Web総本部を開く",
@@ -313,14 +534,86 @@ MESSAGES = {
         "folder_renamed": "📁 フォルダ名を変更しました: 【{old}】➡️【{new}】",
         "folder_deleted": "🗑 フォルダを削除しました: 【{name}】",
         "folder_not_found": "❌ 指定のフォルダが見つかりません: 【{name}】",
-        "my_folders": "📁 <b>カスタムフォルダ一覧：</b>\\n\\n{list}",
+        "my_folders": "📁 <b>カスタムフォルダ一覧：</b>\n\n{list}",
         "no_custom_folders": "📂 フォルダがありません。「追加 フォルダ名」で作成できます。",
         "follow_success": "✅ 著者をフォローしました: <b>{name}</b>",
         "unfollow_success": "✅ 著者のフォローを解除しました: <b>{name}</b>",
         "unfollow_failed": "❌ フォロー解除失敗：著者が存在しません。",
         "no_following": "現在フォロー中の著者はいません。<code>/follow 著者名</code> で追加できます。",
-        "following_list": "👥 <b>フォロー中著者一覧：</b>\\n\\n{list}",
-        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"]
+        "following_list": "👥 <b>フォロー中著者一覧：</b>\n\n{list}",
+        "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
+        "tier_free": "無料版",
+        "tier_basic": "Basic プラン",
+        "tier_standard": "Standard プラン",
+        "tier_premium": "Premium プラン",
+        "tier_ultra": "Ultra プラン",
+        "tier_price": "月額 NT${price}",
+        "tier_search_daily": "検索 {count} 回/日",
+        "tier_deep_daily": "ディープ読解 {count} 回/日",
+        "tier_chat": "論文横断 RAG 質問",
+        "tier_review": "文献レビュー",
+        "tier_gap": "研究ギャップ",
+        "tier_drive": "Google Drive 保存",
+        "tier_drive_limit": "{count} 本/月",
+        "tier_drive_unlimited": "無制限",
+        "tier_follow": "学着追跡",
+        "tier_folder": "カスタムフォルダ",
+        "tier_export": "エクスポート機能",
+        "tier_report": "AI 分析レポート",
+        "tier_report_none": "なし",
+        "tier_report_monthly": "月1回",
+        "tier_report_weekly": "週1回",
+        "tier_report_daily": "毎日",
+        "tier_ads": "Web 広告",
+        "tier_ads_none": "広告なし",
+        "tier_ads_show": "広告あり",
+        "tier_unlock": "ロック解除",
+        "tier_locked": "アップグレード必要",
+        "tier_current": "現在のプラン",
+        "tier_upgrade": "プランをアップグレード",
+        "upgrade_title": "🔒 この機能にはプランのアップグレードが必要です",
+        "upgrade_current_tier": "現在のプラン",
+        "upgrade_compare": "プラン比較",
+        "upgrade_btn": "アップグレードプランを見る",
+        "upgrade_drive_limited": "今月の Drive 上限に達しました。来月自動同期されます。",
+        "tier_plan_comparison": "📊 プラン比較",
+        "tier_basic_price": "Basic - 月額 NT$150",
+        "tier_standard_price": "Standard - 月額 NT$299",
+        "tier_premium_price": "Premium - 月額 NT$499",
+        "tier_ultra_price": "Ultra - 月額 NT$999",
+        "pro_text": (
+            "📊 <b>PaperFilterBot プラン比較</b>\n\n"
+            "👤 現在のプラン：{tier}\n\n"
+            "🟢 <b>Free 無料版</b> — 月額 NT$0\n"
+            "• 検索：10 回/日\n"
+            "• 詳細解説：1 回/日\n"
+            "• Drive：5 本/月\n"
+            "• 広告：あり\n\n"
+            "🔵 <b>Basic</b> — 月額 NT$150\n"
+            "• 検索：30 回/日\n"
+            "• 詳細解説：5 回/日\n"
+            "• /chat 論文横断Q&A：10 回/月\n"
+            "• Drive：30 本/月\n"
+            "• 広告なし\n\n"
+            "🟣 <b>Standard</b> — 月額 NT$299\n"
+            "• 検索：100 回/日\n"
+            "• 詳細解説：15 回/日\n"
+            "• /review 文献レビュー + /gap 研究ギャップ\n"
+            "• Drive：100 本/月\n"
+            "• 月次 AI レポート\n\n"
+            "🟡 <b>Premium</b> — 月額 NT$499\n"
+            "• 検索：200 回/日\n"
+            "• 詳細解説：30 回/日\n"
+            "• 全機能大幅強化\n"
+            "• Drive：無制限\n"
+            "• 週次 AI レポート\n\n"
+            "🔴 <b>Ultra</b> — 月額 NT$999\n"
+            "• 検索：500 回/日\n"
+            "• 詳細解説：50 回/日\n"
+            "• 全機能無制限\n"
+            "• 日次 AI レポート\n\n"
+            "💡 Web研究総本部で今すぐアップグレード！"
+        ),
     }
 }
 
@@ -456,23 +749,25 @@ def handle_my_command(message):
     drive_status = "🟢 已連結" if token else "⚪ 未連結（可用 /drive 授權）"
     categories = db.get_user_categories(user_id)
     cats_str = "、".join(categories) if categories else "預設分類"
-    tier = db.get_user_tier(user_id).get("tier", "free")
-    tier_badge = "👑 Pro 尊榮版" if tier == "pro" else "⚪ 免費體驗版"
+    tier_info = db.get_user_tier(user_id)
+    tier = tier_info.get("tier", "free")
+    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra")}
+    tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
     text = (
-        f"📚 <b>您的個人科研文獻庫總覽</b>\\n\\n"
-        f"👤 會員等級：{tier_badge}\\n"
-        f"☁️ Google Drive 狀態：{drive_status}\\n"
-        f"📑 收藏論文數量：共 <b>{len(papers)}</b> 篇\\n"
-        f"📁 自訂資料夾：{cats_str}\\n\\n"
+        f"📚 <b>您的個人科研文獻庫總覽</b>\n\n"
+        f"👤 會員等級：{tier_badge}\n"
+        f"☁️ Google Drive 狀態：{drive_status}\n"
+        f"📑 收藏論文數量：共 <b>{len(papers)}</b> 篇\n"
+        f"📁 自訂資料夾：{cats_str}\n\n"
     )
 
     if papers:
-        text += "<b>🕒 最近收藏文獻（最新 3 篇）：</b>\\n"
+        text += "<b>🕒 最近收藏文獻（最新 3 篇）：</b>\n"
         for i, p in enumerate(papers[:3], 1):
-            text += f"{i}. <b>{p.get('title', '')[:55]}</b> ({p.get('year', 'N/A')})\\n"
-        text += "\\n💡 提示：使用 <code>/chat 您的研究問題</code> 可跨文獻向 AI 提問；使用 <code>/export</code> 可批次匯出引用格式。"
+            text += f"{i}. <b>{p.get('title', '')[:55]}</b> ({p.get('year', 'N/A')})\n"
+        text += "\n💡 提示：使用 <code>/chat 您的研究問題</code> 可跨文獻向 AI 提問；使用 <code>/export</code> 可批次匯出引用格式。"
     else:
-        text += "您目前尚未收藏任何論文。\\n搜尋論文後點擊卡片下方的【☁️ 歸檔到雲端】即可將論文加入文獻庫！"
+        text += "您目前尚未收藏任何論文。\n搜尋論文後點擊卡片下方的【☁️ 歸檔到雲端】即可將論文加入文獻庫！"
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
@@ -483,36 +778,81 @@ def handle_my_command(message):
 
 @bot.message_handler(commands=['chat', 'ask'])
 def handle_chat_command(message):
-    """【Pro 專屬核心】跨文獻 RAG 智慧問答與深度對比"""
+    """切換跨文獻問答模式"""
     user_id = message.from_user.id
     parts = message.text.strip().split(maxsplit=1)
-    if len(parts) < 2:
-        bot.reply_to(
-            message,
-            "💡 <b>跨文獻 RAG 智慧問答</b>\\n\\n"
-            "請在指令後附帶您的研究問題，例如：\\n"
-            "• <code>/chat 這些論文在模型架構與實驗指標上有何具體差異？</code>\\n"
-            "• <code>/chat 哪一篇論文的方法最適合應用在低延遲或邊緣運算設備？</code>",
-            parse_mode="HTML"
-        )
+
+    # 如果有帶問題，直接回答（兼容舊用法）
+    if len(parts) > 1:
+        _process_chat_query(message, parts[1].strip())
         return
 
-    query = parts[1].strip()
+    # 切換模式
+    if _chat_mode_users.get(user_id):
+        del _chat_mode_users[user_id]
+        bot.reply_to(
+            message,
+            "✅ 已退出<b>跨文獻問答模式</b>。\n\n"
+            "輸入 /chat 可重新進入。",
+            parse_mode="HTML"
+        )
+    else:
+        papers = db.get_user_library(user_id)
+        _chat_mode_users[user_id] = True
+        bot.reply_to(
+            message,
+            "💬 <b>已進入跨文獻問答模式</b>\n\n"
+            f"📚 您的文獻庫：{len(papers)} 篇論文\n\n"
+            "現在可以直接輸入問題，例如：\n"
+            "• 這些論文在方法論上有何異同？\n"
+            "• 哪一篇最適合用在邊緣運算？\n"
+            "• 這些研究有什麼共同限制？\n\n"
+            "輸入 /chat 退出此模式。",
+            parse_mode="HTML"
+        )
+
+def _process_chat_query(message, query):
+    """處理跨文獻問答"""
+    user_id = message.from_user.id
+
+    # 檢查是否第一次使用
+    first_use_key = f"chat_first_{user_id}"
+    if first_use_key not in _user_first_use:
+        _user_first_use.add(first_use_key)
+        bot.reply_to(
+            message,
+            "👋 <b>首次使用跨文獻問答</b>\n\n"
+            "此功能會從您文獻庫中找到相關論文，進行<b>跨篇交叉分析</b>。\n\n"
+            "💡 建議提問方向：\n"
+            "• 比較類：「這些論文在[方法/結果]上有何差異？」\n"
+            "• 推薦類：「哪一篇最適合[我的場景]？」\n"
+            "• 缺口類：「這些研究有哪些共同限制？」\n\n"
+            "⏳ 首次分析可能需要 10-20 秒，請稍候...",
+            parse_mode="HTML"
+        )
+
+    allowed, err_msg = db.check_quota(user_id, "chat")
+    if not allowed:
+        bot.reply_to(message, f"⚠️ {err_msg}")
+        return
+
     papers = db.get_user_library(user_id)
     if not papers:
-        bot.reply_to(message, "📂 您目前文獻庫中沒有論文。請先搜尋並點擊【☁️ 歸檔到雲端】收藏幾篇論文後再來提問！")
+        bot.reply_to(message, "📂 您目前文獻庫中沒有論文。請先搜尋並歸檔幾篇論文後再來提問！")
         return
 
     loading_msg = bot.reply_to(message, f"🧠 <b>AI 正在跨 {len(papers)} 篇文獻進行深入關聯檢索與分析，請稍候...</b>", parse_mode="HTML")
     answer = search_engine.chat_with_user_library(user_id, query, papers)
+    db.increment_usage(user_id, "chat")
 
     try:
         bot.delete_message(loading_msg.chat.id, loading_msg.message_id)
     except Exception:
         pass
 
-    header = f"💬 <b>跨論文解答報告</b>\\n❓ <i>問題：{query}</i>\\n\\n"
-    full_response = header + answer
+    header = f"💬 <b>跨論文解答報告</b>\n❓ <i>問題：{query}</i>\n\n"
+    disclaimer = "\n\n---\n📚 <i>以上分析僅基於您文獻庫中的論文，不代表全域學術觀點。如需更多功能，升級 Pro 方案可享無限次問答。</i>"
+    full_response = header + answer + disclaimer
 
     if len(full_response) > 4000:
         for i in range(0, len(full_response), 4000):
@@ -525,9 +865,9 @@ def handle_bind_command(message):
     user_id = message.from_user.id
     code = db.generate_sync_code(user_id)
     text = (
-        f"🔗 <b>電腦科研大總部同步帳號綁定</b>\\n\\n"
-        f"您的專屬 6 位數同步碼為：<code>{code}</code>\\n\\n"
-        f"💻 請在電腦瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\\n"
+        f"🔗 <b>電腦科研大總部同步帳號綁定</b>\n\n"
+        f"您的專屬 6 位數同步碼為：<code>{code}</code>\n\n"
+        f"💻 請在電腦瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\n"
         f"綁定後，您在 Telegram 的所有標記（看過/略過/歸檔/筆記）將與電腦端全功能儀表板雙向同步！"
     )
     bot.reply_to(message, text, parse_mode="HTML")
@@ -537,19 +877,9 @@ def handle_pro_command(message):
     user_id = message.from_user.id
     tier_info = db.get_user_tier(user_id)
     tier = tier_info.get("tier", "free")
-    tier_badge = "🟢 <b>已是 Pro 尊榮會員</b>" if tier == "pro" else "⚪ 免費體驗版"
-    text = (
-        f"👑 <b>PaperFilterBot Pro 科研專業版 (NT$ 500 / 月價值)</b>\\n\\n"
-        f"當前狀態：{tier_badge}\\n\\n"
-        f"🌟 <b>Pro 專屬特權</b>：\\n"
-        f"1. 💬 <b>AI 全庫跨論文問答 (<code>/chat [問題]</code>)</b>：頂級推理模型 + 附帶文獻精確引用依據\\n"
-        f"2. 🔬 <b>高階全文拆解導讀</b>：深層解析方法論、實驗指標與限制（非僅摘要翻譯）\\n"
-        f"3. 📊 <b>多篇論文橫向結構化對比矩陣</b>（痛點/方法/指標/限制）\\n"
-        f"4. 📑 <b>一鍵產出完整綜述論文草稿 (<code>/review</code>)</b>\\n"
-        f"5. ⏰ <b>每週一 Telegram 頂刊早報自動推播 (Digest)</b>\\n"
-        f"6. 🚀 <b>無限次 AI 深度導讀與高優先級 CrossRef 禮貌通道</b>\\n\\n"
-        f"可在電腦科研大總部一鍵升級或管理訂閱！"
-    )
+    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra")}
+    tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
+    text = _t(user_id, "pro_text", tier=tier_badge)
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['reports'])
@@ -559,10 +889,10 @@ def handle_reports_command(message):
     if not reports:
         bot.reply_to(message, "📝 您目前尚無生成的文獻綜述報告。可使用 <code>/review 主題</code> 立即生成！")
         return
-    text = f"📑 <b>您生成的學術綜述報告清單（共 {len(reports)} 份）：</b>\\n\\n"
+    text = f"📑 <b>您生成的學術綜述報告清單（共 {len(reports)} 份）：</b>\n\n"
     for r in reports[:5]:
-        text += f"• <b>{r.get('topic', '綜合綜述')}</b> ({str(r.get('created_at', ''))[:10]})\\n"
-    text += "\\n可在電腦端科研大總部查看全文與匯出 Markdown/PDF！"
+        text += f"• <b>{r.get('topic', '綜合綜述')}</b> ({str(r.get('created_at', ''))[:10]})\n"
+    text += "\n可在電腦端科研大總部查看全文與匯出 Markdown/PDF！"
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['mode'])
@@ -630,7 +960,7 @@ def handle_following(message):
     if not authors:
         bot.reply_to(message, _t(user_id, "no_following"))
     else:
-        authors_list = "\\n".join(f"• <code>{a}</code>" for a in authors)
+        authors_list = "\n".join(f"• <code>{a}</code>" for a in authors)
         bot.reply_to(message, _t(user_id, "following_list", list=authors_list))
 
 @bot.message_handler(commands=['folders', 'myfolders', 'categories', 'cats'])
@@ -640,7 +970,7 @@ def handle_folders_command(message):
     default_cats = MESSAGES.get(_get_lang(user_id), MESSAGES["en"]).get("default_categories", [])
     all_cats = cats if cats else default_cats
     if all_cats:
-        cats_list = "\\n".join(f"• {c}" for c in all_cats)
+        cats_list = "\n".join(f"• {c}" for c in all_cats)
         bot.reply_to(message, _t(user_id, "my_folders", list=cats_list), parse_mode="HTML")
     else:
         bot.reply_to(message, _t(user_id, "no_custom_folders"))
@@ -721,12 +1051,12 @@ def handle_trend(message):
     year_str = " ".join(f"{y}年:{c}篇" for y, c in sorted(year_dist.items(), reverse=True)[:5])
     ai_analysis = trends.get("ai_analysis", "")
     result = (
-        f"📊 <b>「{topic}」研究趨勢分析</b>\\n\\n"
-        f"📚 找到相關論文：{trends.get('total_papers_found', 0)} 篇\\n"
-        f"📅 發表年份分佈：{year_str}\\n\\n"
+        f"📊 <b>「{topic}」研究趨勢分析</b>\n\n"
+        f"📚 找到相關論文：{trends.get('total_papers_found', 0)} 篇\n"
+        f"📅 發表年份分佈：{year_str}\n\n"
     )
     if ai_analysis:
-        result += f"🤖 <b>AI 趨勢解析：</b>\\n{ai_analysis}"
+        result += f"🤖 <b>AI 趨勢解析：</b>\n{ai_analysis}"
     bot.send_message(message.chat.id, result, parse_mode="HTML")
 
 @bot.message_handler(commands=['export'])
@@ -740,15 +1070,139 @@ def handle_export(message):
     if not papers:
         bot.reply_to(message, "您尚未收藏任何論文。")
         return
-    markup = types.InlineKeyboardMarkup(row_width=3)
+    markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton("📄 BibTeX", callback_data="export_fmt|BibTeX"),
-        types.InlineKeyboardButton("📋 RIS", callback_data="export_fmt|RIS"),
-        types.InlineKeyboardButton("📊 CSV", callback_data="export_fmt|CSV"),
+        types.InlineKeyboardButton(f"📦 全部匯出 ({len(papers)} 篇)", callback_data="export_all"),
+        types.InlineKeyboardButton("☑️ 勾選匯出", callback_data="export_select"),
     )
-    bot.reply_to(message, f"您共有 {len(papers)} 篇論文，請選擇匯出格式：", reply_markup=markup)
+    bot.reply_to(message, f"📚 您共有 {len(papers)} 篇論文，請選擇匯出方式：", reply_markup=markup)
 
-# ===================== 5. 論文卡片與檢索 =====================
+# 匯出選擇模式
+@bot.callback_query_handler(func=lambda call: call.data.startswith("export_"))
+def handle_export_callback(call):
+    user_id = call.from_user.id
+    data = call.data
+
+    if data == "export_all":
+        bot.answer_callback_query(call.id)
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton("📄 BibTeX", callback_data="export_fmt|BibTeX|all"),
+            types.InlineKeyboardButton("📋 RIS", callback_data="export_fmt|RIS|all"),
+            types.InlineKeyboardButton("📊 CSV", callback_data="export_fmt|CSV|all"),
+        )
+        bot.edit_message_text("請選擇匯出格式：", chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
+        return
+
+    if data == "export_select":
+        bot.answer_callback_query(call.id)
+        papers = fetch_user_papers(user_id)
+        # 初始化選取狀態
+        if not hasattr(handle_export_callback, '_selections'):
+            handle_export_callback._selections = {}
+        handle_export_callback._selections[user_id] = set()
+
+        # 顯示論文清單（最多20篇）
+        text = "☑️ <b>請點選要匯出的論文</b>（已選：0 篇）\n\n"
+        buttons = []
+        for i, p in enumerate(papers[:20], 1):
+            title_short = p.get('title', '')[:30]
+            text += f"{i}. {title_short}...\n"
+            buttons.append(types.InlineKeyboardButton(f"❌ {i}", callback_data=f"export_toggle|{i-1}"))
+
+        # 分行按鈕
+        row = []
+        markup = types.InlineKeyboardMarkup(row_width=5)
+        for i, btn in enumerate(buttons):
+            row.append(btn)
+            if len(row) == 5:
+                markup.add(*row)
+                row = []
+        if row:
+            markup.add(*row)
+
+        # 加入確認按鈕
+        markup.add(types.InlineKeyboardButton("✅ 確認匯出", callback_data="export_confirm"))
+        markup.add(types.InlineKeyboardButton("❌ 取消", callback_data="export_cancel"))
+
+        bot.edit_message_text(text, chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup, parse_mode="HTML")
+        return
+
+    if data.startswith("export_toggle|"):
+        idx = int(data.split("|")[1])
+        selections = handle_export_callback._selections.get(user_id, set())
+        if idx in selections:
+            selections.discard(idx)
+        else:
+            selections.add(idx)
+        handle_export_callback._selections[user_id] = selections
+        bot.answer_callback_query(call.id, f"已選 {len(selections)} 篇")
+        return
+
+    if data == "export_confirm":
+        selections = handle_export_callback._selections.get(user_id, set())
+        if not selections:
+            bot.answer_callback_query(call.id, "請先選擇至少一篇論文", show_alert=True)
+            return
+        bot.answer_callback_query(call.id)
+        # 進入格式選擇
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton("📄 BibTeX", callback_data=f"export_fmt|BibTeX|{','.join(map(str, selections))}"),
+            types.InlineKeyboardButton("📋 RIS", callback_data=f"export_fmt|RIS|{','.join(map(str, selections))}"),
+            types.InlineKeyboardButton("📊 CSV", callback_data=f"export_fmt|CSV|{','.join(map(str, selections))}"),
+        )
+        bot.edit_message_text(f"已選 {len(selections)} 篇論文，請選擇匯出格式：", chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
+        return
+
+    if data == "export_cancel":
+        bot.answer_callback_query(call.id, "已取消")
+        bot.edit_message_text("❌ 已取消匯出。", chat_id=call.message.chat.id, message_id=call.message.message_id)
+        return
+
+    # 匯出格式
+    if data.startswith("export_fmt|"):
+        parts = data.split("|")
+        fmt = parts[1]
+        selection_str = parts[2] if len(parts) > 2 else "all"
+
+        papers = fetch_user_papers(user_id)
+        if selection_str == "all":
+            export_papers = papers
+        else:
+            indices = [int(i) for i in selection_str.split(",")]
+            export_papers = [papers[i] for i in indices if i < len(papers)]
+
+        if not export_papers:
+            bot.answer_callback_query(call.id, "沒有論文可匯出", show_alert=True)
+            return
+
+        bot.answer_callback_query(call.id, f"📄 正在生成 {fmt} 格式...")
+        export_content = search_engine.export_papers(export_papers, fmt)
+        db.increment_usage(user_id, "export")
+
+        # 產生檔案並傳送
+        import tempfile
+        import os
+        ext_map = {"BibTeX": "bib", "RIS": "ris", "CSV": "csv"}
+        ext = ext_map.get(fmt, "txt")
+        filename = f"PaperFilter_{fmt}_{len(export_papers)}papers.{ext}"
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{ext}', delete=False, encoding='utf-8') as f:
+            f.write(export_content)
+            temp_path = f.name
+
+        try:
+            with open(temp_path, 'rb') as f:
+                bot.send_document(
+                    call.message.chat.id,
+                    f,
+                    caption=f"📄 <b>{fmt} 匯出結果</b>\n📚 共 {len(export_papers)} 篇論文\n\n可直接匯入 Zotero / EndNote / Mendeley",
+                    parse_mode="HTML"
+                )
+        finally:
+            os.unlink(temp_path)
+        return
 def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint, lang):
     authors_str = ", ".join(authors[:3]) if authors else "Unknown"
     if len(authors) > 3:
@@ -756,9 +1210,9 @@ def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, alread
     seen_badge = "👁 [已看過]" if already_seen else ""
     oa_badge = "🟢 OA" if is_open_access else ""
     text = (
-        f"📄 <b>{title}</b> {seen_badge}\\n\\n"
-        f"👥 {authors_str} | 📅 {year} | 🗂 {source} {oa_badge}\\n\\n"
-        f"🧠 <b>AI 導讀：</b>\\n{ai_summary}\\n\\n"
+        f"📄 <b>{title}</b> {seen_badge}\n\n"
+        f"👥 {authors_str} | 📅 {year} | 🗂 {source} {oa_badge}\n\n"
+        f"🧠 <b>AI 導讀：</b>\n{ai_summary}\n\n"
         f"🔗 <a href='{link}'>{_t(user_id, 'read_paper')}</a>"
     )
     markup = types.InlineKeyboardMarkup(row_width=2)
@@ -835,6 +1289,10 @@ def handle_text(message):
     text = message.text.strip()
     lower = text.lower()
     lang = _get_lang(user_id, message.from_user.language_code)
+
+    # 對話模式優先 - 非指令訊息自動進入跨文獻問答
+    if _chat_mode_users.get(user_id) and not text.startswith('/'):
+        return _process_chat_query(message, text)
 
     # 1. 查詢資料夾清單 (支援 4 國語言)
     folder_triggers = [
@@ -1000,14 +1458,14 @@ def handle_callback_query(call):
                 source=paper.get("source", "")
             )
         db.increment_usage(user_id, "deep")
-        report_msg = f"{_t(user_id, 'deep_header')}\\n\\n{deep_report}"
+        report_msg = f"{_t(user_id, 'deep_header')}\n\n{deep_report}"
         if len(report_msg) > 4000:
             for i in range(0, len(report_msg), 4000):
                 bot.send_message(call.message.chat.id, report_msg[i:i+4000], parse_mode="HTML")
         else:
             bot.send_message(call.message.chat.id, report_msg, parse_mode="HTML")
         if bibtex_str:
-            bot.send_message(call.message.chat.id, f"{_t(user_id, 'bibtex_header')}\\n<pre>{bibtex_str}</pre>", parse_mode="HTML")
+            bot.send_message(call.message.chat.id, f"{_t(user_id, 'bibtex_header')}\n<pre>{bibtex_str}</pre>", parse_mode="HTML")
         return
 
     # 標記已看
@@ -1120,23 +1578,24 @@ def handle_callback_query(call):
                 bot.send_message(call.message.chat.id, _t(user_id, "archive_failed", detail=result))
         return
 
-    # 匯出格式
-    if data.startswith("export_fmt|"):
-        fmt = data.split("|", 1)[1]
-        papers = fetch_user_papers(user_id)
-        if not papers:
-            bot.answer_callback_query(call.id, "沒有論文可匯出", show_alert=True)
-            return
-        bot.answer_callback_query(call.id, f"📄 正在生成 {fmt} 格式...")
-        export_content = search_engine.export_papers(papers, fmt)
-        db.increment_usage(user_id, "export")
-        if len(export_content) > 3800:
-            bot.send_message(call.message.chat.id, f"📄 <b>{fmt} 匯出結果</b> (共 {len(papers)} 篇) ：")
-            for i in range(0, len(export_content), 3800):
-                bot.send_message(call.message.chat.id, f"<pre>{export_content[i:i+3800]}</pre>", parse_mode="HTML")
-        else:
-            bot.send_message(call.message.chat.id, f"📄 <b>{fmt} 匯出結果</b> (共 {len(papers)} 篇) ：\\n\\n<pre>{export_content}</pre>", parse_mode="HTML")
-        return
+# 未知指令處理
+@bot.message_handler(func=lambda message: message.text and message.text.startswith('/') and not any([
+    message.text.startswith('/start'), message.text.startswith('/help'),
+    message.text.startswith('/my'), message.text.startswith('/chat'),
+    message.text.startswith('/bind'), message.text.startswith('/pro'),
+    message.text.startswith('/following'), message.text.startswith('/follow '),
+    message.text.startswith('/unfollow '), message.text.startswith('/review'),
+    message.text.startswith('/gap'), message.text.startswith('/trend'),
+    message.text.startswith('/export'), message.text.startswith('/mode'),
+    message.text.startswith('/lang'), message.text.startswith('/reports'),
+    message.text.startswith('/drive'), message.text.startswith('/web'),
+    message.text.startswith('/folders'), message.text.startswith('/myfolders'),
+    message.text.startswith('/categories'), message.text.startswith('/cats'),
+]))
+def handle_unknown_command(message):
+    user_id = message.from_user.id
+    cmd = message.text.split()[0].split('@')[0]
+    bot.reply_to(message, f"❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。")
 
 # ===================== 8. 科研大總部 Web REST API =====================
 @app.route("/api/view_reports", methods=["GET"])

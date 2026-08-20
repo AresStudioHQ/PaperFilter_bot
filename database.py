@@ -212,6 +212,16 @@ class Database:
                 gap_analyses INTEGER DEFAULT 0,
                 exports INTEGER DEFAULT 0,
                 digests INTEGER DEFAULT 0,
+                chats INTEGER DEFAULT 0,
+                PRIMARY KEY (user_id, date)
+            )
+        ''')
+
+        # 15. Drive 歸檔紀錄 (控制每月 Drive 歸檔額度)
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS drive_archive_log (
+                user_id INTEGER,
+                date TEXT,
                 PRIMARY KEY (user_id, date)
             )
         ''')
@@ -358,31 +368,97 @@ class Database:
         self.conn.commit()
 
     # --- 6. 用戶訂閱方案與配額管理 ---
+    # === 5 級訂閱方案定義 ===
+    TIER_DEFS = {
+        "free": {
+            "daily_search_limit": 10, "daily_deep_limit": 1,
+            "daily_litreview_limit": 0, "daily_gap_analysis_limit": 0,
+            "daily_export_limit": 3, "daily_digest_limit": 0,
+            "daily_chat_limit": 0,
+            "drive_monthly_limit": 5,
+            "follow_limit": 0, "category_limit": 3,
+        },
+        "basic": {
+            "daily_search_limit": 30, "daily_deep_limit": 5,
+            "daily_litreview_limit": 0, "daily_gap_analysis_limit": 0,
+            "daily_export_limit": 10, "daily_digest_limit": 0,
+            "daily_chat_limit": 10,
+            "drive_monthly_limit": 30,
+            "follow_limit": 3, "category_limit": 10,
+        },
+        "standard": {
+            "daily_search_limit": 100, "daily_deep_limit": 15,
+            "daily_litreview_limit": 3, "daily_gap_analysis_limit": 3,
+            "daily_export_limit": 30, "daily_digest_limit": 1,
+            "daily_chat_limit": 30,
+            "drive_monthly_limit": 100,
+            "follow_limit": 10, "category_limit": 50,
+        },
+        "premium": {
+            "daily_search_limit": 200, "daily_deep_limit": 30,
+            "daily_litreview_limit": 10, "daily_gap_analysis_limit": 10,
+            "daily_export_limit": 60, "daily_digest_limit": 3,
+            "daily_chat_limit": 50,
+            "drive_monthly_limit": 999999,
+            "follow_limit": 50, "category_limit": 999999,
+        },
+        "ultra": {
+            "daily_search_limit": 500, "daily_deep_limit": 50,
+            "daily_litreview_limit": 20, "daily_gap_analysis_limit": 20,
+            "daily_export_limit": 999999, "daily_digest_limit": 7,
+            "daily_chat_limit": 100,
+            "drive_monthly_limit": 999999,
+            "follow_limit": 999999, "category_limit": 999999,
+        },
+    }
+    TIER_PRICES = {
+        "free": 0, "basic": 150, "standard": 299, "premium": 499, "ultra": 999,
+    }
+    TIER_RANK = {"free": 0, "basic": 1, "standard": 2, "premium": 3, "ultra": 4}
+
     def get_user_tier(self, user_id: int) -> dict:
         self.cursor.execute("SELECT tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit FROM user_tier WHERE user_id = ?", (user_id,))
         row = self.cursor.fetchone()
         if not row:
-            # 初始化免費方案
+            d = self.TIER_DEFS["free"]
             self.cursor.execute('''
                 INSERT INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
-                VALUES (?, 'free', 20, 3, 0, 0, 5, 0)
-            ''', (user_id,))
+                VALUES (?, 'free', ?, ?, ?, ?, ?, ?)
+            ''', (user_id, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"]))
             self.conn.commit()
-            return {"tier": "free", "daily_search_limit": 20, "daily_deep_limit": 3, "daily_litreview_limit": 0, "daily_gap_analysis_limit": 0, "daily_export_limit": 5, "daily_digest_limit": 0}
+            return {"tier": "free", **d}
         return {"tier": row[0], "daily_search_limit": row[1], "daily_deep_limit": row[2], "daily_litreview_limit": row[3], "daily_gap_analysis_limit": row[4], "daily_export_limit": row[5], "daily_digest_limit": row[6]}
 
     def set_user_tier(self, user_id: int, tier: str, limits: dict = None):
-        default_limits = {
-            "free": {"daily_search_limit": 20, "daily_deep_limit": 3, "daily_litreview_limit": 0, "daily_gap_analysis_limit": 0, "daily_export_limit": 5, "daily_digest_limit": 0},
-            "premium": {"daily_search_limit": 100, "daily_deep_limit": 30, "daily_litreview_limit": 5, "daily_gap_analysis_limit": 5, "daily_export_limit": 50, "daily_digest_limit": 1},
-            "pro": {"daily_search_limit": 500, "daily_deep_limit": 100, "daily_litreview_limit": 20, "daily_gap_analysis_limit": 20, "daily_export_limit": 200, "daily_digest_limit": 7},
-        }
-        l = limits or default_limits.get(tier, default_limits["free"])
+        d = limits or self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
         self.cursor.execute('''
             INSERT INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(user_id) DO UPDATE SET tier = ?, daily_search_limit = ?, daily_deep_limit = ?, daily_litreview_limit = ?, daily_gap_analysis_limit = ?, daily_export_limit = ?, daily_digest_limit = ?, updated_at = CURRENT_TIMESTAMP
-        ''', (user_id, tier, l["daily_search_limit"], l["daily_deep_limit"], l["daily_litreview_limit"], l["daily_gap_analysis_limit"], l["daily_export_limit"], l["daily_digest_limit"], tier, l["daily_search_limit"], l["daily_deep_limit"], l["daily_litreview_limit"], l["daily_gap_analysis_limit"], l["daily_export_limit"], l["daily_digest_limit"]))
+        ''', (user_id, tier, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"], tier, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"]))
+        self.conn.commit()
+
+    def check_drive_quota(self, user_id: int) -> tuple[bool, str]:
+        """檢查 Drive 歸檔額度，回傳 (是否允許, 訊息)"""
+        from datetime import date
+        today = date.today().isoformat()
+        tier_info = self.get_user_tier(user_id)
+        tier = tier_info.get("tier", "free")
+        drive_limit = self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])["drive_monthly_limit"]
+        if drive_limit >= 999999:
+            return True, ""
+        self.cursor.execute("SELECT COUNT(*) FROM drive_archive_log WHERE user_id = ? AND date = ?", (user_id, today))
+        row = self.cursor.fetchone()
+        used = row[0] if row else 0
+        if used >= drive_limit:
+            return False, f"本月 Drive 歸檔額度已用盡 ({used}/{drive_limit})，下個月自動同步或升級方案。"
+        return True, ""
+
+    def log_drive_archive(self, user_id: int):
+        """記錄一次 Drive 歸檔"""
+        from datetime import date
+        today = date.today().isoformat()
+        self.cursor.execute("INSERT INTO drive_archive_log (user_id, date) VALUES (?, ?)", (user_id, today))
         self.conn.commit()
 
     def check_quota(self, user_id: int, action: str) -> tuple[bool, str]:
@@ -397,6 +473,7 @@ class Database:
             "gap_analysis": ("gap_analyses", tier_info["daily_gap_analysis_limit"]),
             "export": ("exports", tier_info["daily_export_limit"]),
             "digest": ("digests", tier_info["daily_digest_limit"]),
+            "chat": ("chats", self.TIER_DEFS.get(tier_info["tier"], self.TIER_DEFS["free"])["daily_chat_limit"]),
         }
         if action not in limit_map:
             return True, ""
@@ -420,6 +497,7 @@ class Database:
             "gap_analysis": "gap_analyses",
             "export": "exports",
             "digest": "digests",
+            "chat": "chats",
         }
         if action not in col_map:
             return

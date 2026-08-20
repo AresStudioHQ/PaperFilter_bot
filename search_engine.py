@@ -6,10 +6,8 @@
    - 'free_only': 開源全文優先模式
 2. 跨平台智慧標題指紋去重
 3. 關注學者加權 + 引用數加權
-4. 【Pro/Free 分級 AI 引擎】：
-   - Free 會員：gpt-4o-mini 極速摘要
-   - Pro 會員 (NT$500/月)：Gemini 2.5 Pro / GPT-4o 頂級推理與長上下文深入解析
-5. 【Pro 專屬】跨文獻 RAG 智慧問答 (/chat [問題])
+4. 【統一 AI 引擎】：全部使用 GPT-4o-mini（低成本、高速度）
+5. 【跨文獻 RAG 智慧問答】(/chat [問題])
 6. 本地 SQLite / Turso 快取 (Cache Layer)
 7. 自動文獻綜述生成 (Literature Review)
 8. 研究缺口分析 (Research Gap Analysis)
@@ -30,14 +28,6 @@ import requests
 from Bio import Entrez
 from openai import OpenAI
 from database import db
-
-# 選擇性載入 Google GenAI SDK
-try:
-    from google import genai
-    from google.genai import types as genai_types
-    HAS_GENAI = True
-except ImportError:
-    HAS_GENAI = False
 
 Entrez.email = os.getenv("ENTREZ_EMAIL", "paperfilter-bot@example.com")
 ARXIV_API = "https://export.arxiv.org/api/query"
@@ -391,10 +381,29 @@ def fetch_paper_multi_source(
     if not words:
         return None, None, None, None, False, [], "", "2024", "Academic", False, ""
 
-    s2_list = search_semantic_scholar(user_input, max_results=6)
-    cr_list = search_crossref(user_input, max_results=6)
-    pubmed_list = search_pubmed(user_input, max_results=5)
-    arxiv_list = search_arxiv_candidates(words, max_results=5)
+    # 並行搜尋 4 個資料源（提速 3-4 倍）
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {
+            executor.submit(search_semantic_scholar, user_input, 6): "s2",
+            executor.submit(search_crossref, user_input, 6): "cr",
+            executor.submit(search_pubmed, user_input, 5): "pubmed",
+            executor.submit(search_arxiv_candidates, words, 5): "arxiv",
+        }
+        s2_list, cr_list, pubmed_list, arxiv_list = [], [], [], []
+        for future in concurrent.futures.as_completed(futures, timeout=12):
+            src = futures[future]
+            try:
+                result = future.result()
+                if src == "s2":
+                    s2_list = result
+                elif src == "cr":
+                    cr_list = result
+                elif src == "pubmed":
+                    pubmed_list = result
+                elif src == "arxiv":
+                    arxiv_list = result
+            except Exception:
+                pass
     raw_list = s2_list + cr_list + pubmed_list + arxiv_list
 
     if not raw_list:
@@ -516,31 +525,14 @@ def fetch_paper_multi_source(
 
 # ===================== AI 摘要、深度導讀與分級調度 =====================
 def _invoke_ai(prompt: str, system_prompt: str = "你是專業學術論文導讀專家。", tier: str = "free", temperature: float = 0.3) -> str:
-    """分級調用 AI：Pro 用戶使用頂級模型 (Gemini 2.5 Pro / GPT-4o)，Free 用戶使用 gpt-4o-mini"""
-    gemini_key = os.getenv("GEMINI_API_KEY")
+    """統一使用 GPT-4o-mini 進行 AI 呼叫（低成本、高速度）"""
     openai_key = os.getenv("OPENAI_API_KEY")
 
-    # 1. Pro 優先調用 Gemini 2.5 Pro 或 GPT-4o
-    if tier == "pro" and HAS_GENAI and gemini_key:
-        try:
-            client = genai.Client(api_key=gemini_key)
-            full_prompt = f"系統指令：{system_prompt}\n\n任務需求：{prompt}"
-            res = client.models.generate_content(
-                model="gemini-2.5-pro",
-                contents=full_prompt,
-            )
-            if res and res.text:
-                return res.text.strip()
-        except Exception as e:
-            print(f"Gemini 2.5 Pro 調用切換: {e}", file=sys.stderr)
-
-    # 2. OpenAI 調用（Pro 用 gpt-4o，Free 用 gpt-4o-mini）
     if openai_key:
         try:
             client = OpenAI(api_key=openai_key)
-            model_name = "gpt-4o" if tier == "pro" else "gpt-4o-mini"
             response = client.chat.completions.create(
-                model=model_name,
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt},
@@ -549,20 +541,7 @@ def _invoke_ai(prompt: str, system_prompt: str = "你是專業學術論文導讀
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
-            print(f"OpenAI {tier} 調用失敗: {e}", file=sys.stderr)
-
-    # 3. 若無 OpenAI 金鑰但有 Gemini 金鑰，使用 Gemini Flash 兜底
-    if HAS_GENAI and gemini_key:
-        try:
-            client = genai.Client(api_key=gemini_key)
-            res = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=f"{system_prompt}\n\n{prompt}",
-            )
-            if res and res.text:
-                return res.text.strip()
-        except Exception as e:
-            print(f"Gemini Flash 兜底失敗: {e}", file=sys.stderr)
+            print(f"OpenAI gpt-4o-mini 調用失敗: {e}", file=sys.stderr)
 
     return ""
 
@@ -671,10 +650,21 @@ def chat_with_user_library(user_id: int, query: str, papers: list) -> str:
 2. 進行跨論文的橫向結構化對比（例如：方法論異同、實驗數據優劣、各自面臨的挑戰）。
 3. 每提到具體數據或結論，必須在句尾精確標註引用出處，例如：[文獻 1] 或 (作者, 年份)。
 4. 若文獻中未提及該資訊，請誠實說明並給出合理的研究方向推論。
+5. 若用戶提問與文獻庫內容無關，請禮貌提醒：「此問題超出文獻庫範圍，建議使用 /chat 針對您收藏的論文提問。」
+
+【智能引導】：
+若用戶提問過於模糊（例如只寫「幫我分析」、「比較一下」），請：
+- 先根據文獻庫內容，主動提供 2-3 個具體的分析方向供用戶選擇
+- 例如：「您的問題較為廣泛，以下是建議的分析方向：\n① 方法論異同比較\n② 實驗結果排名\n③ 研究限制缺口\n請選擇一個方向，或具體描述您想了解的面向。」
+
+【回應格式】：
+- 開頭先用 1-2 句話總結核心發現
+- 接著提供結構化對比（表格或條列式）
+- 結尾標註「📚 以上分析基於您的 {len(papers)} 篇文獻庫」
 """
     answer = _invoke_ai(
         prompt=prompt,
-        system_prompt="你是嚴謹的學術論文評審專家與領域知識圖譜專家，擅長在多篇文獻之間建立對比矩陣與批判性論證。",
+        system_prompt="你是嚴謹的學術論文評審專家與領域知識圖譜專家，擅長在多篇文獻之間建立對比矩陣與批判性論證。你的回答必須嚴格限定在用戶提供的文獻範圍內，不可編造不存在的論文或數據。",
         tier=tier,
         temperature=0.3
     )

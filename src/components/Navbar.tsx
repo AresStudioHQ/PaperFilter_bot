@@ -5,7 +5,6 @@ import {
   Search, 
   TrendingUp, 
   Bot, 
-  Code2, 
   LayoutDashboard, 
   Crown, 
   Link as LinkIcon,
@@ -273,18 +272,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Bot className="h-4 w-4 text-sky-400 shrink-0" />
             <span>{t('nav_simulator')}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('source')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
-              activeTab === 'source'
-                ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50 shadow-inner font-semibold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-            }`}
-          >
-            <Code2 className="h-4 w-4 shrink-0" />
-            <span>{t('nav_source')}</span>
           </button>
         </div>
 

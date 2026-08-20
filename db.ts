@@ -117,7 +117,7 @@ export async function initTables(): Promise<void> {
   await q(`INSERT OR IGNORE INTO users (user_id) VALUES (?)`, [SEED_USER_ID]);
   await q(
     `INSERT OR IGNORE INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
-     VALUES (?, 'free', 20, 3, 0, 0, 5, 0)`,
+     VALUES (?, 'free', 10, 1, 0, 0, 3, 0)`,
     [SEED_USER_ID]
   );
 }
@@ -162,9 +162,11 @@ export async function setUserLang(lang: string): Promise<void> {
 
 export async function setTier(tier: string): Promise<void> {
   const limits: Record<string, number[]> = {
-    free: [20, 3, 0, 0, 5, 0],
-    premium: [100, 30, 5, 5, 50, 1],
-    pro: [500, 100, 20, 20, 200, 7],
+    free: [10, 1, 0, 0, 3, 0],
+    basic: [30, 5, 0, 0, 10, 0],
+    standard: [100, 15, 3, 3, 30, 1],
+    premium: [200, 30, 10, 10, 60, 3],
+    ultra: [500, 50, 20, 20, 999999, 7],
   };
   const l = limits[tier] || limits.free;
   await q(
