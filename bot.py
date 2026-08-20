@@ -1220,10 +1220,10 @@ def handle_lang(message, override_user_id=None):
     current_display = lang_names.get(lang, lang)
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton("🇺🇸 English", callback_data="set_lang|en"),
-        types.InlineKeyboardButton("🇹🇼 繁體中文", callback_data="set_lang|zh_hant"),
-        types.InlineKeyboardButton("🇨🇳 简体中文", callback_data="set_lang|zh_hans"),
-        types.InlineKeyboardButton("🇯🇵 日本語", callback_data="set_lang|ja"),
+        types.InlineKeyboardButton("English", callback_data="set_lang|en"),
+        types.InlineKeyboardButton("繁體中文", callback_data="set_lang|zh_hant"),
+        types.InlineKeyboardButton("简体中文", callback_data="set_lang|zh_hans"),
+        types.InlineKeyboardButton("日本語", callback_data="set_lang|ja"),
     )
     bot.reply_to(message, _t(user_id, "lang_switch_title", current=current_display), reply_markup=markup)
 
