@@ -77,6 +77,11 @@ MESSAGES = {
         "btn_archive": "☁️ 歸檔到雲端",
         "btn_oa": "🟢 免費全文 (OA)",
         "btn_doi": "🔗 官方 DOI 頁面",
+        "btn_hot_transformer": "🔍 熱門：Transformer",
+        "btn_hot_crispr": "🧬 熱門：CRISPR",
+        "btn_bind_web": "🔗 綁定電腦網頁端",
+        "btn_view_pro": "👑 查看 Pro 特權",
+        "btn_full_help": "📖 完整指令幫助",
         "read_paper": "查看原始文獻",
         "searching": "🔍 正在跨庫檢索「{query}」，請稍候...",
         "not_found": "❌ 找不到與「{query}」相關的文獻，建議更換關鍵字。",
@@ -222,6 +227,11 @@ MESSAGES = {
         "btn_archive": "☁️ 归档到云端",
         "btn_oa": "🟢 免费全文 (OA)",
         "btn_doi": "🔗 官方 DOI 页面",
+        "btn_hot_transformer": "🔍 热门：Transformer",
+        "btn_hot_crispr": "🧬 热门：CRISPR",
+        "btn_bind_web": "🔗 绑定电脑网页端",
+        "btn_view_pro": "👑 查看 Pro 特权",
+        "btn_full_help": "📖 完整指令帮助",
         "read_paper": "查看原始文献",
         "searching": "🔍 正在跨库检索「{query}」，请稍候...",
         "not_found": "❌ 找不到与「{query}」相关的文献，建议更换关键词。",
@@ -367,6 +377,11 @@ MESSAGES = {
         "btn_archive": "☁️ Cloud Archive",
         "btn_oa": "🟢 Open Access",
         "btn_doi": "🔗 Official DOI",
+        "btn_hot_transformer": "🔍 Hot: Transformer",
+        "btn_hot_crispr": "🧬 Hot: CRISPR",
+        "btn_bind_web": "🔗 Bind to Web HQ",
+        "btn_view_pro": "👑 View Pro Features",
+        "btn_full_help": "📖 Full Command Guide",
         "read_paper": "Read Full Paper",
         "searching": "🔍 Searching for '{query}' across repositories...",
         "not_found": "❌ No matched papers found for '{query}'.",
@@ -512,6 +527,11 @@ MESSAGES = {
         "btn_archive": "☁️ ドライブ保存",
         "btn_oa": "🟢 オープンアクセス",
         "btn_doi": "🔗 公式DOIページ",
+        "btn_hot_transformer": "🔍 人気：Transformer",
+        "btn_hot_crispr": "🧬 人気：CRISPR",
+        "btn_bind_web": "🔗 Web本部と連携",
+        "btn_view_pro": "👑 Pro機能を見る",
+        "btn_full_help": "📖 コマンド一覧",
         "read_paper": "原著論文を読む",
         "searching": "🔍 「{query}」を検索中...",
         "not_found": "❌ 一致する論文が見つかりませんでした。",
@@ -716,15 +736,15 @@ def handle_start(message):
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton("🔍 熱門：Transformer", callback_data="search_kw|Transformer"),
-        types.InlineKeyboardButton("🧬 熱門：CRISPR", callback_data="search_kw|CRISPR"),
+        types.InlineKeyboardButton(_t(user_id, "btn_hot_transformer"), callback_data="search_kw|Transformer"),
+        types.InlineKeyboardButton(_t(user_id, "btn_hot_crispr"), callback_data="search_kw|CRISPR"),
     )
     markup.add(
-        types.InlineKeyboardButton("🔗 綁定電腦網頁端", callback_data="cmd_bind"),
-        types.InlineKeyboardButton("👑 查看 Pro 特權", callback_data="cmd_pro")
+        types.InlineKeyboardButton(_t(user_id, "btn_bind_web"), callback_data="cmd_bind"),
+        types.InlineKeyboardButton(_t(user_id, "btn_view_pro"), callback_data="cmd_pro")
     )
     markup.add(
-        types.InlineKeyboardButton("📖 完整指令幫助", callback_data="cmd_help")
+        types.InlineKeyboardButton(_t(user_id, "btn_full_help"), callback_data="cmd_help")
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="HTML")
 
