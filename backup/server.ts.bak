@@ -228,14 +228,11 @@ async function loadLibrary(): Promise<PaperItem[]> {
   });
 }
 
-// 模型 -> 所需最低訂閱方案（防止免費用戶燒高階模型）
-const MODEL_TIERS: Record<string, "free" | "premium" | "pro"> = {
+// 模型 -> 所需最低訂閱方案（全部使用 GPT-4o-mini，統一低成本）
+const MODEL_TIERS: Record<string, "free" | "basic" | "standard" | "premium" | "ultra"> = {
   "gpt-4o-mini": "free",
-  "gpt-4.1-mini": "free",
-  "gpt-4o": "pro",
-  "gpt-4.1": "pro",
 };
-const TIER_RANK: Record<string, number> = { free: 0, premium: 1, pro: 2 };
+const TIER_RANK: Record<string, number> = { free: 0, basic: 1, standard: 2, premium: 3, ultra: 4 };
 
 function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -243,16 +240,8 @@ function getOpenAIClient(): OpenAI | null {
   return new OpenAI({ apiKey, baseURL: process.env.OPENAI_BASE_URL });
 }
 
-// 統一 AI 呼叫：含方案權限檢查，失敗時拋出帶 code 的錯誤
-async function generateAIContent({ contents, model: reqModel }: { contents: string; model?: string }): Promise<{ text: string }> {
-  const profile = await getProfile();
-  const model = reqModel || process.env.OPENAI_MODEL || "gpt-4o-mini";
-  const required = MODEL_TIERS[model] || "free";
-  if ((TIER_RANK[profile.tier] ?? 0) < (TIER_RANK[required] ?? 0)) {
-    const err: any = new Error(`此模型（${model}）僅供 ${required === "pro" ? "Pro" : "Premium"} 方案使用，請升級後再試。`);
-    err.code = "MODEL_TIER";
-    throw err;
-  }
+// 統一 AI 呼叫：全部使用 GPT-4o-mini（低成本、高速度）
+async function generateAIContent({ contents }: { contents: string; model?: string }): Promise<{ text: string }> {
   const openai = getOpenAIClient();
   if (!openai) {
     const err: any = new Error("AI 服務尚未設定 API Key");
@@ -260,7 +249,7 @@ async function generateAIContent({ contents, model: reqModel }: { contents: stri
     throw err;
   }
   const resp = await openai.chat.completions.create({
-    model,
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: contents }],
   });
   return { text: resp.choices[0]?.message?.content || "" };
@@ -609,11 +598,16 @@ app.post("/api/auth/logout", (req, res) => {
   res.json({ success: true });
 });
 
-app.post("/api/auth/upgrade-pro", async (req, res) => {
-  await setTier("pro");
+app.post("/api/auth/upgrade-tier", async (req, res) => {
+  const { tier } = req.body;
+  const validTiers = ["free", "basic", "standard", "premium", "ultra"];
+  if (!tier || !validTiers.includes(tier)) {
+    return res.status(400).json({ error: "無效的方案，請選擇 basic/standard/premium/ultra" });
+  }
+  await setTier(tier);
   res.json({
     success: true,
-    message: "👑 恭喜升級至 PaperFilterBot Pro 科研專業版！已解鎖 AI 全庫問答、多篇矩陣對比與定時 Digest 推播。",
+    message: `✅ 已成功升級至 ${tier} 方案！`,
     user: await buildProfile()
   });
 });
@@ -995,21 +989,17 @@ app.post("/api/digest/settings", (req, res) => {
   res.json({ success: true, config: digestConfig, message: "定時推播設定已更新！" });
 });
 
-// AI 模型清單（供前端讓用戶自行選擇，並依訂閱方案標記是否解鎖）
+// AI 模型清單（全部使用 GPT-4o-mini，統一低成本）
 app.get("/api/ai/models", async (req, res) => {
   try {
     const profile = await getProfile();
-    const rank = TIER_RANK[profile.tier] ?? 0;
-    const list = (process.env.OPENAI_MODELS || "gpt-4o-mini,gpt-4o,gpt-4.1-mini,gpt-4.1")
-      .split(",").map(s => s.trim()).filter(Boolean);
-    const models = list.map(m => {
-      const required = MODEL_TIERS[m] || "free";
-      return { id: m, name: m, required_tier: required, unlocked: rank >= (TIER_RANK[required] ?? 0) };
-    });
+    const models = [
+      { id: "gpt-4o-mini", name: "GPT-4o-mini", required_tier: "free", unlocked: true }
+    ];
     res.json({
       success: true,
       models,
-      default: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      default: "gpt-4o-mini",
       user_tier: profile.tier,
     });
   } catch (err: any) {
@@ -1276,14 +1266,32 @@ app.post("/api/simulate-bot", async (req, res) => {
     if (trimmed === "/pro") {
       return res.json({
         type: "text",
-        text: `👑 <b>PaperFilterBot Pro 科研加速版（NT$500 / 月）</b>
+        text: `📊 <b>PaperFilterBot 方案比較</b>
 
-🌟 <b>專屬解鎖特權</b>：
-1. 💬 <b>AI 全庫文獻問答 (Chat with Papers)</b>：跨收藏文獻深度 RAG 解答
-2. 📊 <b>多篇論文橫向結構化對比矩陣</b>（痛點/方法/指標/限制）
-3. 💎 更多 Pro 專屬科研加速功能
+👤 您目前的方案：<b>${profile.tier === 'ultra' ? 'Ultra' : profile.tier === 'premium' ? 'Premium' : profile.tier === 'standard' ? 'Standard' : profile.tier === 'basic' ? 'Basic' : 'Free'}</b>
 
-目前狀態：${profile.tier === 'pro' ? '🟢 <b>已是 Pro 尊榮會員</b>' : '⚪ 免費體驗版'}`
+<b>Free (免費)</b> - NT$0/月
+• 搜尋：10 次/日、深度導讀：1 次/日
+• Google Drive：5 篇/月、有廣告
+
+<b>Basic</b> - NT$150/月
+• 搜尋：30 次/日、深度導讀：5 次/日
+• 解鎖 /chat 跨文獻問答（10次/月）
+• Google Drive：30 篇/月、無廣告
+
+<b>Standard</b> - NT$299/月
+• 搜尋：100 次/日、深度導讀：15 次/日
+• 解鎖 /review 文獻綜述、/gap 研究缺口
+• Google Drive：100 篇/月、每月 AI 分析報告
+
+<b>Premium</b> - NT$499/月
+• 搜尋：200 次/日、深度導讀：30 次/日
+• 所有功能量大幅增加、Google Drive 無限
+• 每週 AI 分析報告
+
+<b>Ultra</b> - NT$999/月
+• 搜尋：500 次/日、深度導讀：50 次/日
+• 所有功能無限、每日 AI 分析報告`
       });
     }
 
