@@ -45,7 +45,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   history,
   library,
   followedAuthors,
-  userLang = 'zh_hant',
+  userLang = 'en',
   onAddAuthor,
   onRemoveAuthor,
   onSelectPaperForDeep,

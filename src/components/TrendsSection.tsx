@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, TrendingUp, BarChart2, Calendar } from 'lucide-react';
 import { TrendData } from '../types';
 
-export const TrendsSection: React.FC<{ userLang?: string; model?: string }> = ({ userLang = 'zh_hant', model }) => {
+export const TrendsSection: React.FC<{ userLang?: string; model?: string }> = ({ userLang = 'en', model }) => {
   const [topic, setTopic] = useState('Reinforcement Learning');
   const [loading, setLoading] = useState(false);
   const [trendData, setTrendData] = useState<TrendData | null>({

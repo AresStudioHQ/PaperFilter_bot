@@ -87,11 +87,11 @@ export async function initTables(): Promise<void> {
 
   await q(`CREATE TABLE IF NOT EXISTS user_tier (
     user_id INTEGER PRIMARY KEY,
-    tier TEXT DEFAULT 'free',
-    daily_search_limit INTEGER DEFAULT 20,
-    daily_deep_limit INTEGER DEFAULT 3,
-    daily_litreview_limit INTEGER DEFAULT 0,
-    daily_gap_analysis_limit INTEGER DEFAULT 0,
+    tier TEXT DEFAULT 'ultra',
+    daily_search_limit INTEGER DEFAULT 500,
+    daily_deep_limit INTEGER DEFAULT 50,
+    daily_litreview_limit INTEGER DEFAULT 20,
+    daily_gap_analysis_limit INTEGER DEFAULT 20,
     daily_export_limit INTEGER DEFAULT 5,
     daily_digest_limit INTEGER DEFAULT 0,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

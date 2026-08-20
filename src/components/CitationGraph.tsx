@@ -30,7 +30,7 @@ interface CitationGraphProps {
 
 export const CitationGraph: React.FC<CitationGraphProps> = ({
   library,
-  userLang = 'zh_hant',
+  userLang = 'en',
   onSelectPaperForDeep,
   onAddToMatrix
 }) => {

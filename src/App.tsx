@@ -25,7 +25,7 @@ export default function App() {
     sync_code: 'PF8892',
     tier: 'pro',
     filter_mode: 'smart',
-    user_lang: 'zh_hant',
+    user_lang: 'en',
     total_read_count: 86,
     total_archived_count: 24,
     total_skipped_count: 42,

@@ -38,7 +38,7 @@ interface LibraryManagementProps {
 export const LibraryManagement: React.FC<LibraryManagementProps> = ({
   library,
   categories,
-  userLang = 'zh_hant',
+  userLang = 'en',
   onAddCategory,
   onDeleteCategory,
   onDeletePaper,

@@ -107,17 +107,17 @@ class Database:
             )
         ''')
 
-        # 7. 用戶訂閱方案 (free / premium / pro)
+        # 7. 用戶訂閱方案 (free / basic / standard / premium / ultra)
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_tier (
                 user_id INTEGER PRIMARY KEY,
-                tier TEXT DEFAULT 'free',
-                daily_search_limit INTEGER DEFAULT 20,
-                daily_deep_limit INTEGER DEFAULT 3,
-                daily_litreview_limit INTEGER DEFAULT 0,
-                daily_gap_analysis_limit INTEGER DEFAULT 0,
-                daily_export_limit INTEGER DEFAULT 5,
-                daily_digest_limit INTEGER DEFAULT 0,
+                tier TEXT DEFAULT 'ultra',
+                daily_search_limit INTEGER DEFAULT 500,
+                daily_deep_limit INTEGER DEFAULT 50,
+                daily_litreview_limit INTEGER DEFAULT 20,
+                daily_gap_analysis_limit INTEGER DEFAULT 20,
+                daily_export_limit INTEGER DEFAULT 999999,
+                daily_digest_limit INTEGER DEFAULT 7,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -420,13 +420,13 @@ class Database:
         self.cursor.execute("SELECT tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit FROM user_tier WHERE user_id = ?", (user_id,))
         row = self.cursor.fetchone()
         if not row:
-            d = self.TIER_DEFS["free"]
+            d = self.TIER_DEFS["ultra"]
             self.cursor.execute('''
                 INSERT INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
-                VALUES (?, 'free', ?, ?, ?, ?, ?, ?)
+                VALUES (?, 'ultra', ?, ?, ?, ?, ?, ?)
             ''', (user_id, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"]))
             self.conn.commit()
-            return {"tier": "free", **d}
+            return {"tier": "ultra", **d}
         return {"tier": row[0], "daily_search_limit": row[1], "daily_deep_limit": row[2], "daily_litreview_limit": row[3], "daily_gap_analysis_limit": row[4], "daily_export_limit": row[5], "daily_digest_limit": row[6]}
 
     def set_user_tier(self, user_id: int, tier: str, limits: dict = None):

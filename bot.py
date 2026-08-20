@@ -117,7 +117,7 @@ MESSAGES = {
         "tier_standard": "Standard 方案",
         "tier_premium": "Premium 方案",
         "tier_ultra": "Ultra 方案",
-        "tier_price": "NT${price}/月",
+        "tier_price": "{price}/月",
         "tier_search_daily": "{count} 次搜尋/日",
         "tier_deep_daily": "{count} 次深度導讀/日",
         "tier_chat": "跨文獻問答",
@@ -147,10 +147,10 @@ MESSAGES = {
         "upgrade_btn": "查看升級方案",
         "upgrade_drive_limited": "本月 Drive 額度已用完，下個月自動同步",
         "tier_plan_comparison": "📊 方案比較",
-        "tier_basic_price": "Basic - NT$150/月",
-        "tier_standard_price": "Standard - NT$299/月",
-        "tier_premium_price": "Premium - NT$499/月",
-        "tier_ultra_price": "Ultra - NT$999/月",
+        "tier_basic_price": "Basic",
+        "tier_standard_price": "Standard",
+        "tier_premium_price": "Premium",
+        "tier_ultra_price": "Ultra",
         "chat_exit": "✅ 已退出<b>跨文獻問答模式</b>。\n\n輸入 /chat 可重新進入。",
         "chat_enter": "💬 <b>已進入跨文獻問答模式</b>\n\n📚 您的文獻庫：{count} 篇論文\n\n現在可以直接輸入問題，例如：\n• 這些論文在方法論上有何異同？\n• 哪一篇最適合用在邊緣運算？\n• 這些研究有什麼共同限制？\n\n輸入 /chat 退出此模式。",
         "chat_first_use": "👋 <b>首次使用跨文獻問答</b>\n\n此功能會從您文獻庫中找到相關論文，進行<b>跨篇交叉分析</b>。\n\n💡 建議提問方向：\n• 比較類：「這些論文在[方法/結果]上有何差異？」\n• 推薦類：「哪一篇最適合[我的場景]？」\n• 缺口類：「這些研究有哪些共同限制？」\n\n⏳ 首次分析可能需要 10-20 秒，請稍候...",
@@ -230,30 +230,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot 方案比較</b>\n\n"
             "👤 您目前方案：{tier}\n\n"
-            "🆓 <b>Free 免費版</b> — NT$0/月\n"
+            "🆓 <b>Free 免費版</b>\n"
             "• 搜尋：10 次/日\n"
             "• 深度導讀：1 次/日\n"
             "• Drive：5 篇/月\n"
             "• 廣告：有\n\n"
-            "🔧 <b>Basic</b> — NT$150/月\n"
+            "🔧 <b>Basic</b>\n"
             "• 搜尋：30 次/日\n"
             "• 深度導讀：5 次/日\n"
             "• /chat 跨文獻問答：10 次/月\n"
             "• Drive：30 篇/月\n"
             "• 無廣告\n\n"
-            "⭐ <b>Standard</b> — NT$299/月\n"
+            "⭐ <b>Standard</b>\n"
             "• 搜尋：100 次/日\n"
             "• 深度導讀：15 次/日\n"
             "• /review 文獻綜述 + /gap 研究缺口\n"
             "• Drive：100 篇/月\n"
             "• 每月 AI 分析報告\n\n"
-            "💎 <b>Premium</b> — NT$499/月\n"
+            "💎 <b>Premium</b>\n"
             "• 搜尋：200 次/日\n"
             "• 深度導讀：30 次/日\n"
             "• 所有功能大幅增加\n"
             "• Drive：無限\n"
             "• 每週 AI 分析報告\n\n"
-            "👑 <b>Ultra</b> — NT$999/月\n"
+            "👑 <b>Ultra</b>\n"
             "• 搜尋：500 次/日\n"
             "• 深度導讀：50 次/日\n"
             "• 所有功能無限\n"
@@ -343,7 +343,7 @@ MESSAGES = {
         "tier_standard": "Standard 方案",
         "tier_premium": "Premium 方案",
         "tier_ultra": "Ultra 方案",
-        "tier_price": "NT${price}/月",
+        "tier_price": "{price}/月",
         "tier_search_daily": "{count} 次搜索/日",
         "tier_deep_daily": "{count} 次深度导读/日",
         "tier_chat": "跨文献问答",
@@ -353,7 +353,7 @@ MESSAGES = {
         "tier_drive_limit": "{count} 篇/月",
         "tier_drive_unlimited": "无限",
         "tier_follow": "追踪学者",
-        "tier_folder": "自定义文件夹",
+        "tier_folder": "自订文件夹",
         "tier_export": "导出功能",
         "tier_report": "AI 分析报告",
         "tier_report_none": "无",
@@ -373,10 +373,10 @@ MESSAGES = {
         "upgrade_btn": "查看升级方案",
         "upgrade_drive_limited": "本月 Drive 额度已用完，下个月自动同步",
         "tier_plan_comparison": "📊 方案比较",
-        "tier_basic_price": "Basic - NT$150/月",
-        "tier_standard_price": "Standard - NT$299/月",
-        "tier_premium_price": "Premium - NT$499/月",
-        "tier_ultra_price": "Ultra - NT$999/月",
+        "tier_basic_price": "Basic",
+        "tier_standard_price": "Standard",
+        "tier_premium_price": "Premium",
+        "tier_ultra_price": "Ultra",
         "chat_exit": "✅ 已退出<b>跨文献问答模式</b>。\n\n输入 /chat 可重新进入。",
         "chat_enter": "💬 <b>已进入跨文献问答模式</b>\n\n📚 您的文献库：{count} 篇论文\n\n现在可以直接输入问题，例如：\n• 这些论文在方法论上有何异同？\n• 哪一篇最适合用在边缘运算？\n• 这些研究有什么共同限制？\n\n输入 /chat 退出此模式。",
         "chat_first_use": "👋 <b>首次使用跨文献问答</b>\n\n此功能会从您文献库中找到相关论文，进行<b>跨篇交叉分析</b>。\n\n💡 建议提问方向：\n• 比较类：「这些论文在[方法/结果]上有何差异？」\n• 推荐类：「哪一篇最适合[我的场景]？」\n• 缺口类：「这些研究有哪些共同限制？」\n\n⏳ 首次分析可能需要 10-20 秒，请稍候...",
@@ -456,30 +456,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot 方案比较</b>\n\n"
             "👤 您目前方案：{tier}\n\n"
-            "🆓 <b>Free 免费版</b> — NT$0/月\n"
+            "🆓 <b>Free 免费版</b>\n"
             "• 搜索：10 次/日\n"
             "• 深度导读：1 次/日\n"
             "• Drive：5 篇/月\n"
             "• 广告：有\n\n"
-            "🔧 <b>Basic</b> — NT$150/月\n"
+            "🔧 <b>Basic</b>\n"
             "• 搜索：30 次/日\n"
             "• 深度导读：5 次/日\n"
             "• /chat 跨文献问答：10 次/月\n"
             "• Drive：30 篇/月\n"
             "• 无广告\n\n"
-            "⭐ <b>Standard</b> — NT$299/月\n"
+            "⭐ <b>Standard</b>\n"
             "• 搜索：100 次/日\n"
             "• 深度导读：15 次/日\n"
             "• /review 文献综述 + /gap 研究缺口\n"
             "• Drive：100 篇/月\n"
             "• 每月 AI 分析报告\n\n"
-            "💎 <b>Premium</b> — NT$499/月\n"
+            "💎 <b>Premium</b>\n"
             "• 搜索：200 次/日\n"
             "• 深度导读：30 次/日\n"
             "• 所有功能大幅增加\n"
             "• Drive：无限\n"
             "• 每周 AI 分析报告\n\n"
-            "👑 <b>Ultra</b> — NT$999/月\n"
+            "👑 <b>Ultra</b>\n"
             "• 搜索：500 次/日\n"
             "• 深度导读：50 次/日\n"
             "• 所有功能无限\n"
@@ -569,10 +569,10 @@ MESSAGES = {
         "tier_standard": "Standard Plan",
         "tier_premium": "Premium Plan",
         "tier_ultra": "Ultra Plan",
-        "tier_price": "NT${price}/mo",
+        "tier_price": "{price}/mo",
         "tier_search_daily": "{count} searches/day",
         "tier_deep_daily": "{count} deep reads/day",
-        "tier_chat": "Cross-Paper Q&A",
+        "tier_chat": "Cross-paper Q&A",
         "tier_review": "Literature Review",
         "tier_gap": "Research Gap",
         "tier_drive": "Google Drive Archive",
@@ -580,29 +580,29 @@ MESSAGES = {
         "tier_drive_unlimited": "Unlimited",
         "tier_follow": "Follow Scholars",
         "tier_folder": "Custom Folders",
-        "tier_export": "Export Features",
+        "tier_export": "Export",
         "tier_report": "AI Analysis Report",
         "tier_report_none": "None",
-        "tier_report_monthly": "Monthly 1 report",
-        "tier_report_weekly": "Weekly 1 report",
-        "tier_report_daily": "Daily 1 report",
+        "tier_report_monthly": "1/month",
+        "tier_report_weekly": "1/week",
+        "tier_report_daily": "1/day",
         "tier_ads": "Web Ads",
         "tier_ads_none": "Ad-Free",
         "tier_ads_show": "With Ads",
-        "tier_unlock": "Unlock",
-        "tier_locked": "Upgrade Required",
+        "tier_unlock": "Unlocked",
+        "tier_locked": "Requires Upgrade",
         "tier_current": "Current Plan",
-        "tier_upgrade": "Upgrade Plan",
+        "tier_upgrade": "Upgrade",
         "upgrade_title": "🔒 This feature requires a plan upgrade",
         "upgrade_current_tier": "Your current plan",
-        "upgrade_compare": "Compare Plans",
+        "upgrade_compare": "Plan Comparison",
         "upgrade_btn": "View Upgrade Plans",
-        "upgrade_drive_limited": "Monthly Drive quota exhausted. Auto-sync next month.",
+        "upgrade_drive_limited": "Monthly Drive quota used up. Resets next month.",
         "tier_plan_comparison": "📊 Plan Comparison",
-        "tier_basic_price": "Basic - NT$150/mo",
-        "tier_standard_price": "Standard - NT$299/mo",
-        "tier_premium_price": "Premium - NT$499/mo",
-        "tier_ultra_price": "Ultra - NT$999/mo",
+        "tier_basic_price": "Basic",
+        "tier_standard_price": "Standard",
+        "tier_premium_price": "Premium",
+        "tier_ultra_price": "Ultra",
         "chat_exit": "✅ Exited <b>Cross-Paper Q&A mode</b>.\n\nType /chat to re-enter.",
         "chat_enter": "💬 <b>Entered Cross-Paper Q&A mode</b>\n\n📚 Your library: {count} papers\n\nYou can now type questions directly, e.g.:\n• How do these papers differ in methodology?\n• Which one is best for edge computing?\n• What are the common limitations?\n\nType /chat to exit this mode.",
         "chat_first_use": "👋 <b>First time using Cross-Paper Q&A</b>\n\nThis feature finds relevant papers from your library and performs <b>cross-paper analysis</b>.\n\n💡 Suggested questions:\n• Compare: \"How do these papers differ in [method/results]?\"\n• Recommend: \"Which is best for [my scenario]?\"\n• Gap: \"What are the common limitations?\"\n\n⏳ First analysis may take 10-20 seconds...",
@@ -682,30 +682,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot Plan Comparison</b>\n\n"
             "👤 Your current plan: {tier}\n\n"
-            "🆓 <b>Free</b> — NT$0/mo\n"
+            "🆓 <b>Free</b>\n"
             "• Search: 10/day\n"
             "• Deep Reading: 1/day\n"
             "• Drive: 5 papers/mo\n"
             "• Ads: Yes\n\n"
-            "🔧 <b>Basic</b> — NT$150/mo\n"
+            "🔧 <b>Basic</b>\n"
             "• Search: 30/day\n"
             "• Deep Reading: 5/day\n"
             "• /chat Cross-paper Q&A: 10/mo\n"
             "• Drive: 30 papers/mo\n"
             "• Ad-Free\n\n"
-            "⭐ <b>Standard</b> — NT$299/mo\n"
+            "⭐ <b>Standard</b>\n"
             "• Search: 100/day\n"
             "• Deep Reading: 15/day\n"
             "• /review Literature Review + /gap Research Gap\n"
             "• Drive: 100 papers/mo\n"
             "• Monthly AI Report\n\n"
-            "💎 <b>Premium</b> — NT$499/mo\n"
+            "💎 <b>Premium</b>\n"
             "• Search: 200/day\n"
             "• Deep Reading: 30/day\n"
             "• All features boosted\n"
             "• Drive: Unlimited\n"
             "• Weekly AI Report\n\n"
-            "👑 <b>Ultra</b> — NT$999/mo\n"
+            "👑 <b>Ultra</b>\n"
             "• Search: 500/day\n"
             "• Deep Reading: 50/day\n"
             "• All features unlimited\n"
@@ -795,40 +795,40 @@ MESSAGES = {
         "tier_standard": "Standard プラン",
         "tier_premium": "Premium プラン",
         "tier_ultra": "Ultra プラン",
-        "tier_price": "月額 NT${price}",
-        "tier_search_daily": "検索 {count} 回/日",
-        "tier_deep_daily": "ディープ読解 {count} 回/日",
-        "tier_chat": "論文横断 RAG 質問",
+        "tier_price": "月額 {price}",
+        "tier_search_daily": "{count} 回/日 検索",
+        "tier_deep_daily": "{count} 回/日 詳細解説",
+        "tier_chat": "論文横断Q&A",
         "tier_review": "文献レビュー",
         "tier_gap": "研究ギャップ",
         "tier_drive": "Google Drive 保存",
         "tier_drive_limit": "{count} 本/月",
         "tier_drive_unlimited": "無制限",
-        "tier_follow": "学着追跡",
+        "tier_follow": "学者フォロー",
         "tier_folder": "カスタムフォルダ",
-        "tier_export": "エクスポート機能",
+        "tier_export": "エクスポート",
         "tier_report": "AI 分析レポート",
         "tier_report_none": "なし",
         "tier_report_monthly": "月1回",
         "tier_report_weekly": "週1回",
-        "tier_report_daily": "毎日",
-        "tier_ads": "Web 広告",
+        "tier_report_daily": "日1回",
+        "tier_ads": "ウェブ広告",
         "tier_ads_none": "広告なし",
         "tier_ads_show": "広告あり",
         "tier_unlock": "ロック解除",
         "tier_locked": "アップグレード必要",
         "tier_current": "現在のプラン",
-        "tier_upgrade": "プランをアップグレード",
+        "tier_upgrade": "アップグレード",
         "upgrade_title": "🔒 この機能にはプランのアップグレードが必要です",
         "upgrade_current_tier": "現在のプラン",
         "upgrade_compare": "プラン比較",
         "upgrade_btn": "アップグレードプランを見る",
-        "upgrade_drive_limited": "今月の Drive 上限に達しました。来月自動同期されます。",
+        "upgrade_drive_limited": "今月の Drive 配分を使い切りました。翌月にリセットされます。",
         "tier_plan_comparison": "📊 プラン比較",
-        "tier_basic_price": "Basic - 月額 NT$150",
-        "tier_standard_price": "Standard - 月額 NT$299",
-        "tier_premium_price": "Premium - 月額 NT$499",
-        "tier_ultra_price": "Ultra - 月額 NT$999",
+        "tier_basic_price": "Basic",
+        "tier_standard_price": "Standard",
+        "tier_premium_price": "Premium",
+        "tier_ultra_price": "Ultra",
         "chat_exit": "✅ <b>論文横断Q&Aモード</b>を終了しました。\n\n/chat で再入できます。",
         "chat_enter": "💬 <b>論文横断Q&Aモードに入りました</b>\n\n📚 文献ライブラリ：{count} 本\n\n直接質問を入力できます。例：\n• これらの論文の方法論の違いは？\n• どれがエッジコンピューティングに最適？\n• これらの研究の共通の限界は？\n\n終了するには /chat を入力してください。",
         "chat_first_use": "👋 <b>論文横断Q&A 初回使用</b>\n\nこの機能はライブラリから関連論文を見つけ、<b>論文横断分析</b>を行います。\n\n💡 おすすめの質問：\n• 比較：「これらの論文の[方法/結果]の違いは？」\n• 推薦：「どれが[自分のシナリオ]に最適？」\n• ギャップ：「共通の限界は何？」\n\n⏳ 初回分析は10-20秒かかる場合があります...",
@@ -908,30 +908,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot プラン比較</b>\n\n"
             "👤 現在のプラン：{tier}\n\n"
-            "🆓 <b>Free 無料版</b> — 月額 NT$0\n"
+            "🆓 <b>Free 無料版</b>\n"
             "• 検索：10 回/日\n"
             "• 詳細解説：1 回/日\n"
             "• Drive：5 本/月\n"
             "• 広告：あり\n\n"
-            "🔧 <b>Basic</b> — 月額 NT$150\n"
+            "🔧 <b>Basic</b>\n"
             "• 検索：30 回/日\n"
             "• 詳細解説：5 回/日\n"
             "• /chat 論文横断Q&A：10 回/月\n"
             "• Drive：30 本/月\n"
             "• 広告なし\n\n"
-            "⭐ <b>Standard</b> — 月額 NT$299\n"
+            "⭐ <b>Standard</b>\n"
             "• 検索：100 回/日\n"
             "• 詳細解説：15 回/日\n"
             "• /review 文献レビュー + /gap 研究ギャップ\n"
             "• Drive：100 本/月\n"
             "• 月次 AI レポート\n\n"
-            "💎 <b>Premium</b> — 月額 NT$499\n"
+            "💎 <b>Premium</b>\n"
             "• 検索：200 回/日\n"
             "• 詳細解説：30 回/日\n"
             "• 全機能大幅強化\n"
             "• Drive：無制限\n"
             "• 週次 AI レポート\n\n"
-            "👑 <b>Ultra</b> — 月額 NT$999\n"
+            "👑 <b>Ultra</b>\n"
             "• 検索：500 回/日\n"
             "• 詳細解説：50 回/日\n"
             "• 全機能無制限\n"
@@ -955,12 +955,12 @@ def _get_lang(user_id: int, tg_lang_code: str = None) -> str:
             return "zh_hant" if "tw" in code or "hk" in code else "zh_hans"
         if "ja" in code:
             return "ja"
-    return "zh_hant"
+    return "en"
 
 def detect_user_lang(user_id_or_code):
     if isinstance(user_id_or_code, int):
         return _get_lang(user_id_or_code)
-    return "zh_hant"
+    return "en"
 
 def _t(user_id: int, key: str, tg_lang_code: str = None, **kwargs) -> str:
     lang = _get_lang(user_id, tg_lang_code)

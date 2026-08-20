@@ -105,7 +105,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tab_writer: '📑 論文綜述起草器',
     tab_gap: '🎯 研究缺口掃描',
     tab_radar: '📡 頂尖學者雷達',
-    tab_roi: '💰 NT$500 價值計算機',
+    tab_roi: '💰 價值計算機',
     btn_copy_latex: '複製 LaTeX 代碼',
     btn_copy_markdown: '複製 Markdown',
     btn_copy_bibtex: '複製 BibTeX',
@@ -144,7 +144,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_standard: 'Standard 方案',
     tier_premium: 'Premium 方案',
     tier_ultra: 'Ultra 方案',
-    tier_price: 'NT${price}/月',
+    tier_price: '{price}/月',
     tier_search_daily: '{count} 次搜尋/日',
     tier_deep_daily: '{count} 次深度導讀/日',
     tier_chat: '跨文獻問答',
@@ -289,7 +289,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tab_writer: '📑 论文综述起草器',
     tab_gap: '🎯 研究缺口扫描',
     tab_radar: '📡 顶尖学者雷达',
-    tab_roi: '💰 NT$500 价值计算器',
+    tab_roi: '💰 价值计算器',
     btn_copy_latex: '复制 LaTeX 代码',
     btn_copy_markdown: '复制 Markdown',
     btn_copy_bibtex: '复制 BibTeX',
@@ -328,7 +328,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_standard: 'Standard 方案',
     tier_premium: 'Premium 方案',
     tier_ultra: 'Ultra 方案',
-    tier_price: 'NT${price}/月',
+    tier_price: '{price}/月',
     tier_search_daily: '{count} 次搜索/日',
     tier_deep_daily: '{count} 次深度导读/日',
     tier_chat: '跨文献问答',
@@ -512,7 +512,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_standard: 'Standard Plan',
     tier_premium: 'Premium Plan',
     tier_ultra: 'Ultra Plan',
-    tier_price: 'NT${price}/mo',
+    tier_price: '{price}/mo',
     tier_search_daily: '{count} searches/day',
     tier_deep_daily: '{count} deep reads/day',
     tier_chat: 'Cross-Paper Q&A',
@@ -696,7 +696,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_standard: 'Standard プラン',
     tier_premium: 'Premium プラン',
     tier_ultra: 'Ultra プラン',
-    tier_price: '月額 NT${price}',
+    tier_price: '月額 {price}',
     tier_search_daily: '検索 {count} 回/日',
     tier_deep_daily: 'ディープ読解 {count} 回/日',
     tier_chat: '論文横断 RAG 質問',
@@ -738,8 +738,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   }
 };
 
-export function useI18n(lang: string = 'zh_hant') {
-  const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'zh_hant') as Language;
+export function useI18n(lang: string = 'en') {
+  const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'en') as Language;
   
   const t = (key: string, params: Record<string, string | number> = {}): string => {
     const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh_hant;
@@ -797,9 +797,9 @@ export function getLocalizedActivityDetail(
   action: string, 
   originalDetails: string, 
   category: string, 
-  lang: string = 'zh_hant'
+  lang: string = 'en'
 ): string {
-  const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'zh_hant') as Language;
+  const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'en') as Language;
   const locCat = getLocalizedCategory(category || '人工智慧', currentLang);
 
   if (action === 'archive') {

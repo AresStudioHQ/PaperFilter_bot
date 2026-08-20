@@ -17,7 +17,7 @@ export const SearchSection: React.FC<SearchSectionProps> = ({
   onOpenDeep,
   onAddToLibrary,
   categories,
-  userLang = 'zh_hant',
+  userLang = 'en',
   libraryPaperIds = [],
 }) => {
   const { t } = useI18n(userLang);

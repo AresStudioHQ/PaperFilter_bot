@@ -401,7 +401,7 @@ ${bibtexStr}`;
                 PaperFilterBot Pro 科研加速旗艦版
               </span>
               <span className="text-xs text-amber-300 font-semibold bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/30">
-                NT$ 500 / 月（或 NT$ 4,800 / 年省 20%）
+                TBA（定價中）
               </span>
             </div>
             <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
@@ -424,7 +424,7 @@ ${bibtexStr}`;
                 className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-sm shadow-xl shadow-amber-500/30 transition-all flex items-center gap-2 cursor-pointer transform hover:scale-[1.02]"
               >
                 <Crown className="h-4 w-4" />
-                <span>立即訂閱升級 (NT$500/月)</span>
+                <span>立即訂閱升級</span>
               </button>
             )}
           </div>
@@ -513,7 +513,7 @@ ${bibtexStr}`;
             }`}
           >
             <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
-            <span>💰 NT$500 價值計算機 & 方案</span>
+            <span>💰 價值計算機 & 方案</span>
           </button>
         </div>
       </div>
@@ -1161,7 +1161,7 @@ ${bibtexStr}`;
                 <div>
                   <div className="flex justify-between text-slate-300 mb-1">
                     <span>您的預估時薪 / 研究員時間價值（NTD/hr）：</span>
-                    <span className="font-bold text-emerald-400">NT$ {hourlyWage} / hr</span>
+                    <span className="font-bold text-emerald-400">${hourlyWage} / hr</span>
                   </div>
                   <input
                     type="range"
@@ -1185,7 +1185,7 @@ ${bibtexStr}`;
                   </div>
                   <div className="text-xs text-slate-300">
                     相當於為您的實驗室創造價值：
-                    <span className="text-emerald-400 font-bold ml-1">NT$ {moneyValueSaved.toLocaleString()}</span>
+                    <span className="text-emerald-400 font-bold ml-1">${moneyValueSaved.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -1207,7 +1207,7 @@ ${bibtexStr}`;
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-bold text-white">免費體驗版</h3>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">NT$ 0</span>
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">Free</span>
                 </div>
                 <p className="text-xs text-slate-400">適合初步探索 Telegram 論文過濾</p>
 
@@ -1247,7 +1247,7 @@ ${bibtexStr}`;
                     <span>Pro 科研專業版</span>
                   </h3>
                   <div>
-                    <span className="text-xl font-extrabold text-amber-300">NT$ 500</span>
+                    <span className="text-xl font-extrabold text-amber-300">TBA</span>
                     <span className="text-[11px] text-slate-400"> / 月</span>
                   </div>
                 </div>
@@ -1286,7 +1286,7 @@ ${bibtexStr}`;
                 className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-3"
               >
                 <Crown className="h-4 w-4" />
-                <span>{user.tier === 'pro' ? '管理 Pro 訂閱' : '立即升級 Pro (NT$500/月)'}</span>
+                <span>{user.tier === 'pro' ? '管理 Pro 訂閱' : '立即升級 Pro'}</span>
               </button>
             </div>
 
@@ -1299,7 +1299,7 @@ ${bibtexStr}`;
                     <span>Lab 實驗室團隊版</span>
                   </h3>
                   <div>
-                    <span className="text-xl font-extrabold text-indigo-300">NT$ 1,800</span>
+                    <span className="text-xl font-extrabold text-indigo-300">TBA</span>
                     <span className="text-[11px] text-slate-400"> / 月</span>
                   </div>
                 </div>

@@ -22,7 +22,7 @@ export const DeepModal: React.FC<DeepModalProps> = ({
   onClose,
   onAddToLibrary,
   isArchived = false,
-  userLang = 'zh_hant',
+  userLang = 'en',
 }) => {
   const { t } = useI18n(userLang);
   const [copiedBib, setCopiedBib] = useState(false);

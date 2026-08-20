@@ -1270,26 +1270,26 @@ app.post("/api/simulate-bot", async (req, res) => {
 
 👤 您目前的方案：<b>${profile.tier === 'ultra' ? 'Ultra' : profile.tier === 'premium' ? 'Premium' : profile.tier === 'standard' ? 'Standard' : profile.tier === 'basic' ? 'Basic' : 'Free'}</b>
 
-<b>Free (免費)</b> - NT$0/月
+<b>Free (免費)</b>
 • 搜尋：10 次/日、深度導讀：1 次/日
 • Google Drive：5 篇/月、有廣告
 
-<b>Basic</b> - NT$150/月
+<b>Basic</b>
 • 搜尋：30 次/日、深度導讀：5 次/日
 • 解鎖 /chat 跨文獻問答（10次/月）
 • Google Drive：30 篇/月、無廣告
 
-<b>Standard</b> - NT$299/月
+<b>Standard</b>
 • 搜尋：100 次/日、深度導讀：15 次/日
 • 解鎖 /review 文獻綜述、/gap 研究缺口
 • Google Drive：100 篇/月、每月 AI 分析報告
 
-<b>Premium</b> - NT$499/月
+<b>Premium</b>
 • 搜尋：200 次/日、深度導讀：30 次/日
 • 所有功能量大幅增加、Google Drive 無限
 • 每週 AI 分析報告
 
-<b>Ultra</b> - NT$999/月
+<b>Ultra</b>
 • 搜尋：500 次/日、深度導讀：50 次/日
 • 所有功能無限、每日 AI 分析報告`
       });
