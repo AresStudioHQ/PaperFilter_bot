@@ -77,11 +77,6 @@ MESSAGES = {
         "btn_archive": "☁️ 歸檔到雲端",
         "btn_oa": "🟢 免費全文 (OA)",
         "btn_doi": "🔗 官方 DOI 頁面",
-        "btn_hot_transformer": "🔍 熱門：Transformer",
-        "btn_hot_crispr": "🧬 熱門：CRISPR",
-        "btn_bind_web": "🔗 綁定電腦網頁端",
-        "btn_view_pro": "👑 查看 Pro 特權",
-        "btn_full_help": "📖 完整指令幫助",
         "read_paper": "查看原始文獻",
         "searching": "🔍 正在跨庫檢索「{query}」，請稍候...",
         "not_found": "❌ 找不到與「{query}」相關的文獻，建議更換關鍵字。",
@@ -151,115 +146,6 @@ MESSAGES = {
         "tier_standard_price": "Standard - NT$299/月",
         "tier_premium_price": "Premium - NT$499/月",
         "tier_ultra_price": "Ultra - NT$999/月",
-        "chat_exit": "✅ 已退出<b>跨文獻問答模式</b>。\n\n輸入 /chat 可重新進入。",
-        "chat_enter": "💬 <b>已進入跨文獻問答模式</b>\n\n📚 您的文獻庫：{count} 篇論文\n\n現在可以直接輸入問題，例如：\n• 這些論文在方法論上有何異同？\n• 哪一篇最適合用在邊緣運算？\n• 這些研究有什麼共同限制？\n\n輸入 /chat 退出此模式。",
-        "chat_first_use": "👋 <b>首次使用跨文獻問答</b>\n\n此功能會從您文獻庫中找到相關論文，進行<b>跨篇交叉分析</b>。\n\n💡 建議提問方向：\n• 比較類：「這些論文在[方法/結果]上有何差異？」\n• 推薦類：「哪一篇最適合[我的場景]？」\n• 缺口類：「這些研究有哪些共同限制？」\n\n⏳ 首次分析可能需要 10-20 秒，請稍候...",
-        "chat_empty_library": "📂 您目前文獻庫中沒有論文。請先搜尋並歸檔幾篇論文後再來提問！",
-        "chat_loading": "🧠 <b>AI 正在跨 {count} 篇文獻進行深入關聯檢索與分析，請稍候...</b>",
-        "chat_header": "💬 <b>跨論文解答報告</b>\n❓ <i>問題：{query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>以上分析僅基於您文獻庫中的論文，不代表全域學術觀點。如需更多功能，升級 Pro 方案可享無限次問答。</i>",
-        "reports_empty": "📝 您目前尚無生成的文獻綜述報告。可使用 <code>/review 主題</code> 立即生成！",
-        "reports_list_header": "📑 <b>您生成的學術綜述報告清單（共 {count} 份）：</b>\n\n",
-        "reports_list_footer": "\n可在電腦端科研大總部查看全文與匯出 Markdown/PDF！",
-        "follow_missing_args": "請輸入學者名稱，例如：<code>/follow Yann LeCun</code>",
-        "unfollow_missing_args": "請輸入要取消追蹤的學者名稱。",
-        "drive_connected": "✅ 您的 Google Drive 已成功連結！可以直接歸檔論文與同步 references.bib。",
-        "drive_auth_prompt": "請點擊下方按鈕授權 Google Drive 存取：",
-        "drive_auth_button": "🔗 授權 Google Drive",
-        "drive_oauth_not_configured": "❌ Google OAuth 設定未完成，請確認 .env 設定。",
-        "drive_auth_success": "✅ Google Drive 授權成功！現在可以隨時將論文歸檔至雲端。",
-        "search_missing_args": "請輸入關鍵字，例如：<code>/search CRISPR</code>",
-        "review_empty": "您尚未收藏任何論文。請先搜尋並歸檔論文後再使用。",
-        "review_loading": "🧠 正在為您的 {count} 篇論文生成高階學術文獻綜述，請稍候...",
-        "gap_empty": "您尚未收藏任何論文。請先搜尋並歸檔論文後再使用。",
-        "gap_loading": "🔍 正在深入分析 {count} 篇論文的研究缺口與盲點，請稍候...",
-        "trend_loading": "📈 正在分析「{topic}」的國際學術趨勢，請稍候...",
-        "trend_year_format": "{year}年:{count}篇",
-        "trend_result_header": "📊 <b>「{topic}」研究趨勢分析</b>\n\n📚 找到相關論文：{count} 篇\n📅 發表年份分佈：{year_str}\n\n",
-        "trend_ai_analysis": "🤖 <b>AI 趨勢解析：</b>\n{analysis}",
-        "export_empty": "您尚未收藏任何論文。",
-        "export_prompt": "📚 您共有 {count} 篇論文，請選擇匯出方式：",
-        "export_all_button": "📦 全部匯出 ({count} 篇)",
-        "export_select_button": "☑️ 勾選匯出",
-        "export_format_prompt": "請選擇匯出格式：",
-        "export_select_prompt": "☑️ <b>請點選要匯出的論文</b>（已選：{count} 篇）\n\n",
-        "export_confirm_button": "✅ 確認匯出",
-        "export_cancel_button": "❌ 取消",
-        "export_selected_count": "已選 {count} 篇",
-        "export_no_selection": "請先選擇至少一篇論文",
-        "export_cancelled": "❌ 已取消匯出。",
-        "export_cancel_callback": "已取消",
-        "export_no_papers": "沒有論文可匯出",
-        "export_generating": "📄 正在生成 {fmt} 格式...",
-        "export_result_caption": "📄 <b>{fmt} 匯出結果</b>\n📚 共 {count} 篇論文\n\n可直接匯入 Zotero / EndNote / Mendeley",
-        "export_selected_format": "已選 {count} 篇論文，請選擇匯出格式：",
-        "archive_choose_folder": "📁 請選擇要歸檔的資料夾：",
-        "archive_skip_button": "⏭ 略過不歸檔",
-        "archive_invalid_button": "❌ 按鈕無效",
-        "archive_skip_archive": "⏭ 已略過歸檔",
-        "archive_archiving": "☁️ 歸檔中...",
-        "archive_drive_auth_prompt": "請先授權 Google Drive：",
-        "archive_drive_auth_button": "🔗 授權 Google Drive",
-        "archive_drive_not_configured": "❌ Google OAuth 未設定。",
-        "my_title": "📚 <b>您的個人科研文獻庫總覽</b>\n\n",
-        "my_tier_label": "👤 會員等級：{tier}",
-        "my_drive_status_label": "☁️ Google Drive 狀態：{status}",
-        "my_drive_connected": "🟢 已連結",
-        "my_drive_disconnected": "⚪ 未連結（可用 /drive 授權）",
-        "my_paper_count": "📑 收藏論文數量：共 <b>{count}</b> 篇",
-        "my_folders_label": "📁 自訂資料夾：{folders}",
-        "my_default_folders": "預設分類",
-        "my_recent_papers": "<b>🕒 最近收藏文獻（最新 3 篇）：</b>\n{list}",
-        "my_recent_hint": "\n💡 提示：使用 <code>/chat 您的研究問題</code> 可跨文獻向 AI 提問；使用 <code>/export</code> 可批次匯出引用格式。",
-        "my_empty_library": "您目前尚未收藏任何論文。\n搜尋論文後點擊卡片下方的【☁️ 歸檔到雲端】即可將論文加入文獻庫！",
-        "my_export_button": "📄 匯出文獻庫",
-        "my_drive_button": "☁️ Drive 授權",
-        "bind_title": "🔗 <b>電腦科研大總部同步帳號綁定</b>\n\n",
-        "bind_code": "您的專屬 6 位數同步碼為：<code>{code}</code>\n\n",
-        "bind_instructions": "💻 請在電腦瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\n綁定後，您在 Telegram 的所有標記（看過/略過/歸檔/筆記）將與電腦端全功能儀表板雙向同步！",
-        "help_bind_button": "🔗 綁定電腦端",
-        "help_pro_button": "👑 查看 Pro 特權",
-        "unknown_command": "❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。",
-        "paper_et_al": "等 {count} 位",
-        "paper_seen_badge": "👁 [已看過]",
-        "paper_ai_summary": "🧠 <b>AI 導讀：</b>\n{text}",
-        "mode_switched_confirm": "✅ 已切換為 {mode}",
-        "lang_switched_confirm": "✅ 語言已切換為 {lang}",
-        "mark_seen_callback": "👁 已標記為已讀",
-        "mark_skip_callback": "❌ 已略過",
-        "pro_text": (
-            "📊 <b>PaperFilterBot 方案比較</b>\n\n"
-            "👤 您目前方案：{tier}\n\n"
-            "🟢 <b>Free 免費版</b> — NT$0/月\n"
-            "• 搜尋：10 次/日\n"
-            "• 深度導讀：1 次/日\n"
-            "• Drive：5 篇/月\n"
-            "• 廣告：有\n\n"
-            "🔵 <b>Basic</b> — NT$150/月\n"
-            "• 搜尋：30 次/日\n"
-            "• 深度導讀：5 次/日\n"
-            "• /chat 跨文獻問答：10 次/月\n"
-            "• Drive：30 篇/月\n"
-            "• 無廣告\n\n"
-            "🟣 <b>Standard</b> — NT$299/月\n"
-            "• 搜尋：100 次/日\n"
-            "• 深度導讀：15 次/日\n"
-            "• /review 文獻綜述 + /gap 研究缺口\n"
-            "• Drive：100 篇/月\n"
-            "• 每月 AI 分析報告\n\n"
-            "🟡 <b>Premium</b> — NT$499/月\n"
-            "• 搜尋：200 次/日\n"
-            "• 深度導讀：30 次/日\n"
-            "• 所有功能大幅增加\n"
-            "• Drive：無限\n"
-            "• 每週 AI 分析報告\n\n"
-            "🔴 <b>Ultra</b> — NT$999/月\n"
-            "• 搜尋：500 次/日\n"
-            "• 深度導讀：50 次/日\n"
-            "• 所有功能無限\n"
-            "• 每日 AI 分析報告\n\n"
-            "💡 可在電腦科研大總部一鍵升級！"
-        ),
     },
     "zh_hans": {
         "welcome": (
@@ -303,11 +189,6 @@ MESSAGES = {
         "btn_archive": "☁️ 归档到云端",
         "btn_oa": "🟢 免费全文 (OA)",
         "btn_doi": "🔗 官方 DOI 页面",
-        "btn_hot_transformer": "🔍 热门：Transformer",
-        "btn_hot_crispr": "🧬 热门：CRISPR",
-        "btn_bind_web": "🔗 绑定电脑网页端",
-        "btn_view_pro": "👑 查看 Pro 特权",
-        "btn_full_help": "📖 完整指令帮助",
         "read_paper": "查看原始文献",
         "searching": "🔍 正在跨库检索「{query}」，请稍候...",
         "not_found": "❌ 找不到与「{query}」相关的文献，建议更换关键词。",
@@ -377,115 +258,6 @@ MESSAGES = {
         "tier_standard_price": "Standard - NT$299/月",
         "tier_premium_price": "Premium - NT$499/月",
         "tier_ultra_price": "Ultra - NT$999/月",
-        "chat_exit": "✅ 已退出<b>跨文献问答模式</b>。\n\n输入 /chat 可重新进入。",
-        "chat_enter": "💬 <b>已进入跨文献问答模式</b>\n\n📚 您的文献库：{count} 篇论文\n\n现在可以直接输入问题，例如：\n• 这些论文在方法论上有何异同？\n• 哪一篇最适合用在边缘运算？\n• 这些研究有什么共同限制？\n\n输入 /chat 退出此模式。",
-        "chat_first_use": "👋 <b>首次使用跨文献问答</b>\n\n此功能会从您文献库中找到相关论文，进行<b>跨篇交叉分析</b>。\n\n💡 建议提问方向：\n• 比较类：「这些论文在[方法/结果]上有何差异？」\n• 推荐类：「哪一篇最适合[我的场景]？」\n• 缺口类：「这些研究有哪些共同限制？」\n\n⏳ 首次分析可能需要 10-20 秒，请稍候...",
-        "chat_empty_library": "📂 您目前文献库中没有论文。请先搜索并归档几篇论文后再来提问！",
-        "chat_loading": "🧠 <b>AI 正在跨 {count} 篇文献进行深入关联检索与分析，请稍候...</b>",
-        "chat_header": "💬 <b>跨论文解答报告</b>\n❓ <i>问题：{query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>以上分析仅基于您文献库中的论文，不代表全域学术观点。如需更多功能，升级 Pro 方案可享无限次问答。</i>",
-        "reports_empty": "📝 您目前尚无生成的文献综述报告。可使用 <code>/review 主题</code> 立即生成！",
-        "reports_list_header": "📑 <b>您生成的学术综述报告清单（共 {count} 份）：</b>\n\n",
-        "reports_list_footer": "\n可在电脑端科研大总部查看全文与导出 Markdown/PDF！",
-        "follow_missing_args": "请输入学者名称，例如：<code>/follow Yann LeCun</code>",
-        "unfollow_missing_args": "请输入要取消追踪的学者名称。",
-        "drive_connected": "✅ 您的 Google Drive 已成功链接！可以直接归档论文与同步 references.bib。",
-        "drive_auth_prompt": "请点击下方按钮授权 Google Drive 访问：",
-        "drive_auth_button": "🔗 授权 Google Drive",
-        "drive_oauth_not_configured": "❌ Google OAuth 设定未完成，请确认 .env 设定。",
-        "drive_auth_success": "✅ Google Drive 授权成功！现在可以随时将论文归档至云端。",
-        "search_missing_args": "请输入关键词，例如：<code>/search CRISPR</code>",
-        "review_empty": "您尚未收藏任何论文。请先搜索并归档论文后再使用。",
-        "review_loading": "🧠 正在为您的 {count} 篇论文生成高阶学术文献综述，请稍候...",
-        "gap_empty": "您尚未收藏任何论文。请先搜索并归档论文后再使用。",
-        "gap_loading": "🔍 正在深入分析 {count} 篇论文的研究缺口与盲点，请稍候...",
-        "trend_loading": "📈 正在分析「{topic}」的国际学术趋势，请稍候...",
-        "trend_year_format": "{year}年:{count}篇",
-        "trend_result_header": "📊 <b>「{topic}」研究趋势分析</b>\n\n📚 找到相关论文：{count} 篇\n📅 发表年份分布：{year_str}\n\n",
-        "trend_ai_analysis": "🤖 <b>AI 趋势解析：</b>\n{analysis}",
-        "export_empty": "您尚未收藏任何论文。",
-        "export_prompt": "📚 您共有 {count} 篇论文，请选择导出方式：",
-        "export_all_button": "📦 全部导出 ({count} 篇)",
-        "export_select_button": "☑️ 勾选导出",
-        "export_format_prompt": "请选择导出格式：",
-        "export_select_prompt": "☑️ <b>请点击要导出的论文</b>（已选：{count} 篇）\n\n",
-        "export_confirm_button": "✅ 确认导出",
-        "export_cancel_button": "❌ 取消",
-        "export_selected_count": "已选 {count} 篇",
-        "export_no_selection": "请先选择至少一篇论文",
-        "export_cancelled": "❌ 已取消导出。",
-        "export_cancel_callback": "已取消",
-        "export_no_papers": "没有论文可导出",
-        "export_generating": "📄 正在生成 {fmt} 格式...",
-        "export_result_caption": "📄 <b>{fmt} 导出结果</b>\n📚 共 {count} 篇论文\n\n可直接导入 Zotero / EndNote / Mendeley",
-        "export_selected_format": "已选 {count} 篇论文，请选择导出格式：",
-        "archive_choose_folder": "📁 请选择要归档的文件夹：",
-        "archive_skip_button": "⏭ 跳过不归档",
-        "archive_invalid_button": "❌ 按钮无效",
-        "archive_skip_archive": "⏭ 已跳过归档",
-        "archive_archiving": "☁️ 归档中...",
-        "archive_drive_auth_prompt": "请先授权 Google Drive：",
-        "archive_drive_auth_button": "🔗 授权 Google Drive",
-        "archive_drive_not_configured": "❌ Google OAuth 未设定。",
-        "my_title": "📚 <b>您的个人科研文献库总览</b>\n\n",
-        "my_tier_label": "👤 会员等级：{tier}",
-        "my_drive_status_label": "☁️ Google Drive 状态：{status}",
-        "my_drive_connected": "🟢 已链接",
-        "my_drive_disconnected": "⚪ 未链接（可用 /drive 授权）",
-        "my_paper_count": "📑 收藏论文数量：共 <b>{count}</b> 篇",
-        "my_folders_label": "📁 自定义文件夹：{folders}",
-        "my_default_folders": "预设分类",
-        "my_recent_papers": "<b>🕒 最近收藏文献（最新 3 篇）：</b>\n{list}",
-        "my_recent_hint": "\n💡 提示：使用 <code>/chat 您的研究问题</code> 可跨文献向 AI 提问；使用 <code>/export</code> 可批次导出引用格式。",
-        "my_empty_library": "您目前尚未收藏任何论文。\n搜索论文后点击卡片下方的【☁️ 归档到云端】即可将论文加入文献库！",
-        "my_export_button": "📄 导出文献库",
-        "my_drive_button": "☁️ Drive 授权",
-        "bind_title": "🔗 <b>电脑科研大总部同步帐号绑定</b>\n\n",
-        "bind_code": "您的专属 6 位数同步码为：<code>{code}</code>\n\n",
-        "bind_instructions": "💻 请在电脑浏览器打开 PaperFilterBot 科研大总部，点击右上角<b>【绑定 Telegram】</b>输入此代码。\n绑定后，您在 Telegram 的所有标记（看过/跳过/归档/笔记）将与电脑端全功能仪表板双向同步！",
-        "help_bind_button": "🔗 绑定电脑端",
-        "help_pro_button": "👑 查看 Pro 特权",
-        "unknown_command": "❌ 没有此指令：{cmd}\n请输入 /help 查看所有可用指令。",
-        "paper_et_al": "等 {count} 位",
-        "paper_seen_badge": "👁 [已看过]",
-        "paper_ai_summary": "🧠 <b>AI 导读：</b>\n{text}",
-        "mode_switched_confirm": "✅ 已切换为 {mode}",
-        "lang_switched_confirm": "✅ 语言已切换为 {lang}",
-        "mark_seen_callback": "👁 已标记为已读",
-        "mark_skip_callback": "❌ 已跳过",
-        "pro_text": (
-            "📊 <b>PaperFilterBot 方案比较</b>\n\n"
-            "👤 您目前方案：{tier}\n\n"
-            "🟢 <b>Free 免费版</b> — NT$0/月\n"
-            "• 搜索：10 次/日\n"
-            "• 深度导读：1 次/日\n"
-            "• Drive：5 篇/月\n"
-            "• 广告：有\n\n"
-            "🔵 <b>Basic</b> — NT$150/月\n"
-            "• 搜索：30 次/日\n"
-            "• 深度导读：5 次/日\n"
-            "• /chat 跨文献问答：10 次/月\n"
-            "• Drive：30 篇/月\n"
-            "• 无广告\n\n"
-            "🟣 <b>Standard</b> — NT$299/月\n"
-            "• 搜索：100 次/日\n"
-            "• 深度导读：15 次/日\n"
-            "• /review 文献综述 + /gap 研究缺口\n"
-            "• Drive：100 篇/月\n"
-            "• 每月 AI 分析报告\n\n"
-            "🟡 <b>Premium</b> — NT$499/月\n"
-            "• 搜索：200 次/日\n"
-            "• 深度导读：30 次/日\n"
-            "• 所有功能大幅增加\n"
-            "• Drive：无限\n"
-            "• 每周 AI 分析报告\n\n"
-            "🔴 <b>Ultra</b> — NT$999/月\n"
-            "• 搜索：500 次/日\n"
-            "• 深度导读：50 次/日\n"
-            "• 所有功能无限\n"
-            "• 每日 AI 分析报告\n\n"
-            "💡 可在电脑科研大总部一键升级！"
-        ),
     },
     "en": {
         "welcome": (
@@ -529,11 +301,6 @@ MESSAGES = {
         "btn_archive": "☁️ Cloud Archive",
         "btn_oa": "🟢 Open Access",
         "btn_doi": "🔗 Official DOI",
-        "btn_hot_transformer": "🔍 Hot: Transformer",
-        "btn_hot_crispr": "🧬 Hot: CRISPR",
-        "btn_bind_web": "🔗 Bind to Web HQ",
-        "btn_view_pro": "👑 View Pro Features",
-        "btn_full_help": "📖 Full Command Guide",
         "read_paper": "Read Full Paper",
         "searching": "🔍 Searching for '{query}' across repositories...",
         "not_found": "❌ No matched papers found for '{query}'.",
@@ -603,115 +370,6 @@ MESSAGES = {
         "tier_standard_price": "Standard - NT$299/mo",
         "tier_premium_price": "Premium - NT$499/mo",
         "tier_ultra_price": "Ultra - NT$999/mo",
-        "chat_exit": "✅ Exited <b>Cross-Paper Q&A mode</b>.\n\nType /chat to re-enter.",
-        "chat_enter": "💬 <b>Entered Cross-Paper Q&A mode</b>\n\n📚 Your library: {count} papers\n\nYou can now type questions directly, e.g.:\n• How do these papers differ in methodology?\n• Which one is best for edge computing?\n• What are the common limitations?\n\nType /chat to exit this mode.",
-        "chat_first_use": "👋 <b>First time using Cross-Paper Q&A</b>\n\nThis feature finds relevant papers from your library and performs <b>cross-paper analysis</b>.\n\n💡 Suggested questions:\n• Compare: \"How do these papers differ in [method/results]?\"\n• Recommend: \"Which is best for [my scenario]?\"\n• Gap: \"What are the common limitations?\"\n\n⏳ First analysis may take 10-20 seconds...",
-        "chat_empty_library": "📂 Your library has no papers. Search and archive some papers first!",
-        "chat_loading": "🧠 <b>AI is analyzing {count} papers for cross-references...</b>",
-        "chat_header": "💬 <b>Cross-Paper Answer Report</b>\n❓ <i>Question: {query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>Analysis based only on your library papers. Upgrade to Pro for unlimited Q&A.</i>",
-        "reports_empty": "📝 No reports yet. Use <code>/review [Topic]</code> to generate one!",
-        "reports_list_header": "📑 <b>Your Literature Reports ({count} total):</b>\n\n",
-        "reports_list_footer": "\nView full text & export Markdown/PDF at Web Research HQ!",
-        "follow_missing_args": "Enter author name, e.g.: <code>/follow Yann LeCun</code>",
-        "unfollow_missing_args": "Enter the author name to unfollow.",
-        "drive_connected": "✅ Google Drive connected! You can archive papers & sync references.bib.",
-        "drive_auth_prompt": "Click the button below to authorize Google Drive access:",
-        "drive_auth_button": "🔗 Authorize Google Drive",
-        "drive_oauth_not_configured": "❌ Google OAuth not configured. Check your .env settings.",
-        "drive_auth_success": "✅ Google Drive authorized! You can now archive papers to the cloud.",
-        "search_missing_args": "Enter keywords, e.g.: <code>/search CRISPR</code>",
-        "review_empty": "No papers in your library. Search and archive some first!",
-        "review_loading": "🧠 Generating literature review for your {count} papers...",
-        "gap_empty": "No papers in your library. Search and archive some first!",
-        "gap_loading": "🔍 Analyzing research gaps across {count} papers...",
-        "trend_loading": "📈 Analyzing trends in \"{topic}\"...",
-        "trend_year_format": "{year}: {count} papers",
-        "trend_result_header": "📊 <b>\"{topic}\" Trend Analysis</b>\n\n📚 Papers found: {count}\n📅 Year distribution: {year_str}\n\n",
-        "trend_ai_analysis": "🤖 <b>AI Trend Analysis:</b>\n{analysis}",
-        "export_empty": "No papers in your library.",
-        "export_prompt": "📚 You have {count} papers. Choose export method:",
-        "export_all_button": "📦 Export All ({count} papers)",
-        "export_select_button": "☑️ Select & Export",
-        "export_format_prompt": "Choose export format:",
-        "export_select_prompt": "☑️ <b>Select papers to export</b> (Selected: {count})\n\n",
-        "export_confirm_button": "✅ Confirm Export",
-        "export_cancel_button": "❌ Cancel",
-        "export_selected_count": "Selected: {count}",
-        "export_no_selection": "Please select at least one paper",
-        "export_cancelled": "❌ Export cancelled.",
-        "export_cancel_callback": "Cancelled",
-        "export_no_papers": "No papers to export",
-        "export_generating": "📄 Generating {fmt} format...",
-        "export_result_caption": "📄 <b>{fmt} Export</b>\n📚 {count} papers\n\nImport directly to Zotero / EndNote / Mendeley",
-        "export_selected_format": "Selected {count} papers. Choose format:",
-        "archive_choose_folder": "📁 Choose archive folder:",
-        "archive_skip_button": "⏭ Skip Archiving",
-        "archive_invalid_button": "❌ Invalid button",
-        "archive_skip_archive": "⏭ Archive skipped",
-        "archive_archiving": "☁️ Archiving...",
-        "archive_drive_auth_prompt": "Please authorize Google Drive first:",
-        "archive_drive_auth_button": "🔗 Authorize Google Drive",
-        "archive_drive_not_configured": "❌ Google OAuth not configured.",
-        "my_title": "📚 <b>Your Research Library Overview</b>\n\n",
-        "my_tier_label": "👤 Plan: {tier}",
-        "my_drive_status_label": "☁️ Google Drive: {status}",
-        "my_drive_connected": "🟢 Connected",
-        "my_drive_disconnected": "⚪ Not connected (use /drive to authorize)",
-        "my_paper_count": "📑 Papers saved: <b>{count}</b>",
-        "my_folders_label": "📁 Custom folders: {folders}",
-        "my_default_folders": "Default categories",
-        "my_recent_papers": "<b>🕒 Recent Papers (last 3):</b>\n{list}",
-        "my_recent_hint": "\n💡 Tip: Use <code>/chat [Question]</code> for cross-paper Q&A; <code>/export</code> for batch export.",
-        "my_empty_library": "No papers yet. Search and click [☁️ Cloud Archive] to add papers!",
-        "my_export_button": "📄 Export Library",
-        "my_drive_button": "☁️ Drive Auth",
-        "bind_title": "🔗 <b>Web Research HQ Account Binding</b>\n\n",
-        "bind_code": "Your 6-digit sync code: <code>{code}</code>\n\n",
-        "bind_instructions": "💻 Open PaperFilterBot Web HQ and click <b>【Bind Telegram】</b> to enter this code.\nAll your marks (seen/skip/archive/notes) will sync bidirectionally!",
-        "help_bind_button": "🔗 Bind to Web",
-        "help_pro_button": "👑 View Pro Features",
-        "unknown_command": "❌ Unknown command: {cmd}\nType /help to see all commands.",
-        "paper_et_al": "et al. ({count} authors)",
-        "paper_seen_badge": "👁 [Seen]",
-        "paper_ai_summary": "🧠 <b>AI Summary:</b>\n{text}",
-        "mode_switched_confirm": "✅ Switched to {mode}",
-        "lang_switched_confirm": "✅ Language set to {lang}",
-        "mark_seen_callback": "👁 Marked as read",
-        "mark_skip_callback": "❌ Skipped",
-        "pro_text": (
-            "📊 <b>PaperFilterBot Plan Comparison</b>\n\n"
-            "👤 Your current plan: {tier}\n\n"
-            "🟢 <b>Free</b> — NT$0/mo\n"
-            "• Search: 10/day\n"
-            "• Deep Reading: 1/day\n"
-            "• Drive: 5 papers/mo\n"
-            "• Ads: Yes\n\n"
-            "🔵 <b>Basic</b> — NT$150/mo\n"
-            "• Search: 30/day\n"
-            "• Deep Reading: 5/day\n"
-            "• /chat Cross-paper Q&A: 10/mo\n"
-            "• Drive: 30 papers/mo\n"
-            "• Ad-Free\n\n"
-            "🟣 <b>Standard</b> — NT$299/mo\n"
-            "• Search: 100/day\n"
-            "• Deep Reading: 15/day\n"
-            "• /review Literature Review + /gap Research Gap\n"
-            "• Drive: 100 papers/mo\n"
-            "• Monthly AI Report\n\n"
-            "🟡 <b>Premium</b> — NT$499/mo\n"
-            "• Search: 200/day\n"
-            "• Deep Reading: 30/day\n"
-            "• All features boosted\n"
-            "• Drive: Unlimited\n"
-            "• Weekly AI Report\n\n"
-            "🔴 <b>Ultra</b> — NT$999/mo\n"
-            "• Search: 500/day\n"
-            "• Deep Reading: 50/day\n"
-            "• All features unlimited\n"
-            "• Daily AI Report\n\n"
-            "💡 Upgrade now at Web Research HQ!"
-        ),
     },
     "ja": {
         "welcome": (
@@ -755,11 +413,6 @@ MESSAGES = {
         "btn_archive": "☁️ ドライブ保存",
         "btn_oa": "🟢 オープンアクセス",
         "btn_doi": "🔗 公式DOIページ",
-        "btn_hot_transformer": "🔍 人気：Transformer",
-        "btn_hot_crispr": "🧬 人気：CRISPR",
-        "btn_bind_web": "🔗 Web本部と連携",
-        "btn_view_pro": "👑 Pro機能を見る",
-        "btn_full_help": "📖 コマンド一覧",
         "read_paper": "原著論文を読む",
         "searching": "🔍 「{query}」を検索中...",
         "not_found": "❌ 一致する論文が見つかりませんでした。",
@@ -829,115 +482,6 @@ MESSAGES = {
         "tier_standard_price": "Standard - 月額 NT$299",
         "tier_premium_price": "Premium - 月額 NT$499",
         "tier_ultra_price": "Ultra - 月額 NT$999",
-        "chat_exit": "✅ <b>論文横断Q&Aモード</b>を終了しました。\n\n/chat で再入できます。",
-        "chat_enter": "💬 <b>論文横断Q&Aモードに入りました</b>\n\n📚 文献ライブラリ：{count} 本\n\n直接質問を入力できます。例：\n• これらの論文の方法論の違いは？\n• どれがエッジコンピューティングに最適？\n• これらの研究の共通の限界は？\n\n終了するには /chat を入力してください。",
-        "chat_first_use": "👋 <b>論文横断Q&A 初回使用</b>\n\nこの機能はライブラリから関連論文を見つけ、<b>論文横断分析</b>を行います。\n\n💡 おすすめの質問：\n• 比較：「これらの論文の[方法/結果]の違いは？」\n• 推薦：「どれが[自分のシナリオ]に最適？」\n• ギャップ：「共通の限界は何？」\n\n⏳ 初回分析は10-20秒かかる場合があります...",
-        "chat_empty_library": "📂 ライブラリに論文がありません。まず検索して保存してください！",
-        "chat_loading": "🧠 <b>AI が {count} 本の論文を横断分析中...</b>",
-        "chat_header": "💬 <b>論文横断回答レポート</b>\n❓ <i>質問：{query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>ライブラリの論文のみに基づく分析です。無制限のQ&Aには Pro にアップグレード。</i>",
-        "reports_empty": "📝 レポートがまだありません。<code>/review [テーマ]</code> で作成してください！",
-        "reports_list_header": "📑 <b>文献レビュー報告書（全 {count} 件）：</b>\n\n",
-        "reports_list_footer": "\nWeb研究総本部で全文閲覧・Markdown/PDFエクスポートが可能！",
-        "follow_missing_args": "著者名を入力してください。例：<code>/follow Yann LeCun</code>",
-        "unfollow_missing_args": "フォロー解除する著者名を入力してください。",
-        "drive_connected": "✅ Google Drive が接続されました！論文の保存と references.bib の同期が可能です。",
-        "drive_auth_prompt": "以下のボタンをクリックして Google Drive を認証してください：",
-        "drive_auth_button": "🔗 Google Drive を認証",
-        "drive_oauth_not_configured": "❌ Google OAuth が設定されていません。.env を確認してください。",
-        "drive_auth_success": "✅ Google Drive 認証成功！論文をクラウドに保存できます。",
-        "search_missing_args": "キーワードを入力してください。例：<code>/search CRISPR</code>",
-        "review_empty": "論文がまだありません。まず検索して保存してください！",
-        "review_loading": "🧠 {count} 本の論文の文献レビューを生成中...",
-        "gap_empty": "論文がまだありません。まず検索して保存してください！",
-        "gap_loading": "🔍 {count} 本の論文の研究ギャップを分析中...",
-        "trend_loading": "📈 「{topic}」のトレンドを分析中...",
-        "trend_year_format": "{year}年: {count}本",
-        "trend_result_header": "📊 <b>「{topic}」トレンド分析</b>\n\n📚 関連論文：{count} 本\n📅 年度分布：{year_str}\n\n",
-        "trend_ai_analysis": "🤖 <b>AI トレンド分析：</b>\n{analysis}",
-        "export_empty": "論文がまだありません。",
-        "export_prompt": "📚 {count} 本の論文があります。エクスポート方法を選択してください：",
-        "export_all_button": "📦 全部エクスポート ({count} 本)",
-        "export_select_button": "☑️ 選択してエクスポート",
-        "export_format_prompt": "エクスポート形式を選択してください：",
-        "export_select_prompt": "☑️ <b>エクスポートする論文を選択</b>（選択中：{count} 本）\n\n",
-        "export_confirm_button": "✅ エクスポート確認",
-        "export_cancel_button": "❌ キャンセル",
-        "export_selected_count": "選択中 {count} 本",
-        "export_no_selection": "まず1本以上選択してください",
-        "export_cancelled": "❌ エクスポートをキャンセルしました。",
-        "export_cancel_callback": "キャンセル済み",
-        "export_no_papers": "エクスポートする論文がありません",
-        "export_generating": "📄 {fmt} 形式を生成中...",
-        "export_result_caption": "📄 <b>{fmt} エクスポート結果</b>\n📚 {count} 本の論文\n\nZotero / EndNote / Mendeley に直接インポート可能",
-        "export_selected_format": "{count} 本を選択。形式を選択してください：",
-        "archive_choose_folder": "📁 保存フォルダを選択してください：",
-        "archive_skip_button": "⏭ 保存しない",
-        "archive_invalid_button": "❌ 無効なボタン",
-        "archive_skip_archive": "⏭ 保存をスキップ",
-        "archive_archiving": "☁️ 保存中...",
-        "archive_drive_auth_prompt": "まず Google Drive を認証してください：",
-        "archive_drive_auth_button": "🔗 Google Drive を認証",
-        "archive_drive_not_configured": "❌ Google OAuth が未設定です。",
-        "my_title": "📚 <b>研究文献ライブラリ概要</b>\n\n",
-        "my_tier_label": "👤 会員等級：{tier}",
-        "my_drive_status_label": "☁️ Google Drive 状態：{status}",
-        "my_drive_connected": "🟢 接続済み",
-        "my_drive_disconnected": "⚪ 未接続（/drive で認証）",
-        "my_paper_count": "📑 保存論文数：合計 <b>{count}</b> 本",
-        "my_folders_label": "📁 カスタムフォルダ：{folders}",
-        "my_default_folders": "デフォルト分類",
-        "my_recent_papers": "<b>🕒 最近の論文（最新3本）：</b>\n{list}",
-        "my_recent_hint": "\n💡 <code>/chat [質問]</code> で論文横断Q&A、<code>/export</code> で一括エクスポートが可能！",
-        "my_empty_library": "まだ論文がありません。検索して【☁️ ドライブ保存】で追加！",
-        "my_export_button": "📄 文献エクスポート",
-        "my_drive_button": "☁️ Drive 認証",
-        "bind_title": "🔗 <b>Web研究総本部 アカウント連携</b>\n\n",
-        "bind_code": "6桁同期コード：<code>{code}</code>\n\n",
-        "bind_instructions": "💻 Web研究総本部を開き、<b>【Telegram連携】</b>をクリックしてこのコードを入力。\nすべてのマーク（既読/スキップ/保存/メモ）が双方向同期されます！",
-        "help_bind_button": "🔗 Web連携",
-        "help_pro_button": "👑 Pro機能を見る",
-        "unknown_command": "❌ 未知のコマンド：{cmd}\n/help で利用可能なコマンド一覧を確認できます。",
-        "paper_et_al": "他 {count} 名",
-        "paper_seen_badge": "👁 [閲覧済み]",
-        "paper_ai_summary": "🧠 <b>AI 解説：</b>\n{text}",
-        "mode_switched_confirm": "✅ {mode} に切り替えました",
-        "lang_switched_confirm": "✅ 言語を {lang} に設定しました",
-        "mark_seen_callback": "👁 既読に設定",
-        "mark_skip_callback": "❌ スキップ済み",
-        "pro_text": (
-            "📊 <b>PaperFilterBot プラン比較</b>\n\n"
-            "👤 現在のプラン：{tier}\n\n"
-            "🟢 <b>Free 無料版</b> — 月額 NT$0\n"
-            "• 検索：10 回/日\n"
-            "• 詳細解説：1 回/日\n"
-            "• Drive：5 本/月\n"
-            "• 広告：あり\n\n"
-            "🔵 <b>Basic</b> — 月額 NT$150\n"
-            "• 検索：30 回/日\n"
-            "• 詳細解説：5 回/日\n"
-            "• /chat 論文横断Q&A：10 回/月\n"
-            "• Drive：30 本/月\n"
-            "• 広告なし\n\n"
-            "🟣 <b>Standard</b> — 月額 NT$299\n"
-            "• 検索：100 回/日\n"
-            "• 詳細解説：15 回/日\n"
-            "• /review 文献レビュー + /gap 研究ギャップ\n"
-            "• Drive：100 本/月\n"
-            "• 月次 AI レポート\n\n"
-            "🟡 <b>Premium</b> — 月額 NT$499\n"
-            "• 検索：200 回/日\n"
-            "• 詳細解説：30 回/日\n"
-            "• 全機能大幅強化\n"
-            "• Drive：無制限\n"
-            "• 週次 AI レポート\n\n"
-            "🔴 <b>Ultra</b> — 月額 NT$999\n"
-            "• 検索：500 回/日\n"
-            "• 詳細解説：50 回/日\n"
-            "• 全機能無制限\n"
-            "• 日次 AI レポート\n\n"
-            "💡 Web研究総本部で今すぐアップグレード！"
-        ),
     }
 }
 
@@ -1028,11 +572,7 @@ def _build_folder_keyboard(user_id: int, paper_id: str, lang: str) -> types.Inli
             f"📁 {cat}",
             callback_data=f"archive|{paper_id[:40]}|{cat[:30]}"
         ))
-    # Extract user_id from the caller context - we'll use a simple approach
-    markup.add(types.InlineKeyboardButton(
-        MESSAGES.get(lang, MESSAGES["en"]).get("archive_skip_button", "⏭ Skip"),
-        callback_data=f"archive|{paper_id[:40]}|略過"
-    ))
+    markup.add(types.InlineKeyboardButton("⏭ 略過不歸檔", callback_data=f"archive|{paper_id[:40]}|略過"))
     return markup
 
 # ===================== 4. 指令系統 =====================
@@ -1044,15 +584,15 @@ def handle_start(message):
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton(_t(user_id, "btn_hot_transformer"), callback_data="search_kw|Transformer"),
-        types.InlineKeyboardButton(_t(user_id, "btn_hot_crispr"), callback_data="search_kw|CRISPR"),
+        types.InlineKeyboardButton("🔍 熱門：Transformer", callback_data="search_kw|Transformer"),
+        types.InlineKeyboardButton("🧬 熱門：CRISPR", callback_data="search_kw|CRISPR"),
     )
     markup.add(
-        types.InlineKeyboardButton(_t(user_id, "btn_bind_web"), callback_data="cmd_bind"),
-        types.InlineKeyboardButton(_t(user_id, "btn_view_pro"), callback_data="cmd_pro")
+        types.InlineKeyboardButton("🔗 綁定電腦網頁端", callback_data="cmd_bind"),
+        types.InlineKeyboardButton("👑 查看 Pro 特權", callback_data="cmd_pro")
     )
     markup.add(
-        types.InlineKeyboardButton(_t(user_id, "btn_full_help"), callback_data="cmd_help")
+        types.InlineKeyboardButton("📖 完整指令幫助", callback_data="cmd_help")
     )
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="HTML")
 
@@ -1063,8 +603,8 @@ def handle_help(message):
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton(_t(user_id, "help_bind_button"), callback_data="cmd_bind"),
-        types.InlineKeyboardButton(_t(user_id, "help_pro_button"), callback_data="cmd_pro")
+        types.InlineKeyboardButton("🔗 綁定電腦端", callback_data="cmd_bind"),
+        types.InlineKeyboardButton("👑 查看 Pro 特權", callback_data="cmd_pro")
     )
     bot.send_message(message.chat.id, help_text, reply_markup=markup, parse_mode="HTML")
 
@@ -1074,34 +614,33 @@ def handle_my_command(message):
     user_id = message.from_user.id
     papers = db.get_user_library(user_id)
     token = db.get_token(user_id)
-    drive_status = _t(user_id, "my_drive_connected") if token else _t(user_id, "my_drive_disconnected")
+    drive_status = "🟢 已連結" if token else "⚪ 未連結（可用 /drive 授權）"
     categories = db.get_user_categories(user_id)
-    cats_str = "、".join(categories) if categories else _t(user_id, "my_default_folders")
+    cats_str = "、".join(categories) if categories else "預設分類"
     tier_info = db.get_user_tier(user_id)
     tier = tier_info.get("tier", "free")
     tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
     text = (
-        _t(user_id, "my_title")
-        + _t(user_id, "my_tier_label", tier=tier_badge) + "\n"
-        + _t(user_id, "my_drive_status_label", status=drive_status) + "\n"
-        + _t(user_id, "my_paper_count", count=len(papers)) + "\n"
-        + _t(user_id, "my_folders_label", folders=cats_str) + "\n\n"
+        f"📚 <b>您的個人科研文獻庫總覽</b>\n\n"
+        f"👤 會員等級：{tier_badge}\n"
+        f"☁️ Google Drive 狀態：{drive_status}\n"
+        f"📑 收藏論文數量：共 <b>{len(papers)}</b> 篇\n"
+        f"📁 自訂資料夾：{cats_str}\n\n"
     )
 
     if papers:
-        recent_lines = ""
+        text += "<b>🕒 最近收藏文獻（最新 3 篇）：</b>\n"
         for i, p in enumerate(papers[:3], 1):
-            recent_lines += f"{i}. <b>{p.get('title', '')[:55]}</b> ({p.get('year', 'N/A')})\n"
-        text += _t(user_id, "my_recent_papers", list=recent_lines)
-        text += _t(user_id, "my_recent_hint")
+            text += f"{i}. <b>{p.get('title', '')[:55]}</b> ({p.get('year', 'N/A')})\n"
+        text += "\n💡 提示：使用 <code>/chat 您的研究問題</code> 可跨文獻向 AI 提問；使用 <code>/export</code> 可批次匯出引用格式。"
     else:
-        text += _t(user_id, "my_empty_library")
+        text += "您目前尚未收藏任何論文。\n搜尋論文後點擊卡片下方的【☁️ 歸檔到雲端】即可將論文加入文獻庫！"
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton(_t(user_id, "my_export_button"), callback_data="cmd_export"),
-        types.InlineKeyboardButton(_t(user_id, "my_drive_button"), callback_data="cmd_drive")
+        types.InlineKeyboardButton("📄 匯出文獻庫", callback_data="cmd_export"),
+        types.InlineKeyboardButton("☁️ Drive 授權", callback_data="cmd_drive")
     )
     bot.reply_to(message, text, reply_markup=markup, parse_mode="HTML")
 
@@ -1119,11 +658,26 @@ def handle_chat_command(message):
     # 切換模式
     if _chat_mode_users.get(user_id):
         del _chat_mode_users[user_id]
-        bot.reply_to(message, _t(user_id, "chat_exit"), parse_mode="HTML")
+        bot.reply_to(
+            message,
+            "✅ 已退出<b>跨文獻問答模式</b>。\n\n"
+            "輸入 /chat 可重新進入。",
+            parse_mode="HTML"
+        )
     else:
         papers = db.get_user_library(user_id)
         _chat_mode_users[user_id] = True
-        bot.reply_to(message, _t(user_id, "chat_enter", count=len(papers)), parse_mode="HTML")
+        bot.reply_to(
+            message,
+            "💬 <b>已進入跨文獻問答模式</b>\n\n"
+            f"📚 您的文獻庫：{len(papers)} 篇論文\n\n"
+            "現在可以直接輸入問題，例如：\n"
+            "• 這些論文在方法論上有何異同？\n"
+            "• 哪一篇最適合用在邊緣運算？\n"
+            "• 這些研究有什麼共同限制？\n\n"
+            "輸入 /chat 退出此模式。",
+            parse_mode="HTML"
+        )
 
 def _process_chat_query(message, query):
     """處理跨文獻問答"""
@@ -1133,7 +687,17 @@ def _process_chat_query(message, query):
     first_use_key = f"chat_first_{user_id}"
     if first_use_key not in _user_first_use:
         _user_first_use.add(first_use_key)
-        bot.reply_to(message, _t(user_id, "chat_first_use"), parse_mode="HTML")
+        bot.reply_to(
+            message,
+            "👋 <b>首次使用跨文獻問答</b>\n\n"
+            "此功能會從您文獻庫中找到相關論文，進行<b>跨篇交叉分析</b>。\n\n"
+            "💡 建議提問方向：\n"
+            "• 比較類：「這些論文在[方法/結果]上有何差異？」\n"
+            "• 推薦類：「哪一篇最適合[我的場景]？」\n"
+            "• 缺口類：「這些研究有哪些共同限制？」\n\n"
+            "⏳ 首次分析可能需要 10-20 秒，請稍候...",
+            parse_mode="HTML"
+        )
 
     allowed, err_msg = db.check_quota(user_id, "chat")
     if not allowed:
@@ -1142,10 +706,10 @@ def _process_chat_query(message, query):
 
     papers = db.get_user_library(user_id)
     if not papers:
-        bot.reply_to(message, _t(user_id, "chat_empty_library"))
+        bot.reply_to(message, "📂 您目前文獻庫中沒有論文。請先搜尋並歸檔幾篇論文後再來提問！")
         return
 
-    loading_msg = bot.reply_to(message, _t(user_id, "chat_loading", count=len(papers)), parse_mode="HTML")
+    loading_msg = bot.reply_to(message, f"🧠 <b>AI 正在跨 {len(papers)} 篇文獻進行深入關聯檢索與分析，請稍候...</b>", parse_mode="HTML")
     answer = search_engine.chat_with_user_library(user_id, query, papers)
     db.increment_usage(user_id, "chat")
 
@@ -1154,8 +718,8 @@ def _process_chat_query(message, query):
     except Exception:
         pass
 
-    header = _t(user_id, "chat_header", query=query)
-    disclaimer = _t(user_id, "chat_disclaimer")
+    header = f"💬 <b>跨論文解答報告</b>\n❓ <i>問題：{query}</i>\n\n"
+    disclaimer = "\n\n---\n📚 <i>以上分析僅基於您文獻庫中的論文，不代表全域學術觀點。如需更多功能，升級 Pro 方案可享無限次問答。</i>"
     full_response = header + answer + disclaimer
 
     if len(full_response) > 4000:
@@ -1168,7 +732,12 @@ def _process_chat_query(message, query):
 def handle_bind_command(message):
     user_id = message.from_user.id
     code = db.generate_sync_code(user_id)
-    text = _t(user_id, "bind_title") + _t(user_id, "bind_code", code=code) + _t(user_id, "bind_instructions")
+    text = (
+        f"🔗 <b>電腦科研大總部同步帳號綁定</b>\n\n"
+        f"您的專屬 6 位數同步碼為：<code>{code}</code>\n\n"
+        f"💻 請在電腦瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\n"
+        f"綁定後，您在 Telegram 的所有標記（看過/略過/歸檔/筆記）將與電腦端全功能儀表板雙向同步！"
+    )
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['pro'])
@@ -1178,7 +747,30 @@ def handle_pro_command(message):
     tier = tier_info.get("tier", "free")
     tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
-    text = _t(user_id, "pro_text", tier=tier_badge)
+    text = (
+        f"📊 <b>PaperFilterBot 方案比較</b>\n\n"
+        f"👤 {_t(user_id, 'upgrade_current_tier')}：<b>{tier_badge}</b>\n\n"
+        f"<b>Free (免費)</b> - NT$0/月\n"
+        f"  • 搜尋：10 次/日、深度導讀：1 次/日\n"
+        f"  • Google Drive：5 篇/月\n"
+        f"  • 廣告：有\n\n"
+        f"<b>Basic</b> - NT$150/月\n"
+        f"  • 搜尋：30 次/日、深度導讀：5 次/日\n"
+        f"  • 解鎖 /chat 跨文獻問答（10次/月）\n"
+        f"  • Google Drive：30 篇/月、無廣告\n\n"
+        f"<b>Standard</b> - NT$299/月\n"
+        f"  • 搜尋：100 次/日、深度導讀：15 次/日\n"
+        f"  • 解鎖 /review 文獻綜述、/gap 研究缺口\n"
+        f"  • Google Drive：100 篇/月、每月 AI 分析報告\n\n"
+        f"<b>Premium</b> - NT$499/月\n"
+        f"  • 搜尋：200 次/日、深度導讀：30 次/日\n"
+        f"  • 所有功能量大幅增加、Google Drive 無限\n"
+        f"  • 每週 AI 分析報告\n\n"
+        f"<b>Ultra</b> - NT$999/月\n"
+        f"  • 搜尋：500 次/日、深度導讀：50 次/日\n"
+        f"  • 所有功能無限、每日 AI 分析報告\n\n"
+        f"💡 可在電腦科研大總部一鍵升級或管理訂閱！"
+    )
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['reports'])
@@ -1186,12 +778,12 @@ def handle_reports_command(message):
     user_id = message.from_user.id
     reports = db.get_user_reports(user_id)
     if not reports:
-        bot.reply_to(message, _t(user_id, "reports_empty"))
+        bot.reply_to(message, "📝 您目前尚無生成的文獻綜述報告。可使用 <code>/review 主題</code> 立即生成！")
         return
-    text = _t(user_id, "reports_list_header", count=len(reports))
+    text = f"📑 <b>您生成的學術綜述報告清單（共 {len(reports)} 份）：</b>\n\n"
     for r in reports[:5]:
         text += f"• <b>{r.get('topic', '綜合綜述')}</b> ({str(r.get('created_at', ''))[:10]})\n"
-    text += _t(user_id, "reports_list_footer")
+    text += "\n可在電腦端科研大總部查看全文與匯出 Markdown/PDF！"
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['mode'])
@@ -1232,7 +824,7 @@ def handle_follow(message):
     user_id = message.from_user.id
     parts = message.text.strip().split(maxsplit=1)
     if len(parts) < 2:
-        bot.reply_to(message, _t(user_id, "follow_missing_args"))
+        bot.reply_to(message, "請輸入學者名稱，例如：<code>/follow Yann LeCun</code>")
         return
     author_name = parts[1].strip()
     db.add_followed_author(user_id, author_name)
@@ -1243,7 +835,7 @@ def handle_unfollow(message):
     user_id = message.from_user.id
     parts = message.text.strip().split(maxsplit=1)
     if len(parts) < 2:
-        bot.reply_to(message, _t(user_id, "unfollow_missing_args"))
+        bot.reply_to(message, "請輸入要取消追蹤的學者名稱。")
         return
     author_name = parts[1].strip()
     success = db.remove_followed_author(user_id, author_name)
@@ -1279,22 +871,22 @@ def handle_drive(message):
     user_id = message.from_user.id
     token = db.get_token(user_id)
     if token:
-        bot.reply_to(message, _t(user_id, "drive_connected"))
+        bot.reply_to(message, "✅ 您的 Google Drive 已成功連結！可以直接歸檔論文與同步 references.bib。")
     else:
         auth_url = drive_manager.get_auth_url(user_id)
         if auth_url:
             markup = types.InlineKeyboardMarkup()
-            markup.add(types.InlineKeyboardButton(_t(user_id, "drive_auth_button"), url=auth_url))
-            bot.reply_to(message, _t(user_id, "drive_auth_prompt"), reply_markup=markup)
+            markup.add(types.InlineKeyboardButton("🔗 授權 Google Drive", url=auth_url))
+            bot.reply_to(message, "請點擊下方按鈕授權 Google Drive 存取：", reply_markup=markup)
         else:
-            bot.reply_to(message, _t(user_id, "drive_oauth_not_configured"))
+            bot.reply_to(message, "❌ Google OAuth 設定未完成，請確認 .env 設定。")
 
 @bot.message_handler(commands=['search'])
 def handle_search_command(message):
     user_id = message.from_user.id
     parts = message.text.strip().split(maxsplit=1)
     if len(parts) < 2:
-        bot.reply_to(message, _t(user_id, "search_missing_args"))
+        bot.reply_to(message, "請輸入關鍵字，例如：<code>/search CRISPR</code>")
         return
     query = parts[1].strip()
     _do_search(message, user_id, query)
@@ -1308,9 +900,9 @@ def handle_review(message):
         return
     papers = fetch_user_papers(user_id)
     if not papers:
-        bot.reply_to(message, _t(user_id, "review_empty"))
+        bot.reply_to(message, "您尚未收藏任何論文。請先搜尋並歸檔論文後再使用。")
         return
-    bot.reply_to(message, _t(user_id, "review_loading", count=len(papers)))
+    bot.reply_to(message, f"🧠 正在為您的 {len(papers)} 篇論文生成高階學術文獻綜述，請稍候...")
     review = search_engine.generate_literature_review(user_id, papers)
     db.increment_usage(user_id, "litreview")
     if len(review) > 4000:
@@ -1328,9 +920,9 @@ def handle_gap(message):
         return
     papers = fetch_user_papers(user_id)
     if not papers:
-        bot.reply_to(message, _t(user_id, "gap_empty"))
+        bot.reply_to(message, "您尚未收藏任何論文。請先搜尋並歸檔論文後再使用。")
         return
-    bot.reply_to(message, _t(user_id, "gap_loading", count=len(papers)))
+    bot.reply_to(message, f"🔍 正在深入分析 {len(papers)} 篇論文的研究缺口與盲點，請稍候...")
     gaps = search_engine.analyze_research_gaps(user_id, papers)
     db.increment_usage(user_id, "gap_analysis")
     if len(gaps) > 4000:
@@ -1344,14 +936,18 @@ def handle_trend(message):
     user_id = message.from_user.id
     parts = message.text.strip().split(maxsplit=1)
     topic = parts[1].strip() if len(parts) > 1 else "machine learning"
-    bot.reply_to(message, _t(user_id, "trend_loading", topic=topic))
+    bot.reply_to(message, f"📈 正在分析「{topic}」的國際學術趨勢，請稍候...")
     trends = search_engine.analyze_research_trends(user_id, topic)
     year_dist = trends.get("year_distribution", {})
-    year_str = " ".join(_t(user_id, "trend_year_format", year=y, count=c) for y, c in sorted(year_dist.items(), reverse=True)[:5])
+    year_str = " ".join(f"{y}年:{c}篇" for y, c in sorted(year_dist.items(), reverse=True)[:5])
     ai_analysis = trends.get("ai_analysis", "")
-    result = _t(user_id, "trend_result_header", topic=topic, count=trends.get('total_papers_found', 0), year_str=year_str)
+    result = (
+        f"📊 <b>「{topic}」研究趨勢分析</b>\n\n"
+        f"📚 找到相關論文：{trends.get('total_papers_found', 0)} 篇\n"
+        f"📅 發表年份分佈：{year_str}\n\n"
+    )
     if ai_analysis:
-        result += _t(user_id, "trend_ai_analysis", analysis=ai_analysis)
+        result += f"🤖 <b>AI 趨勢解析：</b>\n{ai_analysis}"
     bot.send_message(message.chat.id, result, parse_mode="HTML")
 
 @bot.message_handler(commands=['export'])
@@ -1363,14 +959,14 @@ def handle_export(message):
         return
     papers = fetch_user_papers(user_id)
     if not papers:
-        bot.reply_to(message, _t(user_id, "export_empty"))
+        bot.reply_to(message, "您尚未收藏任何論文。")
         return
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton(_t(user_id, "export_all_button", count=len(papers)), callback_data="export_all"),
-        types.InlineKeyboardButton(_t(user_id, "export_select_button"), callback_data="export_select"),
+        types.InlineKeyboardButton(f"📦 全部匯出 ({len(papers)} 篇)", callback_data="export_all"),
+        types.InlineKeyboardButton("☑️ 勾選匯出", callback_data="export_select"),
     )
-    bot.reply_to(message, _t(user_id, "export_prompt", count=len(papers)), reply_markup=markup)
+    bot.reply_to(message, f"📚 您共有 {len(papers)} 篇論文，請選擇匯出方式：", reply_markup=markup)
 
 # 匯出選擇模式
 @bot.callback_query_handler(func=lambda call: call.data.startswith("export_"))
@@ -1386,7 +982,7 @@ def handle_export_callback(call):
             types.InlineKeyboardButton("📋 RIS", callback_data="export_fmt|RIS|all"),
             types.InlineKeyboardButton("📊 CSV", callback_data="export_fmt|CSV|all"),
         )
-        bot.edit_message_text(_t(user_id, "export_format_prompt"), chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
+        bot.edit_message_text("請選擇匯出格式：", chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
         return
 
     if data == "export_select":
@@ -1398,7 +994,7 @@ def handle_export_callback(call):
         handle_export_callback._selections[user_id] = set()
 
         # 顯示論文清單（最多20篇）
-        text = _t(user_id, "export_select_prompt", count=0)
+        text = "☑️ <b>請點選要匯出的論文</b>（已選：0 篇）\n\n"
         buttons = []
         for i, p in enumerate(papers[:20], 1):
             title_short = p.get('title', '')[:30]
@@ -1417,8 +1013,8 @@ def handle_export_callback(call):
             markup.add(*row)
 
         # 加入確認按鈕
-        markup.add(types.InlineKeyboardButton(_t(user_id, "export_confirm_button"), callback_data="export_confirm"))
-        markup.add(types.InlineKeyboardButton(_t(user_id, "export_cancel_button"), callback_data="export_cancel"))
+        markup.add(types.InlineKeyboardButton("✅ 確認匯出", callback_data="export_confirm"))
+        markup.add(types.InlineKeyboardButton("❌ 取消", callback_data="export_cancel"))
 
         bot.edit_message_text(text, chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup, parse_mode="HTML")
         return
@@ -1431,13 +1027,13 @@ def handle_export_callback(call):
         else:
             selections.add(idx)
         handle_export_callback._selections[user_id] = selections
-        bot.answer_callback_query(call.id, _t(user_id, "export_selected_count", count=len(selections)))
+        bot.answer_callback_query(call.id, f"已選 {len(selections)} 篇")
         return
 
     if data == "export_confirm":
         selections = handle_export_callback._selections.get(user_id, set())
         if not selections:
-            bot.answer_callback_query(call.id, _t(user_id, "export_no_selection"), show_alert=True)
+            bot.answer_callback_query(call.id, "請先選擇至少一篇論文", show_alert=True)
             return
         bot.answer_callback_query(call.id)
         # 進入格式選擇
@@ -1447,12 +1043,12 @@ def handle_export_callback(call):
             types.InlineKeyboardButton("📋 RIS", callback_data=f"export_fmt|RIS|{','.join(map(str, selections))}"),
             types.InlineKeyboardButton("📊 CSV", callback_data=f"export_fmt|CSV|{','.join(map(str, selections))}"),
         )
-        bot.edit_message_text(_t(user_id, "export_selected_format", count=len(selections)), chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
+        bot.edit_message_text(f"已選 {len(selections)} 篇論文，請選擇匯出格式：", chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=markup)
         return
 
     if data == "export_cancel":
-        bot.answer_callback_query(call.id, _t(user_id, "export_cancel_callback"))
-        bot.edit_message_text(_t(user_id, "export_cancelled"), chat_id=call.message.chat.id, message_id=call.message.message_id)
+        bot.answer_callback_query(call.id, "已取消")
+        bot.edit_message_text("❌ 已取消匯出。", chat_id=call.message.chat.id, message_id=call.message.message_id)
         return
 
     # 匯出格式
@@ -1469,10 +1065,10 @@ def handle_export_callback(call):
             export_papers = [papers[i] for i in indices if i < len(papers)]
 
         if not export_papers:
-            bot.answer_callback_query(call.id, _t(user_id, "export_no_papers"), show_alert=True)
+            bot.answer_callback_query(call.id, "沒有論文可匯出", show_alert=True)
             return
 
-        bot.answer_callback_query(call.id, _t(user_id, "export_generating", fmt=fmt))
+        bot.answer_callback_query(call.id, f"📄 正在生成 {fmt} 格式...")
         export_content = search_engine.export_papers(export_papers, fmt)
         db.increment_usage(user_id, "export")
 
@@ -1492,7 +1088,7 @@ def handle_export_callback(call):
                 bot.send_document(
                     call.message.chat.id,
                     f,
-                    caption=_t(user_id, "export_result_caption", fmt=fmt, count=len(export_papers)),
+                    caption=f"📄 <b>{fmt} 匯出結果</b>\n📚 共 {len(export_papers)} 篇論文\n\n可直接匯入 Zotero / EndNote / Mendeley",
                     parse_mode="HTML"
                 )
         finally:
@@ -1501,13 +1097,13 @@ def handle_export_callback(call):
 def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint, lang):
     authors_str = ", ".join(authors[:3]) if authors else "Unknown"
     if len(authors) > 3:
-        authors_str += " " + _t(user_id, "paper_et_al", count=len(authors))
-    seen_badge = _t(user_id, "paper_seen_badge") if already_seen else ""
+        authors_str += f" 等 {len(authors)} 位"
+    seen_badge = "👁 [已看過]" if already_seen else ""
     oa_badge = "🟢 OA" if is_open_access else ""
     text = (
         f"📄 <b>{title}</b> {seen_badge}\n\n"
         f"👥 {authors_str} | 📅 {year} | 🗂 {source} {oa_badge}\n\n"
-        f"{_t(user_id, 'paper_ai_summary', text=ai_summary)}\n\n"
+        f"🧠 <b>AI 導讀：</b>\n{ai_summary}\n\n"
         f"🔗 <a href='{link}'>{_t(user_id, 'read_paper')}</a>"
     )
     markup = types.InlineKeyboardMarkup(row_width=2)
@@ -1707,7 +1303,7 @@ def handle_callback_query(call):
         lang_code = data.split("|", 1)[1]
         db.set_user_lang(user_id, lang_code)
         lang_names = {"en": "English", "zh_hant": "繁體中文", "zh_hans": "简体中文", "ja": "日本語"}
-        bot.answer_callback_query(call.id, _t(user_id, "lang_switched_confirm", lang=lang_names.get(lang_code, lang_code)))
+        bot.answer_callback_query(call.id, f"✅ 語言已切換為 {lang_names.get(lang_code, lang_code)}")
         bot.edit_message_text(_t(user_id, "lang_switched"), chat_id=call.message.chat.id, message_id=call.message.message_id)
         return
 
@@ -1717,7 +1313,7 @@ def handle_callback_query(call):
         db.set_filter_mode(user_id, mode)
         mode_names = {"top_tier": _t(user_id, "mode_top"), "smart": _t(user_id, "mode_smart"), "free_only": _t(user_id, "mode_free")}
         mode_display = mode_names.get(mode, mode)
-        bot.answer_callback_query(call.id, _t(user_id, "mode_switched_confirm", mode=mode_display))
+        bot.answer_callback_query(call.id, f"✅ 已切換為 {mode_display}")
         bot.edit_message_text(_t(user_id, "mode_switched", mode=mode_display), chat_id=call.message.chat.id, message_id=call.message.message_id)
         return
 
@@ -1738,7 +1334,7 @@ def handle_callback_query(call):
             papers = db.get_user_library(user_id)
             paper = next((p for p in papers if p.get("fingerprint") == fingerprint), None)
             if not paper:
-                paper = {"title": _t(user_id, "read_paper"), "summary": "", "authors": [], "year": "2024", "link": "", "source": "Academic"}
+                paper = {"title": "學術論文", "summary": "", "authors": [], "year": "2024", "link": "", "source": "Academic"}
             deep_report = search_engine.generate_deep_analysis(
                 title=paper.get("title", ""),
                 text=paper.get("summary", ""),
@@ -1775,7 +1371,7 @@ def handle_callback_query(call):
             title_display = paper.get("title", paper_id)
         else:
             title_display = paper_id
-        bot.answer_callback_query(call.id, _t(user_id, "mark_seen_callback"))
+        bot.answer_callback_query(call.id, "👁 已標記為已讀")
         try:
             bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
         except Exception:
@@ -1795,7 +1391,7 @@ def handle_callback_query(call):
             title_display = paper.get("title", paper_id)
         else:
             title_display = paper_id
-        bot.answer_callback_query(call.id, _t(user_id, "mark_skip_callback"))
+        bot.answer_callback_query(call.id, "❌ 已略過")
         try:
             bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
         except Exception:
@@ -1809,19 +1405,19 @@ def handle_callback_query(call):
         lang = _get_lang(user_id, call.from_user.language_code)
         markup = _build_folder_keyboard(user_id, paper_id, lang)
         bot.answer_callback_query(call.id)
-        bot.send_message(call.message.chat.id, _t(user_id, "archive_choose_folder"), reply_markup=markup)
+        bot.send_message(call.message.chat.id, "📁 請選擇要歸檔的資料夾：", reply_markup=markup)
         return
 
     # 執行歸檔
     if data.startswith("archive|"):
         parts = data.split("|")
         if len(parts) < 3:
-            bot.answer_callback_query(call.id, _t(user_id, "archive_invalid_button"), show_alert=True)
+            bot.answer_callback_query(call.id, "❌ 按鈕無效", show_alert=True)
             return
         paper_id = parts[1]
         folder_name = parts[2]
         if folder_name == "略過":
-            bot.answer_callback_query(call.id, _t(user_id, "archive_skip_archive"))
+            bot.answer_callback_query(call.id, "⏭ 已略過歸檔")
             try:
                 bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
             except Exception:
@@ -1831,9 +1427,9 @@ def handle_callback_query(call):
         papers = db.get_user_library(user_id)
         paper = next((p for p in papers if str(p.get("id", ""))[:40] == paper_id or str(p.get("fingerprint", ""))[:40] == paper_id), None)
         if not paper:
-            paper = {"id": paper_id, "title": _t(user_id, "read_paper"), "summary": "", "link": "", "authors": [], "year": "2024", "category": folder_name}
+            paper = {"id": paper_id, "title": "學術論文", "summary": "", "link": "", "authors": [], "year": "2024", "category": folder_name}
             db.add_paper_to_library(user_id, paper)
-        bot.answer_callback_query(call.id, _t(user_id, "archive_archiving"))
+        bot.answer_callback_query(call.id, "☁️ 歸檔中...")
         bibtex_str = paper.get("bibtex", "") or search_engine.generate_bibtex_str(
             title=paper.get("title", ""),
             authors=paper.get("authors", []),
@@ -1865,10 +1461,10 @@ def handle_callback_query(call):
                 auth_url = drive_manager.get_auth_url(user_id)
                 if auth_url:
                     markup = types.InlineKeyboardMarkup()
-                    markup.add(types.InlineKeyboardButton(_t(user_id, "archive_drive_auth_button"), url=auth_url))
-                    bot.send_message(call.message.chat.id, _t(user_id, "archive_drive_auth_prompt"), reply_markup=markup)
+                    markup.add(types.InlineKeyboardButton("🔗 授權 Google Drive", url=auth_url))
+                    bot.send_message(call.message.chat.id, "請先授權 Google Drive：", reply_markup=markup)
                 else:
-                    bot.send_message(call.message.chat.id, _t(user_id, "archive_drive_not_configured"))
+                    bot.send_message(call.message.chat.id, "❌ Google OAuth 未設定。")
             else:
                 bot.send_message(call.message.chat.id, _t(user_id, "archive_failed", detail=result))
         return
@@ -1890,7 +1486,7 @@ def handle_callback_query(call):
 def handle_unknown_command(message):
     user_id = message.from_user.id
     cmd = message.text.split()[0].split('@')[0]
-    bot.reply_to(message, _t(user_id, "unknown_command", cmd=cmd))
+    bot.reply_to(message, f"❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。")
 
 # ===================== 8. 科研大總部 Web REST API =====================
 @app.route("/api/view_reports", methods=["GET"])
@@ -1950,7 +1546,7 @@ def oauth2callback():
     success = drive_manager.exchange_code(user_id, code)
     if success:
         try:
-            bot.send_message(user_id, _t(user_id, "drive_auth_success"))
+            bot.send_message(user_id, "✅ Google Drive 授權成功！現在可以隨時將論文歸檔至雲端。")
         except Exception:
             pass
         return "<h3>✅ Google Drive 授權成功！請回到 Telegram 繼續使用。</h3>"
