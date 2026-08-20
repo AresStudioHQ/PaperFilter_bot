@@ -50,7 +50,7 @@ MESSAGES = {
             "🔍 <b>論文檢索</b>：直接在聊天室發送關鍵字（例如：LLM Agent）\n"
             "💬 <b>/chat</b> - 切換跨文獻問答模式（進入後直接輸入問題）\n"
             "📚 <b>/my</b> - 查看我的文獻庫、分類資料夾與 Drive 狀態\n"
-            "🔗 <b>/bind</b> - 取得 6 位數同步代碼，綁定電腦科研大總部\n"
+            "🔗 <b>/bind</b> - 取得 6 位數同步代碼，綁定網頁科研大總部\n"
             "💎 <b>/pro</b> - 查看方案比較與升級資訊\n"
             "📂 <b>/following</b> - 管理追蹤學者與關鍵字\n"
             "➕ <b>/follow [學者]</b> - 追蹤頂級學者最新著作\n"
@@ -63,7 +63,7 @@ MESSAGES = {
             "🌐 <b>/lang</b> - 切換多國語言\n"
             "📊 <b>/reports</b> - 產生個人文獻綜述歷史報告\n"
             "☁️ <b>/drive</b> - 連結或檢查 Google Drive 雲端同步狀態\n"
-            "💻 <b>/web</b> - 取得電腦端科研大總部網址\n\n"
+            "💻 <b>/web</b> - 取得網頁端科研大總部網址\n\n"
             "💡 提示：直接輸入關鍵字即可搜尋論文！"
         ),
         "btn_search": "🔍 檢索論文",
@@ -79,7 +79,7 @@ MESSAGES = {
         "btn_doi": "🔗 官方 DOI 頁面",
         "btn_hot_transformer": "🔍 熱門：Transformer",
         "btn_hot_crispr": "🧬 熱門：CRISPR",
-        "btn_bind_web": "🔗 綁定電腦網頁端",
+        "btn_bind_web": "🔗 綁定網頁端",
         "btn_view_pro": "👑 查看 Pro 特權",
         "btn_full_help": "📖 完整指令幫助",
         "read_paper": "查看原始文獻",
@@ -160,7 +160,7 @@ MESSAGES = {
         "chat_disclaimer": "\n\n---\n📚 <i>以上分析僅基於您文獻庫中的論文，不代表全域學術觀點。如需更多功能，升級 Pro 方案可享無限次問答。</i>",
         "reports_empty": "📝 您目前尚無生成的文獻綜述報告。可使用 <code>/review 主題</code> 立即生成！",
         "reports_list_header": "📑 <b>您生成的學術綜述報告清單（共 {count} 份）：</b>\n\n",
-        "reports_list_footer": "\n可在電腦端科研大總部查看全文與匯出 Markdown/PDF！",
+        "reports_list_footer": "\n可在網頁端科研大總部查看全文與匯出 Markdown/PDF！",
         "follow_missing_args": "請輸入學者名稱，例如：<code>/follow Yann LeCun</code>",
         "unfollow_missing_args": "請輸入要取消追蹤的學者名稱。",
         "drive_connected": "✅ 您的 Google Drive 已成功連結！可以直接歸檔論文與同步 references.bib。",
@@ -214,10 +214,10 @@ MESSAGES = {
         "my_empty_library": "您目前尚未收藏任何論文。\n搜尋論文後點擊卡片下方的【☁️ 歸檔到雲端】即可將論文加入文獻庫！",
         "my_export_button": "📄 匯出文獻庫",
         "my_drive_button": "☁️ Drive 授權",
-        "bind_title": "🔗 <b>電腦科研大總部同步帳號綁定</b>\n\n",
+        "bind_title": "🔗 <b>網頁科研大總部同步帳號綁定</b>\n\n",
         "bind_code": "您的專屬 6 位數同步碼為：<code>{code}</code>\n\n",
-        "bind_instructions": "💻 請在電腦瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\n綁定後，您在 Telegram 的所有標記（看過/略過/歸檔/筆記）將與電腦端全功能儀表板雙向同步！",
-        "help_bind_button": "🔗 綁定電腦端",
+        "bind_instructions": "💻 請在瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\n綁定後，您在 Telegram 的所有標記（看過/略過/歸檔/筆記）將與網頁端全功能儀表板雙向同步！",
+        "help_bind_button": "🔗 綁定網頁端",
         "help_pro_button": "👑 查看 Pro 特權",
         "unknown_command": "❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。",
         "paper_et_al": "等 {count} 位",
@@ -258,7 +258,7 @@ MESSAGES = {
             "• 深度導讀：50 次/日\n"
             "• 所有功能無限\n"
             "• 每日 AI 分析報告\n\n"
-            "💡 可在電腦科研大總部一鍵升級！"
+            "💡 可在科研大總部一鍵升級！"
         ),
     },
     "zh_hans": {
@@ -276,7 +276,7 @@ MESSAGES = {
             "🔍 <b>论文检索</b>：直接在聊天室发送关键词（例如：LLM Agent）\n"
             "💬 <b>/chat</b> - 切换跨文献问答模式（进入后直接输入问题）\n"
             "📚 <b>/my</b> - 查看我的文献库、分类文件夹与 Drive 状态\n"
-            "🔗 <b>/bind</b> - 获取 6 位数同步代码，绑定电脑科研大总部\n"
+            "🔗 <b>/bind</b> - 获取 6 位数同步代码，绑定网页科研大总部\n"
             "💎 <b>/pro</b> - 查看方案比较与升级信息\n"
             "📂 <b>/following</b> - 管理追踪学者与关键词\n"
             "➕ <b>/follow [学者]</b> - 追踪顶级学者最新著作\n"
@@ -289,7 +289,7 @@ MESSAGES = {
             "🌐 <b>/lang</b> - 切换多国语言\n"
             "📊 <b>/reports</b> - 生成个人文献综述历史报告\n"
             "☁️ <b>/drive</b> - 链接或检查 Google Drive 云端同步状态\n"
-            "💻 <b>/web</b> - 获取电脑端科研大总部网址\n\n"
+            "💻 <b>/web</b> - 获取网页端科研大总部网址\n\n"
             "💡 提示：直接输入关键词即可搜寻论文！"
         ),
         "btn_search": "🔍 检索论文",
@@ -305,7 +305,7 @@ MESSAGES = {
         "btn_doi": "🔗 官方 DOI 页面",
         "btn_hot_transformer": "🔍 热门：Transformer",
         "btn_hot_crispr": "🧬 热门：CRISPR",
-        "btn_bind_web": "🔗 绑定电脑网页端",
+        "btn_bind_web": "🔗 绑定网页端",
         "btn_view_pro": "👑 查看 Pro 特权",
         "btn_full_help": "📖 完整指令帮助",
         "read_paper": "查看原始文献",
@@ -386,7 +386,7 @@ MESSAGES = {
         "chat_disclaimer": "\n\n---\n📚 <i>以上分析仅基于您文献库中的论文，不代表全域学术观点。如需更多功能，升级 Pro 方案可享无限次问答。</i>",
         "reports_empty": "📝 您目前尚无生成的文献综述报告。可使用 <code>/review 主题</code> 立即生成！",
         "reports_list_header": "📑 <b>您生成的学术综述报告清单（共 {count} 份）：</b>\n\n",
-        "reports_list_footer": "\n可在电脑端科研大总部查看全文与导出 Markdown/PDF！",
+        "reports_list_footer": "\n可在网页端科研大总部查看全文与导出 Markdown/PDF！",
         "follow_missing_args": "请输入学者名称，例如：<code>/follow Yann LeCun</code>",
         "unfollow_missing_args": "请输入要取消追踪的学者名称。",
         "drive_connected": "✅ 您的 Google Drive 已成功链接！可以直接归档论文与同步 references.bib。",
@@ -440,10 +440,10 @@ MESSAGES = {
         "my_empty_library": "您目前尚未收藏任何论文。\n搜索论文后点击卡片下方的【☁️ 归档到云端】即可将论文加入文献库！",
         "my_export_button": "📄 导出文献库",
         "my_drive_button": "☁️ Drive 授权",
-        "bind_title": "🔗 <b>电脑科研大总部同步帐号绑定</b>\n\n",
+        "bind_title": "🔗 <b>网页科研大总部同步帐号绑定</b>\n\n",
         "bind_code": "您的专属 6 位数同步码为：<code>{code}</code>\n\n",
-        "bind_instructions": "💻 请在电脑浏览器打开 PaperFilterBot 科研大总部，点击右上角<b>【绑定 Telegram】</b>输入此代码。\n绑定后，您在 Telegram 的所有标记（看过/跳过/归档/笔记）将与电脑端全功能仪表板双向同步！",
-        "help_bind_button": "🔗 绑定电脑端",
+        "bind_instructions": "💻 请在浏览器打开 PaperFilterBot 科研大总部，点击右上角<b>【绑定 Telegram】</b>输入此代码。\n绑定后，您在 Telegram 的所有标记（看过/跳过/归档/笔记）将与网页端全功能仪表板双向同步！",
+        "help_bind_button": "🔗 绑定网页端",
         "help_pro_button": "👑 查看 Pro 特权",
         "unknown_command": "❌ 没有此指令：{cmd}\n请输入 /help 查看所有可用指令。",
         "paper_et_al": "等 {count} 位",
@@ -484,7 +484,7 @@ MESSAGES = {
             "• 深度导读：50 次/日\n"
             "• 所有功能无限\n"
             "• 每日 AI 分析报告\n\n"
-            "💡 可在电脑科研大总部一键升级！"
+            "💡 可在科研大总部一键升级！"
         ),
     },
     "en": {
