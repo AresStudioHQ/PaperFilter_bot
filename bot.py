@@ -1057,8 +1057,8 @@ def handle_start(message):
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="HTML")
 
 @bot.message_handler(commands=['help', 'h', 'guide'])
-def handle_help(message):
-    user_id = message.from_user.id
+def handle_help(message, override_user_id=None):
+    user_id = override_user_id or message.from_user.id
     help_text = _t(user_id, "help")
 
     markup = types.InlineKeyboardMarkup(row_width=2)
@@ -1165,15 +1165,15 @@ def _process_chat_query(message, query):
         bot.send_message(message.chat.id, full_response, parse_mode="HTML")
 
 @bot.message_handler(commands=['bind', 'web'])
-def handle_bind_command(message):
-    user_id = message.from_user.id
+def handle_bind_command(message, override_user_id=None):
+    user_id = override_user_id or message.from_user.id
     code = db.generate_sync_code(user_id)
     text = _t(user_id, "bind_title") + _t(user_id, "bind_code", code=code) + _t(user_id, "bind_instructions")
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['pro'])
-def handle_pro_command(message):
-    user_id = message.from_user.id
+def handle_pro_command(message, override_user_id=None):
+    user_id = override_user_id or message.from_user.id
     tier_info = db.get_user_tier(user_id)
     tier = tier_info.get("tier", "free")
     tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra")}
@@ -1213,8 +1213,8 @@ def handle_mode(message):
     bot.reply_to(message, _t(user_id, "mode_title", current=current_display), reply_markup=markup)
 
 @bot.message_handler(commands=['lang', 'language'])
-def handle_lang(message):
-    user_id = message.from_user.id
+def handle_lang(message, override_user_id=None):
+    user_id = override_user_id or message.from_user.id
     lang = _get_lang(user_id, message.from_user.language_code)
     lang_names = {"en": "English", "zh_hant": "繁體中文", "zh_hans": "简体中文", "ja": "日本語"}
     current_display = lang_names.get(lang, lang)
@@ -1275,8 +1275,8 @@ def handle_folders_command(message):
         bot.reply_to(message, _t(user_id, "no_custom_folders"))
 
 @bot.message_handler(commands=['drive'])
-def handle_drive(message):
-    user_id = message.from_user.id
+def handle_drive(message, override_user_id=None):
+    user_id = override_user_id or message.from_user.id
     token = db.get_token(user_id)
     if token:
         bot.reply_to(message, _t(user_id, "drive_connected"))
@@ -1355,8 +1355,8 @@ def handle_trend(message):
     bot.send_message(message.chat.id, result, parse_mode="HTML")
 
 @bot.message_handler(commands=['export'])
-def handle_export(message):
-    user_id = message.from_user.id
+def handle_export(message, override_user_id=None):
+    user_id = override_user_id or message.from_user.id
     allowed, err_msg = db.check_quota(user_id, "export")
     if not allowed:
         bot.reply_to(message, f"⚠️ {err_msg}")
@@ -1674,27 +1674,27 @@ def handle_callback_query(call):
     # 快捷導航按鈕
     if data == "cmd_help":
         bot.answer_callback_query(call.id)
-        handle_help(call.message)
+        handle_help(call.message, override_user_id=user_id)
         return
     if data == "cmd_pro":
         bot.answer_callback_query(call.id)
-        handle_pro_command(call.message)
+        handle_pro_command(call.message, override_user_id=user_id)
         return
     if data in ("cmd_bind", "cmd_web"):
         bot.answer_callback_query(call.id)
-        handle_bind_command(call.message)
+        handle_bind_command(call.message, override_user_id=user_id)
         return
     if data == "cmd_lang":
         bot.answer_callback_query(call.id)
-        handle_lang(call.message)
+        handle_lang(call.message, override_user_id=user_id)
         return
     if data == "cmd_drive":
         bot.answer_callback_query(call.id)
-        handle_drive(call.message)
+        handle_drive(call.message, override_user_id=user_id)
         return
     if data == "cmd_export":
         bot.answer_callback_query(call.id)
-        handle_export(call.message)
+        handle_export(call.message, override_user_id=user_id)
         return
     if data.startswith("search_kw|"):
         kw = data.split("|", 1)[1]
