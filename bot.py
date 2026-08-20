@@ -73,7 +73,7 @@ MESSAGES = {
         "btn_lang": "🌐 切換語言",
         "btn_deep": "💡 深度導讀",
         "btn_seen": "👀 看過了",
-        "btn_skip": "⏭ 略過",
+        "btn_skip": "👎 沒興趣",
         "btn_archive": "☁️ 歸檔到雲端",
         "btn_oa": "🟢 免費全文 (OA)",
         "btn_doi": "🔗 官方 DOI 頁面",
@@ -194,7 +194,7 @@ MESSAGES = {
         "export_result_caption": "📄 <b>{fmt} 匯出結果</b>\n📚 共 {count} 篇論文\n\n可直接匯入 Zotero / EndNote / Mendeley",
         "export_selected_format": "已選 {count} 篇論文，請選擇匯出格式：",
         "archive_choose_folder": "📁 請選擇要歸檔的資料夾：",
-        "archive_skip_button": "⏭ 略過不歸檔",
+        "archive_skip_button": "🔙 返回",
         "archive_invalid_button": "❌ 按鈕無效",
         "archive_skip_archive": "⏭ 已略過歸檔",
         "archive_archiving": "☁️ 歸檔中...",
@@ -230,30 +230,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot 方案比較</b>\n\n"
             "👤 您目前方案：{tier}\n\n"
-            "🟢 <b>Free 免費版</b> — NT$0/月\n"
+            "🆓 <b>Free 免費版</b> — NT$0/月\n"
             "• 搜尋：10 次/日\n"
             "• 深度導讀：1 次/日\n"
             "• Drive：5 篇/月\n"
             "• 廣告：有\n\n"
-            "🔵 <b>Basic</b> — NT$150/月\n"
+            "🔧 <b>Basic</b> — NT$150/月\n"
             "• 搜尋：30 次/日\n"
             "• 深度導讀：5 次/日\n"
             "• /chat 跨文獻問答：10 次/月\n"
             "• Drive：30 篇/月\n"
             "• 無廣告\n\n"
-            "🟣 <b>Standard</b> — NT$299/月\n"
+            "⭐ <b>Standard</b> — NT$299/月\n"
             "• 搜尋：100 次/日\n"
             "• 深度導讀：15 次/日\n"
             "• /review 文獻綜述 + /gap 研究缺口\n"
             "• Drive：100 篇/月\n"
             "• 每月 AI 分析報告\n\n"
-            "🟡 <b>Premium</b> — NT$499/月\n"
+            "💎 <b>Premium</b> — NT$499/月\n"
             "• 搜尋：200 次/日\n"
             "• 深度導讀：30 次/日\n"
             "• 所有功能大幅增加\n"
             "• Drive：無限\n"
             "• 每週 AI 分析報告\n\n"
-            "🔴 <b>Ultra</b> — NT$999/月\n"
+            "👑 <b>Ultra</b> — NT$999/月\n"
             "• 搜尋：500 次/日\n"
             "• 深度導讀：50 次/日\n"
             "• 所有功能無限\n"
@@ -299,7 +299,7 @@ MESSAGES = {
         "btn_lang": "🌐 切换语言",
         "btn_deep": "💡 深度导读",
         "btn_seen": "👀 看过了",
-        "btn_skip": "⏭ 略过",
+        "btn_skip": "👎 没兴趣",
         "btn_archive": "☁️ 归档到云端",
         "btn_oa": "🟢 免费全文 (OA)",
         "btn_doi": "🔗 官方 DOI 页面",
@@ -420,7 +420,7 @@ MESSAGES = {
         "export_result_caption": "📄 <b>{fmt} 导出结果</b>\n📚 共 {count} 篇论文\n\n可直接导入 Zotero / EndNote / Mendeley",
         "export_selected_format": "已选 {count} 篇论文，请选择导出格式：",
         "archive_choose_folder": "📁 请选择要归档的文件夹：",
-        "archive_skip_button": "⏭ 跳过不归档",
+        "archive_skip_button": "🔙 返回",
         "archive_invalid_button": "❌ 按钮无效",
         "archive_skip_archive": "⏭ 已跳过归档",
         "archive_archiving": "☁️ 归档中...",
@@ -456,30 +456,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot 方案比较</b>\n\n"
             "👤 您目前方案：{tier}\n\n"
-            "🟢 <b>Free 免费版</b> — NT$0/月\n"
+            "🆓 <b>Free 免费版</b> — NT$0/月\n"
             "• 搜索：10 次/日\n"
             "• 深度导读：1 次/日\n"
             "• Drive：5 篇/月\n"
             "• 广告：有\n\n"
-            "🔵 <b>Basic</b> — NT$150/月\n"
+            "🔧 <b>Basic</b> — NT$150/月\n"
             "• 搜索：30 次/日\n"
             "• 深度导读：5 次/日\n"
             "• /chat 跨文献问答：10 次/月\n"
             "• Drive：30 篇/月\n"
             "• 无广告\n\n"
-            "🟣 <b>Standard</b> — NT$299/月\n"
+            "⭐ <b>Standard</b> — NT$299/月\n"
             "• 搜索：100 次/日\n"
             "• 深度导读：15 次/日\n"
             "• /review 文献综述 + /gap 研究缺口\n"
             "• Drive：100 篇/月\n"
             "• 每月 AI 分析报告\n\n"
-            "🟡 <b>Premium</b> — NT$499/月\n"
+            "💎 <b>Premium</b> — NT$499/月\n"
             "• 搜索：200 次/日\n"
             "• 深度导读：30 次/日\n"
             "• 所有功能大幅增加\n"
             "• Drive：无限\n"
             "• 每周 AI 分析报告\n\n"
-            "🔴 <b>Ultra</b> — NT$999/月\n"
+            "👑 <b>Ultra</b> — NT$999/月\n"
             "• 搜索：500 次/日\n"
             "• 深度导读：50 次/日\n"
             "• 所有功能无限\n"
@@ -525,7 +525,7 @@ MESSAGES = {
         "btn_lang": "🌐 Language",
         "btn_deep": "💡 Deep Reading",
         "btn_seen": "👀 Seen",
-        "btn_skip": "⏭ Skip",
+        "btn_skip": "👎 Not Interested",
         "btn_archive": "☁️ Cloud Archive",
         "btn_oa": "🟢 Open Access",
         "btn_doi": "🔗 Official DOI",
@@ -646,7 +646,7 @@ MESSAGES = {
         "export_result_caption": "📄 <b>{fmt} Export</b>\n📚 {count} papers\n\nImport directly to Zotero / EndNote / Mendeley",
         "export_selected_format": "Selected {count} papers. Choose format:",
         "archive_choose_folder": "📁 Choose archive folder:",
-        "archive_skip_button": "⏭ Skip Archiving",
+        "archive_skip_button": "🔙 Back",
         "archive_invalid_button": "❌ Invalid button",
         "archive_skip_archive": "⏭ Archive skipped",
         "archive_archiving": "☁️ Archiving...",
@@ -682,30 +682,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot Plan Comparison</b>\n\n"
             "👤 Your current plan: {tier}\n\n"
-            "🟢 <b>Free</b> — NT$0/mo\n"
+            "🆓 <b>Free</b> — NT$0/mo\n"
             "• Search: 10/day\n"
             "• Deep Reading: 1/day\n"
             "• Drive: 5 papers/mo\n"
             "• Ads: Yes\n\n"
-            "🔵 <b>Basic</b> — NT$150/mo\n"
+            "🔧 <b>Basic</b> — NT$150/mo\n"
             "• Search: 30/day\n"
             "• Deep Reading: 5/day\n"
             "• /chat Cross-paper Q&A: 10/mo\n"
             "• Drive: 30 papers/mo\n"
             "• Ad-Free\n\n"
-            "🟣 <b>Standard</b> — NT$299/mo\n"
+            "⭐ <b>Standard</b> — NT$299/mo\n"
             "• Search: 100/day\n"
             "• Deep Reading: 15/day\n"
             "• /review Literature Review + /gap Research Gap\n"
             "• Drive: 100 papers/mo\n"
             "• Monthly AI Report\n\n"
-            "🟡 <b>Premium</b> — NT$499/mo\n"
+            "💎 <b>Premium</b> — NT$499/mo\n"
             "• Search: 200/day\n"
             "• Deep Reading: 30/day\n"
             "• All features boosted\n"
             "• Drive: Unlimited\n"
             "• Weekly AI Report\n\n"
-            "🔴 <b>Ultra</b> — NT$999/mo\n"
+            "👑 <b>Ultra</b> — NT$999/mo\n"
             "• Search: 500/day\n"
             "• Deep Reading: 50/day\n"
             "• All features unlimited\n"
@@ -751,7 +751,7 @@ MESSAGES = {
         "btn_lang": "🌐 言語変更",
         "btn_deep": "💡 詳細解説",
         "btn_seen": "👀 閲覧済み",
-        "btn_skip": "⏭ スキップ",
+        "btn_skip": "👎 興味なし",
         "btn_archive": "☁️ ドライブ保存",
         "btn_oa": "🟢 オープンアクセス",
         "btn_doi": "🔗 公式DOIページ",
@@ -872,7 +872,7 @@ MESSAGES = {
         "export_result_caption": "📄 <b>{fmt} エクスポート結果</b>\n📚 {count} 本の論文\n\nZotero / EndNote / Mendeley に直接インポート可能",
         "export_selected_format": "{count} 本を選択。形式を選択してください：",
         "archive_choose_folder": "📁 保存フォルダを選択してください：",
-        "archive_skip_button": "⏭ 保存しない",
+        "archive_skip_button": "🔙 戻る",
         "archive_invalid_button": "❌ 無効なボタン",
         "archive_skip_archive": "⏭ 保存をスキップ",
         "archive_archiving": "☁️ 保存中...",
@@ -908,30 +908,30 @@ MESSAGES = {
         "pro_text": (
             "📊 <b>PaperFilterBot プラン比較</b>\n\n"
             "👤 現在のプラン：{tier}\n\n"
-            "🟢 <b>Free 無料版</b> — 月額 NT$0\n"
+            "🆓 <b>Free 無料版</b> — 月額 NT$0\n"
             "• 検索：10 回/日\n"
             "• 詳細解説：1 回/日\n"
             "• Drive：5 本/月\n"
             "• 広告：あり\n\n"
-            "🔵 <b>Basic</b> — 月額 NT$150\n"
+            "🔧 <b>Basic</b> — 月額 NT$150\n"
             "• 検索：30 回/日\n"
             "• 詳細解説：5 回/日\n"
             "• /chat 論文横断Q&A：10 回/月\n"
             "• Drive：30 本/月\n"
             "• 広告なし\n\n"
-            "🟣 <b>Standard</b> — 月額 NT$299\n"
+            "⭐ <b>Standard</b> — 月額 NT$299\n"
             "• 検索：100 回/日\n"
             "• 詳細解説：15 回/日\n"
             "• /review 文献レビュー + /gap 研究ギャップ\n"
             "• Drive：100 本/月\n"
             "• 月次 AI レポート\n\n"
-            "🟡 <b>Premium</b> — 月額 NT$499\n"
+            "💎 <b>Premium</b> — 月額 NT$499\n"
             "• 検索：200 回/日\n"
             "• 詳細解説：30 回/日\n"
             "• 全機能大幅強化\n"
             "• Drive：無制限\n"
             "• 週次 AI レポート\n\n"
-            "🔴 <b>Ultra</b> — 月額 NT$999\n"
+            "👑 <b>Ultra</b> — 月額 NT$999\n"
             "• 検索：500 回/日\n"
             "• 詳細解説：50 回/日\n"
             "• 全機能無制限\n"
@@ -1030,8 +1030,8 @@ def _build_folder_keyboard(user_id: int, paper_id: str, lang: str) -> types.Inli
         ))
     # Extract user_id from the caller context - we'll use a simple approach
     markup.add(types.InlineKeyboardButton(
-        MESSAGES.get(lang, MESSAGES["en"]).get("archive_skip_button", "⏭ Skip"),
-        callback_data=f"archive|{paper_id[:40]}|略過"
+        MESSAGES.get(lang, MESSAGES["en"]).get("archive_skip_button", "🔙 Back"),
+        callback_data=f"archive|{paper_id[:40]}|返回"
     ))
     return markup
 
@@ -1820,7 +1820,7 @@ def handle_callback_query(call):
             return
         paper_id = parts[1]
         folder_name = parts[2]
-        if folder_name == "略過":
+        if folder_name == "返回":
             bot.answer_callback_query(call.id, _t(user_id, "archive_skip_archive"))
             try:
                 bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
@@ -1870,7 +1870,10 @@ def handle_callback_query(call):
                 else:
                     bot.send_message(call.message.chat.id, _t(user_id, "archive_drive_not_configured"))
             else:
-                bot.send_message(call.message.chat.id, _t(user_id, "archive_failed", detail=result))
+                err_detail = str(result)
+                if "invalid_scope" in err_detail:
+                    err_detail = "Google Drive 權限不足，請重新授權（需在 Google Cloud Console 啟用 drive.file 權限）"
+                bot.send_message(call.message.chat.id, _t(user_id, "archive_failed", detail=err_detail))
         return
 
 # 未知指令處理

@@ -242,7 +242,7 @@ class DriveOAuthManager:
             service.files().create(body={"name": f"{safe_name}.txt", "parents": [folder_id]}, media_body=media).execute()
 
             # 方案 B：自動維護資料夾內的 references.bib 總庫
-            if bibtex and folder_name != "略過":
+            if bibtex and folder_name not in ("返回", "略過"):
                 try:
                     self.append_to_references_bib(service, folder_id, bibtex)
                 except Exception as b_err:

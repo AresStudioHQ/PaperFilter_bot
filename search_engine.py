@@ -564,27 +564,41 @@ def generate_deep_analysis(title: str, text: str, fingerprint: str = None, user_
         if cached and cached[1]:
             return cached[1]
 
-    prompt = f"""請對以下學術論文進行深度結構化導讀與批判性解析：
-標題：{title}
-摘要與核心內文：{text}
+    lang = "en"
+    if user_id:
+        try:
+            lang = db.get_user_lang(user_id) or "en"
+        except Exception:
+            lang = "en"
 
-請以繁體中文，按照以下結構提供深入具體的解析（保留 Emoji 與 HTML 粗體標題 <b>）：
+    lang_instruction = {
+        "zh_hant": "請以繁體中文",
+        "zh_hans": "请以简体中文",
+        "en": "Please respond in English",
+        "ja": "日本語で回答してください",
+    }.get(lang, "Please respond in English")
 
-🎯 <b>【研究痛點與動機】</b>
-（詳細說明本研究試圖解決的既有困境、現存技術瓶頸或理論缺口）
+    prompt = f"""Please perform a deep structured analysis of the following academic paper:
+Title: {title}
+Abstract & Key Content: {text}
 
-⚙️ <b>【核心方法與技術創新】</b>
-（詳細拆解提出的系統架構、數學模型、演算法或實驗設計重點）
+{lang_instruction}, following this structure with specific details (keep Emoji and HTML bold tags <b>):
 
-📊 <b>【關鍵發現與突破數據】</b>
-（本研究所取得的具體量化指標、基準對比提升幅度與實驗重大結論）
+🎯 <b>【Research Motivation & Pain Points】</b>
+(Detail the existing challenges, technical bottlenecks, or theoretical gaps this research aims to solve)
 
-⚠️ <b>【研究限制與未來方向】</b>
-（作者指出或客觀存在的局限性，以及值得學界後續深入突破的研究方向）
+⚙️ <b>【Core Methods & Technical Innovation】</b>
+(Break down the proposed system architecture, mathematical models, algorithms, or experimental design)
+
+📊 <b>【Key Findings & Breakthrough Data】</b>
+(Specific quantitative metrics, benchmark improvements, and major experimental conclusions)
+
+⚠️ <b>【Limitations & Future Directions】</b>
+(Limitations identified by authors or objectively existing, and promising research directions)
 """
     report = _invoke_ai(
         prompt=prompt,
-        system_prompt="你是國際頂級學術期刊的資深評審與領域導讀專家，請深入解析論文機理與數據，避免空泛空洞的套話。",
+        system_prompt="You are a senior reviewer and domain expert at top international academic journals. Provide deep analysis of the paper's mechanisms and data. Avoid vague or generic statements.",
         tier=tier,
         temperature=0.2
     )
