@@ -284,6 +284,19 @@ MESSAGES = {
             "• 適合研究團隊\n\n"
             "💡 可在科研大總部一鍵升級！"
         ),
+        "promo_generated": "🎫 測試碼已生成：<code>{code}</code>\n備註：{note}\n⏳ 請在 72 小時內兌換（/redeem {code}）",
+        "promo_admin_only": "⛔ 此指令僅限管理員使用。",
+        "promo_redeem_ok": "🎉 兌換成功！全功能已開通至 <b>{expires}</b>（7 天）。\n👑 感謝你成為 Beta 測試員——測試過程中任何想法都歡迎直接傳訊告訴我！",
+        "promo_redeem_usage": "用法：<code>/redeem PF-XXXXXX</code>",
+        "promo_invalid": "❌ 找不到這組測試碼，請確認後重試。",
+        "promo_already_used": "⚠️ 這組測試碼已被使用。",
+        "promo_expired": "⏰ 這組測試碼已過期（72 小時兌換期限），請聯絡發碼人重新生成。",
+        "codes_header": "🎫 測試碼總覽（{used} 已用 / {unused} 未用 / {expired} 過期）：\n\n",
+        "codes_empty": "目前沒有任何測試碼。用 /gencode 產生第一組。",
+        "founder_granted": "👑 已將 <code>{uid}</code> 設為 Founding Member（終身全功能）！",
+        "founder_fail": "找不到該使用者（需先與 Bot 有過互動）。",
+        "trial_expiring": "⏰ 你的全功能測試將於 <b>{expires}</b> 到期（剩餘不到 24 小時）。\n📝 別忘了填寫回饋表單，你的建議會直接影響定價與功能方向！",
+        "founder_badge_line": "\n👑 <b>Founding Member</b> · 終身榮譽全功能\n",
     },
     "zh_hans": {
         "welcome": (
@@ -523,6 +536,19 @@ MESSAGES = {
             "• 适合研究团队\n\n"
             "💡 可在科研大总部一键升级！"
         ),
+        "promo_generated": "🎫 测试码已生成：<code>{code}</code>\n备注：{note}\n⏳ 请在 72 小时内兑换（/redeem {code}）",
+        "promo_admin_only": "⛔ 此指令仅限管理员使用。",
+        "promo_redeem_ok": "🎉 兑换成功！全功能已开通至 <b>{expires}</b>（7 天）。\n👑 感谢你成为 Beta 测试员——测试过程中任何想法都欢迎直接传讯告诉我！",
+        "promo_redeem_usage": "用法：<code>/redeem PF-XXXXXX</code>",
+        "promo_invalid": "❌ 找不到这组测试码，请确认后重试。",
+        "promo_already_used": "⚠️ 这组测试码已被使用。",
+        "promo_expired": "⏰ 这组测试码已过期（72 小时兑换期限），请联系发码人重新生成。",
+        "codes_header": "🎫 测试码总览（{used} 已用 / {unused} 未用 / {expired} 过期）：\n\n",
+        "codes_empty": "目前没有任何测试码。用 /gencode 产生第一组。",
+        "founder_granted": "👑 已将 <code>{uid}</code> 设为 Founding Member（终身全功能）！",
+        "founder_fail": "找不到该用户（需先与 Bot 有过互动）。",
+        "trial_expiring": "⏰ 你的全功能测试将于 <b>{expires}</b> 到期（剩余不到 24 小时）。\n📝 别忘了填写回馈表单，你的建议会直接影响定价与功能方向！",
+        "founder_badge_line": "\n👑 <b>Founding Member</b> · 终身荣誉全功能\n",
     },
     "en": {
         "welcome": (
@@ -762,6 +788,19 @@ MESSAGES = {
             "• For research groups\n\n"
             "💡 Upgrade now at Web Research HQ!"
         ),
+        "promo_generated": "🎫 Test code generated: <code>{code}</code>\nNote: {note}\n⏳ Must be redeemed within 72 hours (/redeem {code})",
+        "promo_admin_only": "⛔ Admin only.",
+        "promo_redeem_ok": "🎉 Redeemed! Full access unlocked until <b>{expires}</b> (7 days).\n👑 Thanks for joining the beta — feel free to message me anytime with feedback!",
+        "promo_redeem_usage": "Usage: <code>/redeem PF-XXXXXX</code>",
+        "promo_invalid": "❌ Code not found. Please double-check and try again.",
+        "promo_already_used": "⚠️ This code has already been used.",
+        "promo_expired": "⏰ This code has expired (72-hour redemption window). Please ask for a new one.",
+        "codes_header": "🎫 Test codes ({used} used / {unused} unused / {expired} expired):\n\n",
+        "codes_empty": "No test codes yet. Use /gencode to create the first one.",
+        "founder_granted": "👑 <code>{uid}</code> is now a Founding Member (lifetime full access)!",
+        "founder_fail": "User not found (they need to interact with the bot first).",
+        "trial_expiring": "⏰ Your full-access trial ends at <b>{expires}</b> (less than 24h left).\n📝 Don't forget to fill out the feedback form — your input directly shapes pricing and features!",
+        "founder_badge_line": "\n👑 <b>Founding Member</b> · Lifetime full access\n",
     },
     "ja": {
         "welcome": (
@@ -1001,6 +1040,19 @@ MESSAGES = {
             "• 研究グループ向け\n\n"
             "💡 Web研究総本部で今すぐアップグレード！"
         ),
+        "promo_generated": "🎫 テストコードを生成しました：<code>{code}</code>\nメモ：{note}\n⏳ 72 時間以内に引き換えてください（/redeem {code}）",
+        "promo_admin_only": "⛔ 管理者専用コマンドです。",
+        "promo_redeem_ok": "🎉 引き換え完了！全機能が <b>{expires}</b> まで利用可能（7 日間）。\n👑 ベータテスターへの参加ありがとうございます——フィードバックはいつでもメッセージでどうぞ！",
+        "promo_redeem_usage": "使い方：<code>/redeem PF-XXXXXX</code>",
+        "promo_invalid": "❌ そのコードは見つかりません。確認して再試行してください。",
+        "promo_already_used": "⚠️ このコードは既に使用されています。",
+        "promo_expired": "⏰ このコードは期限切れです（72 時間の引き換え期限）。新しいコードを発行者にお問い合わせください。",
+        "codes_header": "🎫 テストコード一覧（{used} 使用済 / {unused} 未使用 / {expired} 期限切れ）：\n\n",
+        "codes_empty": "まだテストコードがありません。/gencode で最初の 1 枚を作成してください。",
+        "founder_granted": "👑 <code>{uid}</code> を Founding Member（永久フルアクセス）に設定しました！",
+        "founder_fail": "ユーザーが見つかりません（先に Bot とやり取りが必要です）。",
+        "trial_expiring": "⏰ フルアクセストライアルは <b>{expires}</b> に終了します（残り 24 時間未満）。\n📝 フィードバックフォームの記入をお忘れなく——あなたの意見が価格と機能の方向性を直接決めます！",
+        "founder_badge_line": "\n👑 <b>Founding Member</b> · 永久フルアクセス\n",
     }
 }
 
@@ -1055,6 +1107,11 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
 WEB_APP_URL = os.getenv("WEB_APP_URL", "") or os.getenv("APP_URL", "")
 PORT = int(os.getenv("PORT", 10000))
+# Beta 測試碼管理員（逗號分隔的 Telegram user ID）
+ADMIN_USER_IDS = {int(x) for x in os.getenv("ADMIN_USER_IDS", "").split(",") if x.strip().isdigit()}
+
+def _is_admin(user_id: int) -> bool:
+    return user_id in ADMIN_USER_IDS
 
 if not TELEGRAM_TOKEN:
     print("❌ 缺少 TELEGRAM_TOKEN！請在 .env 中設定", file=sys.stderr)
@@ -1129,6 +1186,7 @@ def handle_start(message):
             types.InlineKeyboardButton(_t(user_id, "btn_open_web"), url=WEB_APP_URL)
         )
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="HTML")
+    _check_trial_reminder(message)
 
 @bot.message_handler(commands=['help', 'h', 'guide'])
 def handle_help(message, override_user_id=None):
@@ -1260,6 +1318,11 @@ def handle_pro_command(message, override_user_id=None):
     tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra"), "lab": _t(user_id, "tier_lab")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
     text = _t(user_id, "pro_text", tier=tier_badge)
+    # 👑 Founding Member 終身徽章
+    if tier_info.get("is_founder"):
+        text += _t(user_id, "founder_badge_line")
+    elif tier_info.get("tier_expires_at") and tier != "free":
+        text += f"\n⏳ Beta full access until <b>{str(tier_info['tier_expires_at'])[:10]}</b>\n"
     bot.reply_to(message, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['reports'])
@@ -1464,6 +1527,97 @@ def handle_export(message, override_user_id=None):
         types.InlineKeyboardButton(_t(user_id, "export_select_button"), callback_data="export_select"),
     )
     bot.reply_to(message, _t(user_id, "export_prompt", count=len(papers)), reply_markup=markup)
+
+# ===================== Beta 測試碼系統 =====================
+@bot.message_handler(commands=['gencode'])
+def handle_gencode(message):
+    user_id = message.from_user.id
+    if not _is_admin(user_id):
+        bot.reply_to(message, _t(user_id, "promo_admin_only"))
+        return
+    note = message.text.split(maxsplit=1)[1].strip() if len(message.text.split(maxsplit=1)) > 1 else "-"
+    info = db.create_promo_code(note)
+    bot.reply_to(message, _t(user_id, "promo_generated", code=info["code"], note=info["note"]))
+
+@bot.message_handler(commands=['codes'])
+def handle_codes(message):
+    user_id = message.from_user.id
+    if not _is_admin(user_id):
+        bot.reply_to(message, _t(user_id, "promo_admin_only"))
+        return
+    codes = db.list_promo_codes()
+    if not codes:
+        bot.reply_to(message, _t(user_id, "codes_empty"))
+        return
+    used = sum(1 for c in codes if c["status"] == "used")
+    expired = sum(1 for c in codes if c["status"] == "expired")
+    unused = len(codes) - used - expired
+    lines = [_t(user_id, "codes_header", used=used, unused=unused, expired=expired)]
+    from datetime import datetime
+    now = datetime.utcnow()
+    for c in codes[:20]:
+        status_icon = {"used": "✅", "expired": "⏰"}.get(c["status"], "🟡")
+        line = f"{status_icon} <code>{c['code']}</code>"
+        if c["note"] and c["note"] != "-":
+            line += f"（{c['note']}）"
+        if c["status"] == "used":
+            line += f" → <code>{c['redeemed_by']}</code>"
+        elif c["status"] == "unused":
+            try:
+                remain = datetime.fromisoformat(c["redeem_deadline"]) - now
+                hrs = max(0, int(remain.total_seconds() // 3600))
+                line += f" ⏳ {hrs}h"
+            except (ValueError, TypeError):
+                pass
+        lines.append(line)
+    bot.reply_to(message, "\n".join(lines))
+
+@bot.message_handler(commands=['founder'])
+def handle_founder(message):
+    user_id = message.from_user.id
+    if not _is_admin(user_id):
+        bot.reply_to(message, _t(user_id, "promo_admin_only"))
+        return
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2 or not parts[1].strip().lstrip('@').isdigit():
+        bot.reply_to(message, "Usage: /founder 123456789")
+        return
+    target_uid = int(parts[1].strip().lstrip('@'))
+    if db.set_founder(target_uid):
+        bot.reply_to(message, _t(user_id, "founder_granted", uid=target_uid))
+        try:
+            bot.send_message(target_uid, "👑 Congratulations! You've been granted <b>Founding Member</b> status — lifetime full access as a thank-you for your beta feedback!")
+        except Exception:
+            pass
+    else:
+        bot.reply_to(message, _t(user_id, "founder_fail"))
+
+@bot.message_handler(commands=['redeem'])
+def handle_redeem(message):
+    user_id = message.from_user.id
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        bot.reply_to(message, _t(user_id, "promo_redeem_usage"))
+        return
+    ok, result = db.redeem_promo_code(parts[1], user_id)
+    if ok:
+        expires_display = result[:10] if isinstance(result, str) else str(result)
+        bot.reply_to(message, _t(user_id, "promo_redeem_ok", expires=expires_display))
+    else:
+        bot.reply_to(message, _t(result))
+
+def _check_trial_reminder(message):
+    """到期前 24 小時自動提醒填回饋表單（每次互動時惰性檢查）"""
+    try:
+        user_id = message.from_user.id
+        for trial in db.get_expiring_trials(within_hours=24):
+            if trial["user_id"] != user_id:
+                continue
+            expires_display = (trial.get("tier_expires_at") or "")[:10]
+            bot.send_message(user_id, _t(user_id, "trial_expiring", expires=expires_display))
+            db.mark_expiry_notified(user_id)
+    except Exception:
+        pass
 
 # 匯出選擇模式
 @bot.callback_query_handler(func=lambda call: call.data.startswith("export_"))
@@ -1719,6 +1873,9 @@ def handle_text(message):
     text = message.text.strip()
     lower = text.lower()
     lang = _get_lang(user_id, message.from_user.language_code)
+
+    # Beta 試用到期前提醒（惰性檢查，不打擾正常流程）
+    _check_trial_reminder(message)
 
     # 對話模式優先 - 非指令訊息自動進入跨文獻問答
     if _chat_mode_users.get(user_id) and not text.startswith('/'):
@@ -2042,6 +2199,8 @@ def handle_callback_query(call):
     message.text.startswith('/drive'), message.text.startswith('/web'),
     message.text.startswith('/folders'), message.text.startswith('/myfolders'),
     message.text.startswith('/categories'), message.text.startswith('/cats'),
+    message.text.startswith('/gencode'), message.text.startswith('/codes'),
+    message.text.startswith('/founder'), message.text.startswith('/redeem'),
 ]))
 def handle_unknown_command(message):
     user_id = message.from_user.id

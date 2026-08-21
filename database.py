@@ -122,6 +122,27 @@ class Database:
             )
         ''')
 
+        # Beta 測試碼系統：一人一碼，72h 兌換期限，兌換後 7 天全功能
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS promo_codes (
+                code TEXT PRIMARY KEY,
+                note TEXT DEFAULT '',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                redeem_deadline TIMESTAMP,
+                redeemed_by INTEGER,
+                redeemed_at TIMESTAMP,
+                status TEXT DEFAULT 'unused'
+            )
+        ''')
+
+        # 舊庫升級：user_tier 加入到期/創始成員欄位
+        for col_def in ("tier_expires_at TEXT", "is_founder INTEGER DEFAULT 0",
+                        "expiry_notified INTEGER DEFAULT 0"):
+            try:
+                self.cursor.execute(f"ALTER TABLE user_tier ADD COLUMN {col_def}")
+            except Exception:
+                pass
+
         # 7.5 Telegram ↔ Web 綁定關聯表（驗證碼僅為暫時憑證，資料跟 telegram_user_id 走）
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS telegram_links (
@@ -438,7 +459,7 @@ class Database:
     TIER_RANK = {"free": 0, "basic": 1, "standard": 2, "premium": 3, "ultra": 4, "lab": 5}
 
     def get_user_tier(self, user_id: int) -> dict:
-        self.cursor.execute("SELECT tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit FROM user_tier WHERE user_id = ?", (user_id,))
+        self.cursor.execute("SELECT tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit, tier_expires_at, is_founder FROM user_tier WHERE user_id = ?", (user_id,))
         row = self.cursor.fetchone()
         if not row:
             d = self.TIER_DEFS["free"]
@@ -449,9 +470,20 @@ class Database:
             self.conn.commit()
             return {"tier": "free", **d}
         tier = row[0]
+        tier_expires_at = row[7]
+        is_founder = bool(row[8])
+        # 到期自動降級（Founder 終身不受影響）
+        if tier_expires_at and not is_founder and tier != "free":
+            from datetime import datetime
+            try:
+                if datetime.utcnow() > datetime.fromisoformat(tier_expires_at):
+                    self.set_user_tier(user_id, "free")
+                    return {"tier": "free", **self.TIER_DEFS["free"]}
+            except (ValueError, TypeError):
+                pass
         # Serve live TIER_DEFS limits for every tier so plan changes apply instantly
         d = self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
-        return {"tier": tier, **d}
+        return {"tier": tier, "tier_expires_at": tier_expires_at, "is_founder": is_founder, **d}
 
     def set_user_tier(self, user_id: int, tier: str, limits: dict = None):
         d = limits or self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
@@ -461,6 +493,93 @@ class Database:
             ON CONFLICT(user_id) DO UPDATE SET tier = ?, daily_search_limit = ?, daily_deep_limit = ?, daily_litreview_limit = ?, daily_gap_analysis_limit = ?, daily_export_limit = ?, daily_digest_limit = ?, updated_at = CURRENT_TIMESTAMP
         ''', (user_id, tier, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"], tier, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"]))
         self.conn.commit()
+
+    # --- Beta 測試碼系統 ---
+    PROMO_REDEEM_HOURS = 72    # 生成後多久內要兌換
+    PROMO_ACCESS_DAYS = 7      # 兌換後全功能天數
+
+    def create_promo_code(self, note: str = "") -> dict:
+        import secrets as _secrets
+        from datetime import datetime, timedelta
+        code = "PF-" + _secrets.token_hex(3).upper()
+        deadline = (datetime.utcnow() + timedelta(hours=self.PROMO_REDEEM_HOURS)).isoformat()
+        self.cursor.execute(
+            "INSERT INTO promo_codes (code, note, redeem_deadline) VALUES (?, ?, ?)",
+            (code, note, deadline)
+        )
+        self.conn.commit()
+        return {"code": code, "note": note, "redeem_deadline": deadline}
+
+    def redeem_promo_code(self, code: str, user_id: int) -> tuple[bool, str]:
+        """兌換測試碼。回傳 (是否成功, 訊息 key / 說明)"""
+        from datetime import datetime, timedelta
+        code = (code or "").strip().upper()
+        self.cursor.execute("SELECT status, redeem_deadline, redeemed_by FROM promo_codes WHERE code = ?", (code,))
+        row = self.cursor.fetchone()
+        if not row:
+            return False, "promo_invalid"
+        status, deadline, redeemed_by = row[0], row[1], row[2]
+        if status == "used":
+            return False, "promo_already_used"
+        try:
+            if datetime.utcnow() > datetime.fromisoformat(deadline):
+                self.cursor.execute("UPDATE promo_codes SET status = 'expired' WHERE code = ?", (code,))
+                self.conn.commit()
+                return False, "promo_expired"
+        except (ValueError, TypeError):
+            return False, "promo_invalid"
+        # 升級為 lab 全功能 + 寫入到期日
+        expires_at = (datetime.utcnow() + timedelta(days=self.PROMO_ACCESS_DAYS)).isoformat()
+        self.set_user_tier(user_id, "lab")
+        self.cursor.execute(
+            "UPDATE user_tier SET tier_expires_at = ?, expiry_notified = 0 WHERE user_id = ?",
+            (expires_at, user_id)
+        )
+        self.cursor.execute(
+            "UPDATE promo_codes SET status = 'used', redeemed_by = ?, redeemed_at = CURRENT_TIMESTAMP WHERE code = ?",
+            (user_id, code)
+        )
+        self.conn.commit()
+        return True, expires_at
+
+    def list_promo_codes(self) -> list:
+        self.cursor.execute("SELECT code, note, created_at, redeem_deadline, redeemed_by, status FROM promo_codes ORDER BY created_at DESC")
+        rows = self.cursor.fetchall()
+        result = []
+        for r in rows:
+            result.append({
+                "code": r[0], "note": r[1], "created_at": r[2],
+                "redeem_deadline": r[3], "redeemed_by": r[4], "status": r[5]
+            })
+        return result
+
+    def get_expiring_trials(self, within_hours: int = 24) -> list:
+        """取得即將到期、尚未提醒的試用者"""
+        from datetime import datetime, timedelta
+        horizon = (datetime.utcnow() + timedelta(hours=within_hours)).isoformat()
+        now = datetime.utcnow().isoformat()
+        self.cursor.execute(
+            "SELECT user_id, tier_expires_at FROM user_tier WHERE tier != 'free' AND is_founder = 0 AND expiry_notified = 0 AND tier_expires_at IS NOT NULL AND tier_expires_at > ? AND tier_expires_at <= ?",
+            (now, horizon)
+        )
+        return [{"user_id": r[0], "tier_expires_at": r[1]} for r in self.cursor.fetchall()]
+
+    def mark_expiry_notified(self, user_id: int):
+        self.cursor.execute("UPDATE user_tier SET expiry_notified = 1 WHERE user_id = ?", (user_id,))
+        self.conn.commit()
+
+    def set_founder(self, user_id: int) -> bool:
+        self.cursor.execute(
+            "UPDATE user_tier SET is_founder = 1, tier = CASE WHEN tier = 'free' THEN 'lab' ELSE tier END, tier_expires_at = NULL, expiry_notified = 0 WHERE user_id = ?",
+            (user_id,)
+        )
+        self.conn.commit()
+        return self.cursor.rowcount > 0
+
+    def is_founder(self, user_id: int) -> bool:
+        self.cursor.execute("SELECT is_founder FROM user_tier WHERE user_id = ?", (user_id,))
+        row = self.cursor.fetchone()
+        return bool(row and row[0])
 
     def check_drive_quota(self, user_id: int) -> tuple[bool, str]:
         """檢查 Drive 歸檔額度，回傳 (是否允許, 訊息)"""
