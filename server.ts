@@ -10,7 +10,6 @@ import {
   getProfile,
   setFilterMode,
   setUserLang,
-  setTier,
   getLibrary,
   addPaper,
   updatePaper,
@@ -29,10 +28,17 @@ import {
   getPendingCode,
   migrateWebToTelegram,
   ensureUser,
+  checkQuota,
+  incrementUsage,
+  logActivity,
+  listActivity,
+  getActivityStats,
+  redeemPromoCode,
   type PaperItem,
+  type QuotaAction,
 } from "./db";
 import { getVenueTier, credibilityBadge, isPreprint } from "./src/academicTiers";
-import { TIER_DEFS, TIER_PRICES, TIER_ORDER, isUnlimited } from "./src/subscriptionTiers";
+import { TIER_DEFS, TIER_PRICES, normalizeTier, hasPaidTier, isUnlimited } from "./src/subscriptionTiers";
 
 dotenv.config();
 
@@ -101,52 +107,29 @@ app.use("/api", (req, res, next) => {
   return setUserContext(uid, async () => { await next(); });
 });
 
-// ================= In-memory (demo-only) state =================
-// 這些欄位 bot 未存入 Turso，僅在網頁程序生命週期內保留：
-interface HistoryItem {
-  id: string;
-  action: 'archive' | 'seen' | 'skip' | 'deep_read' | 'search';
-  paper_id?: string;
-  paper_title: string;
-  authors?: string[];
-  year?: string;
-  source?: string;
-  category?: string;
-  timestamp: string;
-  details?: string;
-}
-
-interface UserMem {
-  history: HistoryItem[];
-  read: number;
-  archived: number;
-  skipped: number;
-  deep: number;
-}
-const memByUser: Record<number, UserMem> = {};
-function mem(): UserMem {
-  const uid = currentUserId();
-  if (!memByUser[uid]) {
-    memByUser[uid] = { history: [], read: 0, archived: 0, skipped: 0, deep: 0 };
-  }
-  return memByUser[uid];
-}
-
-let digestConfig = {
-  is_active: false,
-  frequency: "weekly" as "daily" | "weekly",
-  push_time: "08:30",
-  topics: [] as string[],
-  include_deep: true
-};
-
 let userBias = {
   positive: {} as Record<string, number>,
   negative: {} as Record<string, number>
 };
 
-// 網頁端 UI 專用欄位（starred / notes / tags）Turso 目前未儲存，先用 overlay 保留於程序記憶體
-const paperOverlay: Record<string, { user_notes?: string; tags?: string[]; is_starred?: boolean }> = {};
+async function enforceQuota(res: any, action: QuotaAction): Promise<boolean> {
+  const result = await checkQuota(action);
+  if (!result.allowed) {
+    res.status(429).json({ success: false, error: result.error, quota: true });
+    return false;
+  }
+  return true;
+}
+
+function activityToHistoryItem(row: { id: number; action: string; paper_title: string | null; details: string | null; created_at: string }) {
+  return {
+    id: String(row.id),
+    action: row.action,
+    paper_title: row.paper_title || "",
+    timestamp: row.created_at,
+    details: row.details || "",
+  };
+}
 
 // ================= Profile builder =================
 async function buildProfile() {
@@ -154,6 +137,13 @@ async function buildProfile() {
   const webUid = currentUserId();
   const link = await getLinkByWeb(webUid);
   const syncCode = (await getPendingCode(webUid)) || (await createBindCode(webUid));
+  let stats = { total: 0, read: 0, archived: 0, skipped: 0, deep: 0 };
+  try {
+    stats = await getActivityStats();
+  } catch {
+    // user_activity may not exist on a brand-new DB until initTables finishes
+  }
+  const tier = normalizeTier(dbp.tier);
   return {
     user_id: webUid,
     username: "",
@@ -161,23 +151,22 @@ async function buildProfile() {
     is_telegram_linked: !!link,
     telegram_id: link ? link.telegram_user_id : null,
     sync_code: syncCode,
-    tier: dbp.tier,
-    pro_expires_at: "",
+    tier,
+    pro_expires_at: dbp.tier_expires_at || "",
     filter_mode: dbp.filter_mode,
     user_lang: dbp.user_lang,
-    total_read_count: mem().read,
-    total_archived_count: mem().archived,
-    total_skipped_count: mem().skipped,
-    total_deep_read_count: mem().deep,
+    total_read_count: stats.read,
+    total_archived_count: stats.archived,
+    total_skipped_count: stats.skipped,
+    total_deep_read_count: stats.deep,
+    history_count: stats.total,
+    is_pro: hasPaidTier(tier),
+    pro_price: TIER_PRICES.pro,
   };
 }
 
 async function loadLibrary(): Promise<PaperItem[]> {
-  const lib = await getLibrary();
-  return lib.map(p => {
-    const o = paperOverlay[p.id];
-    return o ? { ...p, ...o } : p;
-  });
+  return getLibrary();
 }
 
 // 模型 -> 所需最低訂閱方案（全部使用 GPT-4o-mini，統一低成本）
@@ -575,7 +564,7 @@ app.get("/api/auth/profile", async (req, res) => {
       categories,
       followed_authors: authors,
       library_count: library.length,
-      history_count: mem().history.length
+      history_count: user.history_count || 0
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "取得個人檔案失敗" });
@@ -640,39 +629,28 @@ app.post("/api/auth/logout", (req, res) => {
   res.json({ success: true });
 });
 
-app.post("/api/auth/upgrade-tier", async (req, res) => {
-  const { tier } = req.body;
-  const validTiers = ["free", "basic", "standard", "premium", "ultra"];
-  if (!tier || !validTiers.includes(tier)) {
-    return res.status(400).json({ error: "Invalid plan. Lab licensing uses /api/lab-inquiry." });
-  }
-  await setTier(tier);
-  res.json({
-    success: true,
-    message: `Upgraded to ${tier} (beta simulated — no payment collected).`,
-    user: await buildProfile()
+app.post("/api/auth/upgrade-tier", async (_req, res) => {
+  res.status(402).json({
+    success: false,
+    error: "Payment not enabled yet. Redeem a beta code with /api/auth/redeem.",
   });
 });
 
-const labInquiries: Array<{ uid: number; username: string; org?: string; email?: string; note?: string; at: string }> = [];
-app.post("/api/lab-inquiry", async (req, res) => {
+app.post("/api/auth/redeem", async (req, res) => {
   try {
-    const { org, email, note } = req.body || {};
-    const profile = await buildProfile();
-    const row = {
-      uid: currentUserId(),
-      username: profile.username,
-      org: String(org || "").slice(0, 200),
-      email: String(email || "").slice(0, 200),
-      note: String(note || "").slice(0, 1000),
-      at: new Date().toISOString()
-    };
-    labInquiries.push(row);
-    console.log("[Lab licensing inquiry]", row);
-    res.json({ success: true });
+    const { code } = req.body || {};
+    const result = await redeemPromoCode(String(code || ""));
+    if (!result.ok) {
+      return res.status(400).json({ success: false, error: result.errorKey || "promo_invalid" });
+    }
+    res.json({ success: true, expiresAt: result.expiresAt, user: await buildProfile() });
   } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: err.message || "兌換失敗" });
   }
+});
+
+app.post("/api/lab-inquiry", async (_req, res) => {
+  res.status(410).json({ success: false, error: "Gone" });
 });
 
 app.post("/api/auth/update-mode", async (req, res) => {
@@ -690,9 +668,10 @@ app.post("/api/user/language", async (req, res) => {
 // 2. History & Analytics
 app.get("/api/history", async (req, res) => {
   const user = await buildProfile();
+  const rows = await listActivity(80);
   res.json({
     success: true,
-    history: mem().history,
+    history: rows.map(activityToHistoryItem),
     stats: {
       read: user.total_read_count,
       archived: user.total_archived_count,
@@ -711,19 +690,18 @@ app.get("/api/analytics/charts", async (req, res) => {
     categoryCounts[c] = (categoryCounts[c] || 0) + 1;
   }
 
-  // 真實統計：由歷史紀錄彙計近 7 天（無紀錄 = 全 0，圖表貼地）
+  const hist = (await listActivity(400)).map(activityToHistoryItem);
   const now = new Date();
   const readingTrend = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 86400000);
     const dayKey = d.toISOString().slice(0, 10);
     const dayLabel = `${d.getMonth() + 1}/${d.getDate()}`;
-    const hist = mem().history;
     readingTrend.push({
       date: dayLabel,
-      searches: hist.filter(h => h.action === "search" && h.timestamp.slice(0, 10) === dayKey).length,
-      archived: hist.filter(h => h.action === "archive" && h.timestamp.slice(0, 10) === dayKey).length,
-      deep_reads: hist.filter(h => h.action === "deep_read" && h.timestamp.slice(0, 10) === dayKey).length
+      searches: hist.filter(h => h.action === "search" && String(h.timestamp).slice(0, 10) === dayKey).length,
+      archived: hist.filter(h => h.action === "archive" && String(h.timestamp).slice(0, 10) === dayKey).length,
+      deep_reads: hist.filter(h => h.action === "deep_read" && String(h.timestamp).slice(0, 10) === dayKey).length
     });
   }
 
@@ -740,20 +718,19 @@ app.post("/api/search", async (req, res) => {
   try {
     const { query, mode } = req.body;
     if (!query) return res.status(400).json({ error: "請輸入搜尋關鍵字" });
+    if (!(await enforceQuota(res, "search"))) return;
 
     const profile = await buildProfile();
     const searchMode = mode || profile.filter_mode;
 
-    mem().read += 1;
-    mem().history.unshift({
-      id: `h_${Date.now()}`,
+    const papers = await fetchAcademicPapers(query, searchMode);
+    await incrementUsage("search");
+    await logActivity({
       action: "search",
       paper_title: `搜尋主題：${query}`,
-      timestamp: new Date().toISOString(),
-      details: `以 [${searchMode}] 策略跨 5 大庫進行檢索`
+      details: `以 [${searchMode}] 策略跨 5 大庫進行檢索`,
     });
 
-    const papers = await fetchAcademicPapers(query, searchMode);
     res.json({ success: true, count: papers.length, papers });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "搜尋發生異常" });
@@ -765,18 +742,7 @@ app.post("/api/deep", async (req, res) => {
   try {
     const { title, summary, authors = [], year = "2024", link = "", source = "" } = req.body;
     if (!title) return res.status(400).json({ error: "缺少論文標題" });
-
-    mem().deep += 1;
-    mem().history.unshift({
-      id: `h_${Date.now()}`,
-      action: "deep_read",
-      paper_title: title,
-      authors,
-      year,
-      source,
-      timestamp: new Date().toISOString(),
-      details: "完成 AI 4 大維度深度導讀與 BibTeX 提取"
-    });
+    if (!(await enforceQuota(res, "deep"))) return;
 
     const gemini = getGeminiClient();
     let deepReport = "";
@@ -788,6 +754,7 @@ app.post("/api/deep", async (req, res) => {
           contents: `你是一位頂級學術期刊審稿專家與科研導讀專家。請針對以下學術論文進行深度 4 大維度導讀。
 
 【嚴格誠信規則】：
+- 依據標題與摘要，禁止捏造數字。
 - 只能使用下方【論文標題】與【論文摘要全文】中實際出現的資訊，嚴禁杜撰作者姓名、具體數據、數據集、指標或結論。
 - 若摘要未提及具體量化結果，請明確寫「未提供具體量化數據」，不要編造數字或 SOTA 提升幅度。
 - 清楚區分「論文作者聲稱的內容」與「你自身的領域背景知識」。
@@ -838,7 +805,19 @@ ${summary || "（無摘要提供，請根據標題與領域學術背景深入解
       is_top_journal: true
     });
 
-    res.json({ success: true, deep_report: deepReport, bibtex });
+    await incrementUsage("deep");
+    await logActivity({
+      action: "deep_read",
+      paper_title: title,
+      details: "完成 AI 4 大維度深度導讀與 BibTeX 提取",
+    });
+
+    res.json({
+      success: true,
+      deep_report: `【資料來源：標題與摘要】依據標題與摘要，禁止捏造數字。\n\n${deepReport}`,
+      bibtex,
+      source: "abstract",
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "生成深度導讀失敗" });
   }
@@ -847,6 +826,7 @@ ${summary || "（無摘要提供，請根據標題與領域學術背景深入解
 // 5. Literature Review & Gap Analysis
 app.post("/api/review", async (req, res) => {
   try {
+    if (!(await enforceQuota(res, "litreview"))) return;
     const papers: PaperItem[] = req.body.papers || (await loadLibrary());
     if (!papers || papers.length === 0) {
       return res.status(400).json({ error: "尚未收藏任何論文可供生成文獻綜述" });
@@ -888,6 +868,9 @@ ${papersText}
       return res.status(502).json({ success: false, error: "🚫 AI 服務暫時無法使用，可能是 API 額度用盡或服務異常。請稍後再試。" });
     }
 
+    await incrementUsage("litreview");
+    await logActivity({ action: "litreview", paper_title: "文獻綜述", details: `${papers.length} 篇` });
+
     res.json({ success: true, review: reviewText, paper_count: papers.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "文獻綜述生成失敗" });
@@ -896,6 +879,7 @@ ${papersText}
 
 app.post("/api/gap", async (req, res) => {
   try {
+    if (!(await enforceQuota(res, "gap_analysis"))) return;
     const papers: PaperItem[] = req.body.papers || (await loadLibrary());
     if (!papers || papers.length === 0) {
       return res.status(400).json({ error: "尚未收藏任何論文可供分析研究缺口" });
@@ -930,6 +914,9 @@ ${papersText}
       return res.status(502).json({ success: false, error: "🚫 AI 服務暫時無法使用，可能是 API 額度用盡或服務異常。請稍後再試。" });
     }
 
+    await incrementUsage("gap_analysis");
+    await logActivity({ action: "gap_analysis", paper_title: "研究缺口分析", details: `${papers.length} 篇` });
+
     res.json({ success: true, gap_analysis: gapText });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "研究缺口分析失敗" });
@@ -939,6 +926,7 @@ ${papersText}
 // 6. Pro: Chat with Library (RAG over user library)
 app.post("/api/pro/chat-library", async (req, res) => {
   try {
+    if (!(await enforceQuota(res, "chat"))) return;
     const { question, papers = await loadLibrary() } = req.body;
     if (!question) return res.status(400).json({ error: "請輸入問答問題" });
 
@@ -989,6 +977,9 @@ ${question}
       citedPapers.push(papers[0].title);
     }
 
+    await incrementUsage("chat");
+    await logActivity({ action: "chat", paper_title: String(question).slice(0, 120) });
+
     res.json({
       success: true,
       answer: reply,
@@ -1002,6 +993,7 @@ ${question}
 // 7. Pro: Multi-Paper Matrix Comparison
 app.post("/api/pro/matrix-compare", async (req, res) => {
   try {
+    if (!(await enforceQuota(res, "litreview"))) return;
     const papers: PaperItem[] = req.body.papers || (await loadLibrary()).slice(0, 4);
     if (!papers || papers.length < 2) {
       return res.status(400).json({ error: "請至少選擇 2 篇論文以進行橫向矩陣對比" });
@@ -1039,6 +1031,9 @@ ${papers.map((p, i) => `${i + 1}. 標題: ${p.title}\n   摘要: ${p.summary}`).
       return res.status(502).json({ success: false, error: "🚫 AI 服務暫時無法使用，可能是 API 額度用盡或服務異常。請稍後再試。" });
     }
 
+    await incrementUsage("litreview");
+    await logActivity({ action: "litreview", paper_title: "矩陣對比", details: `${papers.length} 篇` });
+
     res.json({ success: true, matrix: matrixData });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "生成對比矩陣失敗" });
@@ -1046,13 +1041,12 @@ ${papers.map((p, i) => `${i + 1}. 標題: ${p.title}\n   摘要: ${p.summary}`).
 });
 
 // 8. Digest Schedule
-app.get("/api/digest/settings", (req, res) => {
-  res.json({ success: true, config: digestConfig });
+app.get("/api/digest/settings", (_req, res) => {
+  res.status(501).json({ success: false, error: "Daily Telegram digest is not live yet" });
 });
 
-app.post("/api/digest/settings", (req, res) => {
-  digestConfig = { ...digestConfig, ...req.body };
-  res.json({ success: true, config: digestConfig, message: "定時推播設定已更新！" });
+app.post("/api/digest/settings", (_req, res) => {
+  res.status(501).json({ success: false, error: "Daily Telegram digest is not live yet" });
 });
 
 // AI 模型清單（全部使用 GPT-4o-mini，統一低成本）
@@ -1099,7 +1093,6 @@ app.post("/api/library/add", async (req, res) => {
     const paper: PaperItem = req.body;
     if (!paper || !paper.title) return res.status(400).json({ error: "論文資料不完整" });
 
-    const existing = (await getLibrary()).find(p => p.fingerprint === paper.fingerprint || p.id === paper.id);
     const bibtex = paper.bibtex || generateBibTeX(paper);
     const item: PaperItem = {
       ...paper,
@@ -1112,26 +1105,19 @@ app.post("/api/library/add", async (req, res) => {
     };
 
     await addPaper(item);
-    if (!existing) {
-      mem().archived += 1;
-    }
-
-    mem().history.unshift({
-      id: `h_${Date.now()}`,
+    await logActivity({
       action: "archive",
       paper_id: item.id,
       paper_title: item.title,
-      authors: item.authors,
-      year: item.year,
-      source: item.source,
-      category: item.category,
-      timestamp: new Date().toISOString(),
-      details: `歸檔至 [${item.category}] 雲端資料夾 & references.bib`
+      details: `歸檔至 [${item.category}]`,
     });
 
     const updated = (await loadLibrary()).find(p => p.id === item.id) || item;
     res.json({ success: true, message: "論文已成功雙軌歸檔至大總部與 Google Drive！", paper: updated });
   } catch (err: any) {
+    if (err?.code === "LIBRARY_FULL") {
+      return res.status(403).json({ success: false, error: err.message, code: "LIBRARY_FULL" });
+    }
     res.status(500).json({ error: err.message });
   }
 });
@@ -1139,13 +1125,12 @@ app.post("/api/library/add", async (req, res) => {
 app.post("/api/library/update-paper", async (req, res) => {
   try {
     const { id, user_notes, tags, is_starred, category } = req.body;
-    if (category !== undefined) await updatePaper(id, { category });
-    paperOverlay[id] = {
-      ...(paperOverlay[id] || {}),
+    await updatePaper(id, {
       ...(user_notes !== undefined ? { user_notes } : {}),
       ...(tags !== undefined ? { tags } : {}),
       ...(is_starred !== undefined ? { is_starred } : {}),
-    };
+      ...(category !== undefined ? { category } : {}),
+    });
     const lib = await loadLibrary();
     const updated = lib.find(p => p.id === id || p.fingerprint === id);
     if (updated) return res.json({ success: true, paper: updated });
@@ -1159,7 +1144,6 @@ app.delete("/api/library/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await removePaper(id);
-    delete paperOverlay[id];
     res.json({ success: true, message: "已自大總部文獻庫移除" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1170,7 +1154,18 @@ app.delete("/api/library/:id", async (req, res) => {
 app.post("/api/categories", async (req, res) => {
   try {
     const { action, name, oldName, newName } = req.body;
-    if (action === "add" && name) await addCategory(name);
+    if (action === "add" && name) {
+      const cats = await getCategories();
+      const clean = String(name).trim();
+      if (clean && !cats.includes(clean)) {
+        const profile = await getProfile();
+        const limit = TIER_DEFS[normalizeTier(profile.tier)].category_limit;
+        if (!isUnlimited(limit) && cats.length >= limit) {
+          return res.status(403).json({ success: false, error: `分類已達方案上限 (${cats.length}/${limit})` });
+        }
+      }
+      await addCategory(name);
+    }
     else if (action === "rename" && oldName && newName) await renameCategory(oldName, newName);
     else if (action === "delete" && name) await deleteCategory(name);
     res.json({ success: true, categories: await getCategories() });
@@ -1182,7 +1177,18 @@ app.post("/api/categories", async (req, res) => {
 app.post("/api/authors", async (req, res) => {
   try {
     const { action, name } = req.body;
-    if (action === "add" && name) await addAuthor(name);
+    if (action === "add" && name) {
+      const authors = await getAuthors();
+      const clean = String(name).trim();
+      if (clean && !authors.includes(clean)) {
+        const profile = await getProfile();
+        const limit = TIER_DEFS[normalizeTier(profile.tier)].follow_limit;
+        if (!isUnlimited(limit) && authors.length >= limit) {
+          return res.status(403).json({ success: false, error: `追蹤學者已達方案上限 (${authors.length}/${limit})` });
+        }
+      }
+      await addAuthor(name);
+    }
     else if (action === "remove" && name) await removeAuthor(name);
     res.json({ success: true, followed_authors: await getAuthors() });
   } catch (err: any) {
@@ -1193,6 +1199,7 @@ app.post("/api/authors", async (req, res) => {
 // 11. Export endpoint
 app.post("/api/export", async (req, res) => {
   try {
+    if (!(await enforceQuota(res, "export"))) return;
     const { format = "BibTeX", papers = await loadLibrary() } = req.body;
     if (!papers || papers.length === 0) {
       return res.status(400).json({ error: "沒有論文可供匯出" });
@@ -1224,6 +1231,9 @@ app.post("/api/export", async (req, res) => {
       content = [header, ...rows].join("\n");
     }
 
+    await incrementUsage("export");
+    await logActivity({ action: "export", paper_title: format, details: `${papers.length} 篇` });
+
     res.json({ success: true, format, content, count: papers.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1233,6 +1243,7 @@ app.post("/api/export", async (req, res) => {
 // 12. Trend Analysis
 app.post("/api/trend", async (req, res) => {
   try {
+    if (!(await enforceQuota(res, "search"))) return;
     const { topic = "machine learning" } = req.body;
     const papers = await fetchAcademicPapers(topic, "smart");
 
@@ -1271,6 +1282,9 @@ ${papers.slice(0, 10).map(p => `- ${p.title} (${p.year})`).join("\n")}
     if (!aiAnalysis) {
       return res.status(502).json({ success: false, error: "🚫 AI 服務暫時無法使用，可能是 API 額度用盡或服務異常。請稍後再試。" });
     }
+
+    await incrementUsage("search");
+    await logActivity({ action: "search", paper_title: `趨勢：${topic}` });
 
     res.json({
       success: true,
@@ -1525,7 +1539,11 @@ function st(lang: SimLang, key: string, vars: Record<string, string | number> = 
 const LANG_LABEL: Record<SimLang, string> = { en: "English", zh_hant: "繁體中文", zh_hans: "简体中文", ja: "日本語" };
 
 // 13. Telegram Bot Simulator — commands are never treated as keyword search
-app.post("/api/simulate-bot", async (req, res) => {
+app.post("/api/simulate-bot", async (_req, res) => {
+  res.status(410).json({ success: false, error: "Gone" });
+});
+
+/* disabled bot simulator body
   try {
     const { text, lang: bodyLang, user_id = currentUserId() } = req.body;
     if (!text) return res.status(400).json({ error: "Message required" });
@@ -1722,6 +1740,7 @@ app.post("/api/simulate-bot", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+disabled bot simulator body */
 
 // 14. System files content provider
 app.get("/api/files", (req, res) => {
