@@ -79,20 +79,22 @@ export function getVenueTier(venueName: string): TierCode | null {
 
 export interface Credibility {
   emoji: string;
-  label: string;
+  key: string;
   tier: TierCode | null;
 }
 
+// Stable translation keys (rendered via t() in UI components).
+// User-visible strings live in src/_i18n_tier.json to follow the UI language.
 export function credibilityBadge(venueName: string, sourceLabel: string): Credibility {
   if (isPreprint(sourceLabel) || isPreprint(venueName || '')) {
-    return { emoji: '🔴', label: 'Preprint (未經 peer review)', tier: null };
+    return { emoji: '🔴', key: 'tier_preprint', tier: null };
   }
   const tier = getVenueTier(venueName);
-  if (tier === 'TOP') return { emoji: '🏆', label: '頂級期刊 (Nature/Science/Cell 級)', tier };
-  if (tier === 'CCF-A') return { emoji: '🥇', label: 'CCF-A / 領域頂會頂刊', tier };
-  if (tier === 'CCF-B') return { emoji: '🥈', label: 'CCF-B / 優良期刊', tier };
-  if (tier === 'CCF-C') return { emoji: '🥉', label: 'CCF-C / 認可期刊', tier };
-  if (tier === 'Q1') return { emoji: '📈', label: 'Q1 / 高影響力期刊', tier };
-  if (venueName) return { emoji: '📄', label: 'Peer-reviewed (一般期刊)', tier: null };
-  return { emoji: '📄', label: 'Peer-reviewed', tier: null };
+  if (tier === 'TOP') return { emoji: '🏆', key: 'tier_top', tier };
+  if (tier === 'CCF-A') return { emoji: '🥇', key: 'tier_ccf_a', tier };
+  if (tier === 'CCF-B') return { emoji: '🥈', key: 'tier_ccf_b', tier };
+  if (tier === 'CCF-C') return { emoji: '🥉', key: 'tier_ccf_c', tier };
+  if (tier === 'Q1') return { emoji: '📈', key: 'tier_q1', tier };
+  if (venueName) return { emoji: '📄', key: 'tier_general', tier: null };
+  return { emoji: '📄', key: 'tier_peer', tier: null };
 }

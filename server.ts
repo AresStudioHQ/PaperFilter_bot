@@ -31,6 +31,7 @@ import {
   type PaperItem,
 } from "./db";
 import { getVenueTier, credibilityBadge, isPreprint } from "./src/academicTiers";
+import { TIER_DEFS, TIER_PRICES, TIER_ORDER, isUnlimited } from "./src/subscriptionTiers";
 
 dotenv.config();
 
@@ -51,7 +52,7 @@ function getUid(req: any): number | null {
   return v ? Number(v) : null;
 }
 function verifyTelegramAuth(data: any): boolean {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const token = process.env.TELEGRAM_BOT_TOKEN || process.env.TELEGRAM_TOKEN;
   if (!token) {
     console.error("⚠️ 缺少 TELEGRAM_BOT_TOKEN，無法驗證 Telegram 登入");
     return false;
@@ -239,7 +240,7 @@ async function loadLibrary(): Promise<PaperItem[]> {
 const MODEL_TIERS: Record<string, "free" | "basic" | "standard" | "premium" | "ultra"> = {
   "gpt-4o-mini": "free",
 };
-const TIER_RANK: Record<string, number> = { free: 0, basic: 1, standard: 2, premium: 3, ultra: 4 };
+const TIER_RANK: Record<string, number> = { free: 0, basic: 1, standard: 2, premium: 3, ultra: 4, lab: 5 };
 
 function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -579,7 +580,7 @@ async function fetchAcademicPapers(query: string, mode: string = "smart") {
       is_preprint: isPre,
       is_top_journal: isTopTier,
       credibility_emoji: cred.emoji,
-      credibility_label: cred.label,
+      credibility_label: cred.key,
     };
   });
 
@@ -691,7 +692,7 @@ app.post("/api/auth/logout", (req, res) => {
 
 app.post("/api/auth/upgrade-tier", async (req, res) => {
   const { tier } = req.body;
-  const validTiers = ["free", "basic", "standard", "premium", "ultra"];
+  const validTiers = ["free", "basic", "standard", "premium", "ultra", "lab"];
   if (!tier || !validTiers.includes(tier)) {
     return res.status(400).json({ error: "無效的方案，請選擇 basic/standard/premium/ultra" });
   }
@@ -1361,34 +1362,28 @@ app.post("/api/simulate-bot", async (req, res) => {
     }
 
     if (trimmed === "/pro") {
+      const tierNames: Record<string, string> = {
+        free: "Free (免費)", basic: "Basic", standard: "Standard",
+        premium: "Premium", ultra: "Ultra", lab: "Lab 實驗室"
+      };
+      const fmtN = (n: number) => isUnlimited(n) ? "無限" : String(n);
+      const tierBlocks = TIER_ORDER.map((tc) => {
+        const d = TIER_DEFS[tc];
+        return `<b>${tierNames[tc]}</b>${TIER_PRICES[tc] > 0 ? `（定價徵集中）` : ""}
+• 搜尋：${fmtN(d.daily_search_limit)} 次/日、深度導讀：${fmtN(d.daily_deep_limit)} 次/日
+• 跨文獻問答：${fmtN(d.daily_chat_limit)} 次/日、追蹤學者：${fmtN(d.follow_limit)} 位
+• Google Drive：${fmtN(d.drive_monthly_limit)} 篇/月`;
+      }).join("\n\n");
+
       return res.json({
         type: "text",
         text: `📊 <b>PaperFilterBot 方案比較</b>
 
-👤 您目前的方案：<b>${profile.tier === 'ultra' ? 'Ultra' : profile.tier === 'premium' ? 'Premium' : profile.tier === 'standard' ? 'Standard' : profile.tier === 'basic' ? 'Basic' : 'Free'}</b>
+👤 您目前的方案：<b>${tierNames[profile.tier] || profile.tier}</b>
 
-<b>Free (免費)</b>
-• 搜尋：10 次/日、深度導讀：1 次/日
-• Google Drive：5 篇/月、有廣告
+${tierBlocks}
 
-<b>Basic</b>
-• 搜尋：30 次/日、深度導讀：5 次/日
-• 解鎖 /chat 跨文獻問答（10次/月）
-• Google Drive：30 篇/月、無廣告
-
-<b>Standard</b>
-• 搜尋：100 次/日、深度導讀：15 次/日
-• 解鎖 /review 文獻綜述、/gap 研究缺口
-• Google Drive：100 篇/月、每月 AI 分析報告
-
-<b>Premium</b>
-• 搜尋：200 次/日、深度導讀：30 次/日
-• 所有功能量大幅增加、Google Drive 無限
-• 每週 AI 分析報告
-
-<b>Ultra</b>
-• 搜尋：500 次/日、深度導讀：50 次/日
-• 所有功能無限、每日 AI 分析報告`
+<i>💡 定價尚未公佈，歡迎在測試回饋中告訴我們你認為合理的定價！</i>`
       });
     }
 

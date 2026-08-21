@@ -1,0 +1,26 @@
+{
+  "dash_cat_ai": {
+    "zh_hant": "人工智慧",
+    "zh_hans": "人工智能",
+    "en": "Artificial Intelligence",
+    "ja": "人工知能"
+  },
+  "dash_cat_life": {
+    "zh_hant": "生命科學",
+    "zh_hans": "生命科学",
+    "en": "Life Sciences",
+    "ja": "生命科学"
+  },
+  "dash_cat_quantum": {
+    "zh_hant": "量子物理",
+    "zh_hans": "量子物理",
+    "en": "Quantum Physics",
+    "ja": "量子物理"
+  },
+  "dash_cat_general": {
+    "zh_hant": "通用科學",
+    "zh_hans": "通用科学",
+    "en": "General Science",
+    "ja": "一般科学"
+  }
+}

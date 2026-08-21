@@ -30,7 +30,7 @@ export const DeepModal: React.FC<DeepModalProps> = ({
 
   if (!paper) return null;
 
-  const defaultReport = deepReport || `【1. 核心突破與研究動機】\n針對目前深度學習在大規模長文本推理與知識對齊面臨之瓶頸，本文提出新型態注意力路由與梯度壓縮架構，有效降低 45% 計算冗餘。\n\n【2. 理論架構與方法論】\n採用多層交叉注意力（Cross-Attention）與自適應先驗分佈估計，建立了可微最佳化約束公式，並在理論上證明了收斂上界。\n\n【3. 實驗驗證與 Benchmark】\n在 arXiv、MMLU 及 SQuAD 基準資料集上進行了廣泛實驗，相較於現有 SOTA 模型準確率提升 3.8%，且推理延遲減少 30%。\n\n【4. 局限性與後續研究啟示】\n本方法在極端稀疏數據分佈下之泛化性仍有待提升，未來可結合符號推理與主動學習機制進一步探索。`;
+  const defaultReport = deepReport || t('deep_modal_default_report');
 
   const defaultBibtex = bibtex || paper.bibtex || `@article{${paper.id},\n  title={${paper.title}},\n  author={${paper.authors.join(' and ')}},\n  journal={${paper.source}},\n  year={${paper.year}},\n  url={${paper.link}}\n}`;
 
@@ -64,8 +64,8 @@ export const DeepModal: React.FC<DeepModalProps> = ({
                   paper.is_preprint
                     ? 'bg-red-500/10 text-red-300 border-red-500/20'
                     : (paper.tier ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' : 'bg-slate-500/10 text-slate-300 border-slate-500/20')
-                }`} title={paper.credibility_label}>
-                  {paper.credibility_emoji} {paper.credibility_label}
+                }`} title={t(paper.credibility_label)}>
+                   {paper.credibility_emoji} {t(paper.credibility_label)}
                 </span>
               )}
             </div>
@@ -85,7 +85,7 @@ export const DeepModal: React.FC<DeepModalProps> = ({
           {loading ? (
             <div className="py-16 flex flex-col items-center justify-center space-y-4">
               <div className="w-10 h-10 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-slate-400 text-sm font-medium animate-pulse">正在進行 AI 深度學術架構分析與 BibTeX 生成，請稍候...</p>
+              <p className="text-slate-400 text-sm font-medium animate-pulse">{t('deep_modal_loading')}</p>
             </div>
           ) : (
             <>
@@ -108,7 +108,7 @@ export const DeepModal: React.FC<DeepModalProps> = ({
                   {defaultReport}
                 </div>
                 <p className="text-xs text-slate-500 italic flex items-center gap-1">
-                  ⚠️ 此深度導讀由 AI 根據論文摘要生成，僅供快速理解，正式引用請務必核對原文。
+                  {t('deep_modal_disclaimer')}
                 </p>
               </div>
 

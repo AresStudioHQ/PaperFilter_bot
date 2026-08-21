@@ -1,0 +1,23 @@
+{ 
+  "bot_transport_command": {"zh_hant": "司令部", "zh_hans": "指挥部", "en": "Command Center", "ja": "司令部"}, 
+  "bot_transport_connection": {"zh_hant": "接続", "zh_hans": "连接", "en": "Connection", "ja": "接続"}, 
+  "bot_transport_feature": {"zh_hant": "機能", "zh_hans": "功能", "en": "Function", "ja": "機能"}, 
+  "bot_transport_language": {"zh_hant": "國語", "zh_hans": "国语", "en": "National Language", "ja": "国語"}, 
+  "bot_transport_response": {"zh_hant": "對應", "zh_hans": "对应", "en": "Response", "ja": "対応"}, 
+  "bot_transport_direct_search": {"zh_hant": "直接搜索", "zh_hans": "直接搜索", "en": "Direct Search", "ja": "直接捜索"}, 
+  "bot_transport_now": {"zh_hant": "現在", "zh_hans": "现在", "en": "Now", "ja": "今"}, 
+  "bot_transport_overview": {"zh_hant": "一覽", "zh_hans": "一览", "en": "Overview", "ja": "一覧"}, 
+  "bot_transport_add": {"zh_hant": "新增", "zh_hans": "新建", "en": "Add", "ja": "追加"}, 
+  "bot_transport_create": {"zh_hant": "建立", "zh_hans": "创建", "en": "Create", "ja": "作成"}, 
+  "bot_transport_rename": {"zh_hant": "更名", "zh_hans": "重命名", "en": "Rename", "ja": "改名"}, 
+  "bot_transport_change": {"zh_hant": "變更", "zh_hans": "变更", "en": "Change", "ja": "変更"}, 
+  "bot_transport_delete": {"zh_hant": "刪除", "zh_hans": "删除", "en": "Delete", "ja": "削除"}, 
+  "bot_transport_author_name": {"zh_hant": "作者名", "zh_hans": "作者名", "en": "Author Name", "ja": "著者名"}, 
+  "bot_transport_watch_author": {"zh_hant": "關注作者", "zh_hans": "关注作者", "en": "Watch Author", "ja": "注目著者"}, 
+  "bot_transport_track": {"zh_hant": "追蹤", "zh_hans": "追踪", "en": "Track", "ja": "追跡"}, 
+  "bot_transport_priority_recommendation": {"zh_hant": "重點優先推薦", "zh_hans": "重点优先推荐", "en": "Priority Recommendation", "ja": "点優先推薦"}, 
+  "bot_transport_input_box": {"zh_hant": "輸入欄", "zh_hans": "输入框", "en": "Input Box", "ja": "輸入欄"}, 
+  "bot_transport_send": {"zh_hant": "傳送", "zh_hans": "发送", "en": "Send", "ja": "送信"}, 
+  "bot_transport_welcome": {"zh_hant": "歡迎使用 PaperFilterBot 學術智慧雷達與雲端文獻總庫！", "zh_hans": "欢迎使用 PaperFilterBot 学术智能雷达与云端文献库！", "en":"Welcome to PaperFilterBot Academic Intelligence HQ!", "ja": "PaperFilterBot学術インテリジェンス司令部へようこそ！"}, 
+  "bot_transport_welcome_setup": {"zh_hant": "全球 4 大官方庫直連：Semantic Scholar、CrossRef、PubMed、arXiv", "zh_hans": "全球 4 大官方库直连：Semantic Scholar、CrossRef、PubMed、arXiv", "en": "Connects to 4 major databases worldwide: Semantic Scholar, CrossRef, PubMed, arXiv", "ja": "4つの主要なデータベースに接続しています：Semantic Scholar、CrossRef、PubMed、arXiv"} 
+}

@@ -10,7 +10,8 @@ import { BotSimulator } from './components/BotSimulator';
 import { DeepModal } from './components/DeepModal';
 import { TelegramBindingModal } from './components/TelegramBindingModal';
 import { Paper, UserProfile, FilterMode, HistoryRecord } from './types';
-import { useI18n } from './i18n';
+import { useI18n, Language } from './i18n';
+import './_i18n_tier';
 import { getModel, setModel, AIModel } from './modelStore';
 import { TelegramLogin } from './TelegramLogin';
 import { BrainCircuit, X, Copy, Check } from 'lucide-react';
@@ -19,11 +20,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [user, setUser] = useState<UserProfile>({
     user_id: 88921473,
-    username: 'Ares (科研總監)',
+    username: 'Ares (Research Director)',
     telegram_handle: '@ares_researcher',
     is_telegram_linked: true,
     sync_code: 'PF8892',
-    tier: 'pro',
+    tier: 'ultra',
     filter_mode: 'smart',
     user_lang: 'en',
     total_read_count: 86,
@@ -31,12 +32,11 @@ export default function App() {
     total_skipped_count: 42,
     total_deep_read_count: 18,
   });
-  const [categories, setCategories] = useState<string[]>(['人工智慧', '生命科學', '量子物理', '綜合科學', '人類基因']);
+  const { t } = useI18n(user.user_lang);
+  const [categories, setCategories] = useState<string[]>([t('app_cat_ai'), t('app_cat_life'), t('app_cat_quantum'), t('app_cat_general'), t('app_cat_genome')]);
   const [followedAuthors, setFollowedAuthors] = useState<string[]>(['Yann LeCun', 'Geoffrey Hinton', 'Jennifer Doudna', 'Yoshua Bengio', 'Kaiming He']);
   const [library, setLibrary] = useState<Paper[]>([]);
   const [history, setHistory] = useState<HistoryRecord[]>([]);
-
-  const { t } = useI18n(user.user_lang);
 
   // AI 模型自選
   const [models, setModels] = useState<AIModel[]>([]);
@@ -131,7 +131,7 @@ export default function App() {
         setBibtex(data.bibtex);
         fetch('/api/history').then(r => r.json()).then(d => d.success && setHistory(d.history));
       } else {
-        setDeepReport(data.error || '⚠️ AI 服務暫時無法使用，請稍後再試。');
+        setDeepReport(data.error || t('app_deep_error'));
       }
     } catch (err) {
       console.error('Deep read error:', err);
@@ -142,7 +142,7 @@ export default function App() {
 
   const handleAddToLibrary = async (paper: Paper, targetCategory?: string) => {
     try {
-      const cat = targetCategory || paper.category || categories[0] || '人工智慧';
+      const cat = targetCategory || paper.category || categories[0] || t('app_cat_ai');
       const res = await fetch('/api/library/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -249,7 +249,7 @@ export default function App() {
 
   const handleTriggerReview = async (papers: Paper[] = library) => {
     setReviewLoading(true);
-    setReviewModalData({ title: '📚 學術文獻綜述報告', content: 'AI 正在對文獻庫進行五段式結構綜述分析中...' });
+    setReviewModalData({ title: t('app_review_title'), content: t('app_review_loading') });
     try {
       const res = await fetch('/api/review', {
         method: 'POST',
@@ -258,9 +258,9 @@ export default function App() {
       });
       const data = await res.json();
       if (data.success) {
-        setReviewModalData({ title: `📚 學術文獻綜述（共 ${data.paper_count} 篇）`, content: data.review });
+        setReviewModalData({ title: t('app_review_title_count', { count: data.paper_count }), content: data.review });
       } else {
-        setReviewModalData({ title: '⚠️ AI 服務異常', content: data.error || 'AI 服務暫時無法使用，請稍後再試。' });
+        setReviewModalData({ title: t('app_ai_error_title'), content: data.error || t('app_ai_service_unavailable') });
       }
     } catch (err) {
       console.error(err);
@@ -271,7 +271,7 @@ export default function App() {
 
   const handleTriggerGap = async (papers: Paper[] = library) => {
     setReviewLoading(true);
-    setReviewModalData({ title: '🔍 5大研究缺口與未來突破方向', content: 'AI 正在探勘文獻局限性與未解問題...' });
+    setReviewModalData({ title: t('app_gap_title'), content: t('app_gap_loading') });
     try {
       const res = await fetch('/api/gap', {
         method: 'POST',
@@ -280,9 +280,9 @@ export default function App() {
       });
       const data = await res.json();
       if (data.success) {
-        setReviewModalData({ title: '🔍 5大研究缺口與未來方向分析', content: data.gap_analysis });
+        setReviewModalData({ title: t('app_gap_title_done'), content: data.gap_analysis });
       } else {
-        setReviewModalData({ title: '⚠️ AI 服務異常', content: data.error || 'AI 服務暫時無法使用，請稍後再試。' });
+        setReviewModalData({ title: t('app_ai_error_title'), content: data.error || t('app_ai_service_unavailable') });
       }
     } catch (err) {
       console.error(err);
@@ -295,9 +295,13 @@ export default function App() {
     setActiveTab('pro');
   };
 
-  const handleUpgradePro = async () => {
+  const handleUpgradePro = async (tier: string = 'premium') => {
     try {
-      const res = await fetch('/api/auth/upgrade-pro', { method: 'POST' });
+      const res = await fetch('/api/auth/upgrade-tier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier })
+      });
       const data = await res.json();
       if (data.success && data.user) setUser(data.user);
     } catch (err) {
@@ -309,7 +313,7 @@ export default function App() {
   if (authed === null) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-300 flex items-center justify-center">
-        載入中…
+        {t('app_loading')}
       </div>
     );
   }
@@ -317,11 +321,11 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
         <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 max-w-md w-full text-center space-y-5">
-          <h1 className="text-xl font-bold text-white">📲 登入 PaperFilterBot 科研大總部</h1>
-          <p className="text-sm text-slate-400">請使用 Telegram 帳號登入，登入後即可查看您專屬的文獻庫（與您的 Telegram bot 雙向同步）。</p>
-          <TelegramLogin botUsername={botUsername} onLoggedIn={handleLoggedIn} />
+          <h1 className="text-xl font-bold text-white">{t('app_login_title')}</h1>
+          <p className="text-sm text-slate-400">{t('app_login_desc')}</p>
+          <TelegramLogin botUsername={botUsername} userLang={user.user_lang as Language} onLoggedIn={handleLoggedIn} />
           {!botUsername && (
-            <p className="text-xs text-slate-500">若登入按鈕未出現，請聯絡管理員設定 TELEGRAM_BOT_USERNAME。</p>
+            <p className="text-xs text-slate-500">{t('app_login_no_button')}</p>
           )}
         </div>
       </div>
@@ -405,6 +409,7 @@ export default function App() {
           <ProFeaturesHub
             library={library}
             user={user}
+            userLang={user.user_lang}
             onUpgradePro={handleUpgradePro}
             onSelectPaperForDeep={handleOpenDeep}
             model={selectedModel}
@@ -475,14 +480,14 @@ export default function App() {
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md"
               >
                 {copiedReview ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                <span>{copiedReview ? '已複製全文' : '複製 Markdown 報告'}</span>
+                <span>{copiedReview ? t('app_copied_full') : t('app_copy_markdown')}</span>
               </button>
 
               <button
                 onClick={() => setReviewModalData(null)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold"
               >
-                關閉
+                {t('app_close')}
               </button>
             </div>
           </div>

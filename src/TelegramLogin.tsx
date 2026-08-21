@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useI18n, Language } from "./i18n";
 
 declare global {
   interface Window {
@@ -8,11 +9,14 @@ declare global {
 
 export function TelegramLogin({
   botUsername,
+  userLang,
   onLoggedIn,
 }: {
   botUsername: string;
+  userLang: Language;
   onLoggedIn: () => void;
 }) {
+  const { t } = useI18n(userLang);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,9 +40,9 @@ export function TelegramLogin({
         });
         const data = await res.json();
         if (data.success) onLoggedIn();
-        else alert(data.error || "登入失敗");
+        else alert(data.error || t('tg_login_failed'));
       } catch (e) {
-        alert("登入發生錯誤，請稍後再試");
+        alert(t('tg_login_error'));
       }
     };
 

@@ -172,8 +172,8 @@ export const SearchSection: React.FC<SearchSectionProps> = ({
                          paper.is_preprint
                            ? 'bg-red-500/10 text-red-300 border-red-500/20'
                            : (paper.tier ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' : 'bg-slate-500/10 text-slate-300 border-slate-500/20')
-                       }`} title={paper.credibility_label}>
-                         <Award className="w-3 h-3" /> {paper.credibility_emoji} {paper.credibility_label}
+                        }`} title={t(paper.credibility_label)}>
+                          <Award className="w-3 h-3" /> {paper.credibility_emoji} {t(paper.credibility_label)}
                        </span>
                      )}
                      {paper.is_open_access && (

@@ -33,7 +33,7 @@ export interface UserProfile {
   telegram_handle: string;
   is_telegram_linked: boolean;
   sync_code: string;
-  tier: 'free' | 'pro' | 'premium';
+  tier: 'free' | 'basic' | 'standard' | 'premium' | 'ultra' | 'lab';
   filter_mode: FilterMode;
   user_lang: string;
   total_read_count: number;

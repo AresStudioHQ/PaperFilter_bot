@@ -65,7 +65,7 @@ export const LibraryManagement: React.FC<LibraryManagementProps> = ({
 
   // Filter papers
   const filteredPapers = library.filter(p => {
-    if (selectedCategory !== 'all' && (p.category || '未分類') !== selectedCategory) return false;
+    if (selectedCategory !== 'all' && (p.category || t('lib_uncategorized')) !== selectedCategory) return false;
     if (onlyStarred && !p.is_starred) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -415,8 +415,8 @@ export const LibraryManagement: React.FC<LibraryManagementProps> = ({
                                 paper.is_preprint
                                   ? 'text-red-300 bg-red-500/10 border-red-500/20'
                                   : (paper.tier ? 'text-amber-300 bg-amber-500/10 border-amber-500/20' : 'text-slate-300 bg-slate-500/10 border-slate-500/20')
-                              }`} title={paper.credibility_label}>
-                                {paper.credibility_emoji} {paper.credibility_label}
+                               }`} title={t(paper.credibility_label)}>
+                                 {paper.credibility_emoji} {t(paper.credibility_label)}
                               </span>
                             )}
                           </div>

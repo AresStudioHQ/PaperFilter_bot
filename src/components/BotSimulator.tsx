@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, RefreshCw, Link as LinkIcon, Globe, FolderPlus, ListOrdered, UserPlus, HelpCircle } from 'lucide-react';
 import { BotMessage, Paper } from '../types';
+import { useI18n } from '../i18n';
 
 interface BotSimulatorProps {
   userLang: string;
@@ -19,6 +20,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
   onOpenSyncModal,
   onOpenProModal
 }) => {
+  const { t } = useI18n(userLang);
   const getInitialMessage = (lang: string): string => {
     switch (lang) {
       case 'en':
@@ -160,11 +162,11 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
 
   const quickGroups = [
     {
-      title: '🌐 語言與說明 (Language & Help)',
+      titleKey: 'sim_quick_group_lang',
       items: ['/help', '/lang', '/lang en', '/lang ja', '/lang zh_hant', '/start']
     },
     {
-      title: '📂 資料夾指令 (4 語言支援: Folders / Add / Rename / Delete)',
+      titleKey: 'sim_quick_group_folders',
       items: [
         '/folders',
         'my folders',
@@ -178,11 +180,11 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
       ]
     },
     {
-      title: '👥 學者追蹤 (Follow / Track Authors)',
+      titleKey: 'sim_quick_group_scholars',
       items: ['/following', '/follow Yann LeCun', 'follow Geoffrey Hinton', 'フォロー Jennifer Doudna', '追蹤 Kaiming He']
     },
     {
-      title: '🔬 旗艦科研與檢索 (Pro & Search)',
+      titleKey: 'sim_quick_group_flagship',
       items: ['/pro', '/bind', '/mode', '/review', '/gap', 'CRISPR Cas9', 'Attention Transformer']
     }
   ];
@@ -201,7 +203,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
             <p className="text-xs text-slate-400 font-mono">
-              Telegram 雙向同步中 · 4 國語言指令支援 (ZH/EN/JA)
+              {t('sim_sync_status')}
             </p>
           </div>
         </div>
@@ -231,7 +233,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
             className="flex items-center space-x-1 text-xs text-sky-300 hover:text-white px-2.5 py-1.5 bg-sky-950/60 hover:bg-sky-900/60 rounded-lg border border-sky-500/40 transition-colors cursor-pointer"
           >
             <LinkIcon className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">同步代碼</span>
+            <span className="hidden sm:inline">{t('sim_sync_code')}</span>
           </button>
 
           <button
@@ -239,7 +241,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
             className="flex items-center space-x-1 text-xs text-slate-400 hover:text-white px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>重置</span>
+            <span>{t('sim_btn_reset')}</span>
           </button>
         </div>
       </div>
@@ -300,7 +302,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
         {loading && (
           <div className="flex items-center space-x-2 text-slate-400 text-xs pl-11">
             <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            <span>PaperFilterBot 正在分析指令並跨庫連線中...</span>
+            <span>{t('sim_loading')}</span>
           </div>
         )}
 
@@ -310,13 +312,13 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
       {/* Categorized Quick Command Testing Chips */}
       <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 space-y-2.5">
         <div className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-          <span>⚡ 快速指令測試區（點擊即可在機器人中執行）：</span>
-          <span className="text-[11px] text-emerald-400">支援 /folders, add folder, rename, /following 等</span>
+          <span>{t('sim_quick_test_label')}</span>
+          <span className="text-[11px] text-emerald-400">{t('sim_quick_test_hint')}</span>
         </div>
 
         {quickGroups.map((group, idx) => (
           <div key={idx} className="space-y-1.5">
-            <div className="text-[11px] text-slate-400 font-medium">{group.title}</div>
+            <div className="text-[11px] text-slate-400 font-medium">{t(group.titleKey)}</div>
             <div className="flex flex-wrap gap-1.5">
               {group.items.map((cmd) => (
                 <button
@@ -338,13 +340,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder={
-            userLang === 'en'
-              ? 'Type /folders, add folder AI, /follow Hinton, /help, /pro, or paper keywords...'
-              : userLang === 'ja'
-              ? 'コマンド /folders、追加 ナノ、/follow 著者名、/help または論文キーワードを入力...'
-              : '輸入 /folders, add folder 量子, /follow 作者名, /help, /pro 或學術關鍵字...'
-          }
+          placeholder={t('sim_input_placeholder')}
           className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500"
         />
         <button
@@ -353,7 +349,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
           className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition-colors flex items-center space-x-1.5 shadow-md shadow-indigo-600/30 disabled:opacity-50 cursor-pointer"
         >
           <Send className="w-4 h-4" />
-          <span className="hidden sm:inline">傳送</span>
+          <span className="hidden sm:inline">{t('sim_btn_send')}</span>
         </button>
       </form>
     </div>

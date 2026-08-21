@@ -1053,7 +1053,7 @@ def fetch_user_papers(user_id: int) -> list:
 # ===================== 3. Bot 初始化 =====================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
-WEB_APP_URL = os.getenv("WEB_APP_URL", "")
+WEB_APP_URL = os.getenv("WEB_APP_URL", "") or os.getenv("APP_URL", "")
 PORT = int(os.getenv("PORT", 10000))
 
 if not TELEGRAM_TOKEN:

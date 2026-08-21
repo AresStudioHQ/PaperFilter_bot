@@ -1,0 +1,8 @@
+{
+  "trend_ai_analysis": {
+    "zh_hant": "【主流研究方向】當前聚焦於多模態大模型架構、長上下文理解（Long-Context Reasoning）以及高效微調技術。\n\n【新興技術】自適應強化學習對齊（RLAIF/DPO）與自主智能體（Agentic Workflows）快速普及。\n\n【研究熱度】近 3 年論文發表量呈顯著攀升，算力效率與輕量化模型部署備受關注。\n\n【未來 2-3 年預測】結合物理世界反饋的具身智能（Embodied AI）與神經符號系統將成為下一個學術爆發點。",
+    "zh_hans": "【主流研究方向】当前聚焦于多模态大模型架构、长上下文理解（Long-Context Reasoning）以及高效微调技术。\n\n【新兴技术】自适应强化学习对齐（RLAIF/DPO）与自主智能体（Agentic Workflows）快速普及。\n\n【研究热度】近 3 年论文发表量呈显著攀升，算力效率与轻量化模型部署备受关注。\n\n【未来 2-3 年预测】结合物理世界反馈的具身智能（Embodied AI）与神经符号系统将成为下一个学术爆发点。",
+    "en": "【Main Research Directions】Current focus is on multimodal large model architectures, long-context reasoning (Long-Context Reasoning), and efficient fine-tuning techniques.\n\n【Emerging Technologies】Adaptive reinforcement learning alignment (RLAIF/DPO) and autonomous agents (Agentic Workflows) are rapidly gaining adoption.\n\n【Research Momentum】Paper publications over the past 3 years show significant growth, with computational efficiency and lightweight model deployment receiving considerable attention.\n\n【Forecast for the Next 2-3 Years】Embodied AI grounded in real-world physical feedback (Embodied AI) and neuro-symbolic systems will become the next academic breakthrough frontier.",
+    "ja": "【主流の研究方向】現在はマルチモーダル大規模モデルアーキテクチャ、長文脈理解（Long-Context Reasoning）、および効率的な微調整技術に焦点が当てられている。\n\n【新興技術】適応型強化学習アライメント（RLAIF/DPO）と自律エージェント（Agentic Workflows）が急速に普及している。\n\n【研究の熱度】過去 3 年の論文発表数は顕著な上昇を示しており、計算効率と軽量モデル展開に注目が集まっている。\n\n【今後 2-3 年の予測】物理世界のフィードバックを組み込んだ身体性AI（Embodied AI）と神経記号システムが、次の学術的ブレイクスルーの起点となるだろう。"
+  }
+}

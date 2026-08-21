@@ -19,7 +19,7 @@ import {
   Plus
 } from 'lucide-react';
 import { Paper, GraphNode, GraphLink } from '../types';
-import { useI18n } from '../i18n';
+import { useI18n, getLocalizedCategory } from '../i18n';
 
 interface CitationGraphProps {
   library: Paper[];
@@ -56,7 +56,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
         year: '2017',
         citations: 124500,
         category: '人工智慧',
-        source: 'NeurIPS (開山奠基作)',
+        source: 'graph_source_neurips',
         is_open_access: true,
         is_top_journal: true,
         is_seminal: true,
@@ -68,7 +68,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
         year: '2016',
         citations: 215000,
         category: '人工智慧',
-        source: 'CVPR (千載基石)',
+        source: 'graph_source_cvpr',
         is_open_access: true,
         is_top_journal: true,
         is_seminal: true,
@@ -80,7 +80,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
         year: '2012',
         citations: 18500,
         category: '生命科學',
-        source: 'Science (諾貝爾獎奠基作)',
+        source: 'graph_source_science',
         is_open_access: true,
         is_top_journal: true,
         is_seminal: true,
@@ -90,11 +90,11 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
     const libraryNodes: GraphNode[] = library.map((p, idx) => ({
       id: p.id || `lib_${idx}`,
       title: p.title,
-      authors: p.authors?.[0] ? `${p.authors[0]} et al.` : '科研團隊',
+      authors: p.authors?.[0] ? `${p.authors[0]} et al.` : 'graph_author_team',
       year: p.year || '2024',
       citations: p.citations || Math.floor(Math.random() * 450) + 20,
       category: p.category || '人工智慧',
-      source: p.source || '頂會頂刊',
+      source: p.source || 'graph_source_default',
       is_open_access: p.is_open_access,
       is_top_journal: p.is_top_journal,
       is_seminal: false,
@@ -240,13 +240,13 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  學術文獻知識拓撲與引用網絡圖譜
+                  {t('graph_title')}
                   <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                    Pro 專屬
+                    {t('graph_pro_badge')}
                   </span>
                 </h2>
                 <p className="text-xs text-slate-300 mt-0.5">
-                  自動梳理您的文獻庫與全球 3.5 億篇文獻的引用傳承鏈、開山奠基文獻與跨領域交匯節點
+                  {t('graph_banner_sub')}
                 </p>
               </div>
             </div>
@@ -261,14 +261,14 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
               className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition-colors"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              重置視野
+              {t('reset_view')}
             </button>
             <button
-              onClick={() => alert('圖譜已匯出為高解析度向量 SVG 格式，可直接嵌入學術論文 LaTeX / Word 插圖！')}
+              onClick={() => alert(t('graph_export_alert'))}
               className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-sm shadow-indigo-600/30 transition-all"
             >
               <Download className="h-3.5 w-3.5" />
-              匯出論文插圖 (.svg)
+              {t('export_svg')}
             </button>
           </div>
         </div>
@@ -279,14 +279,14 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
         
         {/* Layout Modes */}
         <div className="flex items-center space-x-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
-          <span className="text-slate-400 text-[11px] px-2 font-medium">佈局排版：</span>
+          <span className="text-slate-400 text-[11px] px-2 font-medium">{t('graph_layout_label')}</span>
           <button
             onClick={() => setLayoutMode('force')}
             className={`px-3 py-1 rounded-md transition-colors ${
               layoutMode === 'force' ? 'bg-indigo-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🕸️ 引力拓撲
+            {t('layout_force')}
           </button>
           <button
             onClick={() => setLayoutMode('timeline')}
@@ -294,7 +294,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
               layoutMode === 'timeline' ? 'bg-indigo-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            ⏳ 年代傳承軸
+            {t('layout_timeline')}
           </button>
           <button
             onClick={() => setLayoutMode('cluster')}
@@ -302,24 +302,24 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
               layoutMode === 'cluster' ? 'bg-indigo-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🪐 領域聚合圈
+            {t('layout_clusters')}
           </button>
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center space-x-2">
-            <span className="text-slate-400">領域：</span>
+            <span className="text-slate-400">{t('graph_filter_label')}</span>
             <select
               value={filterDomain}
               onChange={(e) => setFilterDomain(e.target.value)}
               className="bg-slate-950 border border-slate-800 text-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:border-indigo-500"
             >
-              <option value="all">🌐 全領域總覽</option>
-              <option value="人工智慧">🤖 人工智慧 (AI/ML)</option>
-              <option value="生命科學">🧬 生命科學 (Biomed)</option>
-              <option value="量子物理">⚛️ 量子物理 (Quantum)</option>
-              <option value="綜合科學">🔬 綜合前沿科學</option>
+              <option value="all">{t('graph_filter_all')}</option>
+              <option value="人工智慧">{t('graph_cat_ai')}</option>
+              <option value="生命科學">{t('graph_cat_life')}</option>
+              <option value="量子物理">{t('graph_cat_quantum')}</option>
+              <option value="綜合科學">{t('graph_cat_general')}</option>
             </select>
           </div>
 
@@ -330,7 +330,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
               onChange={(e) => setOnlyTopJournals(e.target.checked)}
               className="rounded bg-slate-950 border-slate-700 text-indigo-600 focus:ring-0"
             />
-            <span>🏆 僅看頂刊/頂會 (Nature/CVPR/NeurIPS)</span>
+            <span>{t('graph_filter_journals')}</span>
           </label>
         </div>
 
@@ -339,7 +339,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
           <button
             onClick={() => setZoomLevel(prev => Math.max(prev - 0.15, 0.5))}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-            title="縮小"
+            title={t('graph_zoom_out')}
           >
             <ZoomOut className="h-4 w-4" />
           </button>
@@ -347,7 +347,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
           <button
             onClick={() => setZoomLevel(prev => Math.min(prev + 0.15, 2.0))}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-            title="放大"
+            title={t('graph_zoom_in')}
           >
             <ZoomIn className="h-4 w-4" />
           </button>
@@ -470,7 +470,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
                       fontWeight={isSelected ? 'bold' : 'normal'}
                       className="pointer-events-none"
                     >
-                      {node.authors} ({node.year})
+                      {t(node.authors)} ({node.year})
                     </text>
                   </g>
                 );
@@ -482,19 +482,19 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
           <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur border border-slate-800 rounded-lg p-2.5 flex items-center space-x-4 text-[11px] text-slate-300">
             <div className="flex items-center space-x-1.5">
               <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
-              <span>人工智慧</span>
+              <span>{t('graph_legend_ai')}</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
-              <span>生命科學</span>
+              <span>{t('graph_legend_life')}</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-              <span>綜合前沿</span>
+              <span>{t('graph_legend_frontier')}</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <span className="text-amber-400 font-bold">👑</span>
-              <span>開山基石論文</span>
+              <span>{t('graph_legend_seminal')}</span>
             </div>
           </div>
         </div>
@@ -509,7 +509,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
                     ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' 
                     : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                 }`}>
-                  {selectedNode.category}
+                  {getLocalizedCategory(selectedNode.category, userLang)}
                 </span>
                 <span className="text-xs text-slate-400 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
@@ -522,25 +522,25 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
                   {selectedNode.title}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  作者：<span className="text-slate-200">{selectedNode.authors}</span>
+                  {t('graph_detail_author')}<span className="text-slate-200">{t(selectedNode.authors)}</span>
                 </p>
                 <p className="text-xs text-slate-400">
-                  出處：<span className="text-indigo-300 font-medium">{selectedNode.source}</span>
+                  {t('graph_detail_source')}<span className="text-indigo-300 font-medium">{t(selectedNode.source)}</span>
                 </p>
               </div>
 
               {/* Metrics Card */}
               <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
                 <div>
-                  <span className="text-slate-400 block">全球被引用量</span>
+                  <span className="text-slate-400 block">{t('graph_citations_label')}</span>
                   <span className="text-amber-400 font-mono font-bold text-sm">
-                    {selectedNode.citations.toLocaleString()} 次
+                    {selectedNode.citations.toLocaleString()} {t('graph_citations_unit')}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">文獻屬性</span>
+                  <span className="text-slate-400 block">{t('graph_detail_attribute')}</span>
                   <span className="text-emerald-400 font-medium text-xs flex items-center gap-1 mt-0.5">
-                    {selectedNode.is_seminal ? '👑 領域奠基作' : '🟢 Open Access'}
+                    {selectedNode.is_seminal ? t('graph_detail_seminal_label') : '🟢 Open Access'}
                   </span>
                 </div>
               </div>
@@ -549,12 +549,12 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
               <div className="space-y-1.5 text-xs text-slate-300 bg-indigo-950/30 p-3 rounded-xl border border-indigo-900/40">
                 <span className="text-indigo-300 font-semibold flex items-center gap-1">
                   <Sparkles className="h-3.5 w-3.5" />
-                  圖譜傳承脈絡解析：
+                  {t('graph_insight_title')}
                 </span>
                 <p className="leading-relaxed text-slate-300">
                   {selectedNode.is_seminal 
-                    ? '該論文為本領域核心引力樞紐，直接衍生了 2020-2024 年超過 40% 的頂會架構改進。' 
-                    : '本篇在方法論上直接繼承了 Vaswani et al. (2017) 的自注意力架構，並針對損失函數進行了閉式優化。'}
+                    ? t('graph_insight_seminal')
+                    : t('graph_insight_normal')}
                 </p>
               </div>
 
@@ -569,17 +569,17 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
                       year: selectedNode.year,
                       source: selectedNode.source,
                       link: 'https://doi.org/10.1038/s42256-024-0001',
-                      summary: `針對 ${selectedNode.title} 之核心突破、實驗基準與理論邊界進行全面性剖析。`,
-                      citations: selectedNode.citations,
-                      is_open_access: true,
-                      is_top_journal: true,
-                    };
-                    onSelectPaperForDeep(paperMock);
+                       summary: t('graph_deep_summary', { title: selectedNode.title }),
+                       citations: selectedNode.citations,
+                       is_open_access: true,
+                       is_top_journal: true,
+                     };
+                     onSelectPaperForDeep(paperMock);
                   }}
                   className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
-                  開啟 4 維 AI 深度導讀
+                  {t('drawer_deep')}
                 </button>
 
                 {onAddToMatrix && (
@@ -602,7 +602,7 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
                     className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 border border-slate-700 transition-colors"
                   >
                     <Table className="h-3.5 w-3.5 text-indigo-400" />
-                    加入文獻比較矩陣 (Matrix)
+                    {t('drawer_add_matrix')}
                   </button>
                 )}
               </div>
@@ -613,17 +613,17 @@ export const CitationGraph: React.FC<CitationGraphProps> = ({
                 <Network className="h-6 w-6" />
               </div>
               <h4 className="text-sm font-semibold text-slate-200">
-                點擊圖譜中任一節點
+                {t('graph_empty_hint')}
               </h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                可即時檢視該論文的引用樞紐權重、奠基文獻傳承路徑，並一鍵啟動 4 維 AI 解析或納入文獻矩陣。
+                {t('graph_empty_detail')}
               </p>
             </div>
           )}
 
-          <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-500 text-center">
-            節點大小與引用量成正比 • 雙向拖曳畫布縮放
-          </div>
+           <div className="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-500 text-center">
+             {t('graph_footer_hint')}
+           </div>
         </div>
       </div>
     </div>

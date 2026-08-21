@@ -1,0 +1,32 @@
+{
+  "nav_hq": {
+    "zh_hant": "大總部",
+    "zh_hans": "大总部",
+    "en": "HQ",
+    "ja": "総本部"
+  },
+  "nav_lang_zh_hant": {
+    "zh_hant": "繁中",
+    "zh_hans": "繁中",
+    "en": "Traditional",
+    "ja": "繁体中文"
+  },
+  "nav_lang_zh_hans": {
+    "zh_hant": "简中",
+    "zh_hans": "简中",
+    "en": "Simplified",
+    "ja": "簡体中文"
+  },
+  "nav_lang_ja": {
+    "zh_hant": "日本語",
+    "zh_hans": "日本語",
+    "en": "Japanese",
+    "ja": "日本語"
+  },
+  "nav_model_tooltip": {
+    "zh_hant": "選擇 AI 模型（Pro 模型需對應訂閱方案）",
+    "zh_hans": "选择 AI 模型（Pro 模型需对应订阅方案）",
+    "en": "Select AI model (Pro models require matching subscription plan)",
+    "ja": "AI モデルを選択（Pro モデルは対応するサブスクリプションが必要）"
+  }
+}

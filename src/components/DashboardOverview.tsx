@@ -278,10 +278,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <PieChart>
                 <Pie
                   data={(chartData.category_distribution.length > 0 ? chartData.category_distribution : [
-                    { name: '人工智慧', value: 14 },
-                    { name: '生命科學', value: 5 },
-                    { name: '量子物理', value: 3 },
-                    { name: '通用科學', value: 2 },
+                    { name: t('dash_cat_ai'), value: 14 },
+                    { name: t('dash_cat_life'), value: 5 },
+                    { name: t('dash_cat_quantum'), value: 3 },
+                    { name: t('dash_cat_general'), value: 2 },
                   ]).map(item => ({
                     ...item,
                     name: getLocalizedCategory(item.name, userLang)
@@ -294,10 +294,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   dataKey="value"
                 >
                   {(chartData.category_distribution.length > 0 ? chartData.category_distribution : [
-                    { name: '人工智慧', value: 14 },
-                    { name: '生命科學', value: 5 },
-                    { name: '量子物理', value: 3 },
-                    { name: '通用科學', value: 2 },
+                    { name: t('dash_cat_ai'), value: 14 },
+                    { name: t('dash_cat_life'), value: 5 },
+                    { name: t('dash_cat_quantum'), value: 3 },
+                    { name: t('dash_cat_general'), value: 2 },
                   ]).map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
@@ -311,10 +311,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           <div className="grid grid-cols-2 gap-2 text-xs">
             {(chartData.category_distribution.length > 0 ? chartData.category_distribution : [
-              { name: '人工智慧', value: 14 },
-              { name: '生命科學', value: 5 },
-              { name: '量子物理', value: 3 },
-              { name: '通用科學', value: 2 },
+              { name: t('dash_cat_ai'), value: 14 },
+              { name: t('dash_cat_life'), value: 5 },
+              { name: t('dash_cat_quantum'), value: 3 },
+              { name: t('dash_cat_general'), value: 2 },
             ]).map((item, idx) => {
               const localizedName = getLocalizedCategory(item.name, userLang);
               return (

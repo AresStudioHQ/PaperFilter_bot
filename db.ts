@@ -188,19 +188,20 @@ export async function setUserLang(lang: string): Promise<void> {
 }
 
 export async function setTier(tier: string): Promise<void> {
-  const limits: Record<string, number[]> = {
-    free: [10, 1, 0, 0, 3, 0],
-    basic: [30, 5, 0, 0, 10, 0],
-    standard: [100, 15, 3, 3, 30, 1],
-    premium: [200, 30, 10, 10, 60, 3],
-    ultra: [500, 50, 20, 20, 999999, 7],
+  const LIMITS: Record<string, Record<string, number>> = {
+    free:     { daily_search_limit: 20, daily_deep_limit: 5, daily_litreview_limit: 3, daily_gap_analysis_limit: 3, daily_export_limit: 10, daily_digest_limit: 2 },
+    basic:    { daily_search_limit: 50, daily_deep_limit: 15, daily_litreview_limit: 10, daily_gap_analysis_limit: 10, daily_export_limit: 25, daily_digest_limit: 5 },
+    standard: { daily_search_limit: 150, daily_deep_limit: 50, daily_litreview_limit: 25, daily_gap_analysis_limit: 25, daily_export_limit: 80, daily_digest_limit: 10 },
+    premium:  { daily_search_limit: 300, daily_deep_limit: 150, daily_litreview_limit: 100, daily_gap_analysis_limit: 100, daily_export_limit: 250, daily_digest_limit: 20 },
+    ultra:    { daily_search_limit: 500, daily_deep_limit: 300, daily_litreview_limit: 999999, daily_gap_analysis_limit: 999999, daily_export_limit: 999999, daily_digest_limit: 50 },
+    lab:      { daily_search_limit: 999999, daily_deep_limit: 999999, daily_litreview_limit: 999999, daily_gap_analysis_limit: 999999, daily_export_limit: 999999, daily_digest_limit: 999999 },
   };
-  const l = limits[tier] || limits.free;
+  const l = LIMITS[tier] || LIMITS.free;
   await q(
     `INSERT INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
      ON CONFLICT(user_id) DO UPDATE SET tier = ?, daily_search_limit = ?, daily_deep_limit = ?, daily_litreview_limit = ?, daily_gap_analysis_limit = ?, daily_export_limit = ?, daily_digest_limit = ?, updated_at = CURRENT_TIMESTAMP`,
-    [currentUserId(), tier, ...l, tier, ...l]
+    [currentUserId(), tier, l.daily_search_limit, l.daily_deep_limit, l.daily_litreview_limit, l.daily_gap_analysis_limit, l.daily_export_limit, l.daily_digest_limit, tier, l.daily_search_limit, l.daily_deep_limit, l.daily_litreview_limit, l.daily_gap_analysis_limit, l.daily_export_limit, l.daily_digest_limit]
   );
 }
 

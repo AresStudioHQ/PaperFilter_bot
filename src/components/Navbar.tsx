@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, FilterMode } from '../types';
 import { useI18n } from '../i18n';
+import { hasPaidTier } from '../subscriptionTiers';
 import { AIModel } from '../modelStore';
 
 interface NavbarProps {
@@ -67,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {t('brand_title')}
                 </span>
                 <span className="px-1.5 py-0.2 text-[10px] font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
-                  {userLang === 'en' ? 'HQ' : userLang === 'ja' ? '総本部' : '大總部'}
+                  {t('nav_hq')}
                 </span>
               </div>
               <p className="hidden md:block text-[11px] text-slate-400 font-medium truncate max-w-sm">
@@ -117,10 +118,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onChange={(e) => onLanguageChange(e.target.value)}
                 className="bg-transparent text-slate-200 text-xs py-1 px-1 focus:outline-none cursor-pointer font-medium"
               >
-                <option value="zh_hant" className="bg-slate-900 text-slate-100">🇹🇼 繁中</option>
-                <option value="zh_hans" className="bg-slate-900 text-slate-100">🇨🇳 简中</option>
+                <option value="zh_hant" className="bg-slate-900 text-slate-100">🇹🇼 {t('nav_lang_zh_hant')}</option>
+                <option value="zh_hans" className="bg-slate-900 text-slate-100">🇨🇳 {t('nav_lang_zh_hans')}</option>
                 <option value="en" className="bg-slate-900 text-slate-100">🇺🇸 EN</option>
-                <option value="ja" className="bg-slate-900 text-slate-100">🇯🇵 日本語</option>
+                <option value="ja" className="bg-slate-900 text-slate-100">🇯🇵 {t('nav_lang_ja')}</option>
               </select>
             </div>
 
@@ -130,7 +131,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 value={model}
                 onChange={(e) => onModelChange(e.target.value)}
                 className="bg-transparent text-slate-200 text-xs py-1 px-1 focus:outline-none cursor-pointer font-medium w-full"
-                title="選擇 AI 模型（Pro 模型需對應訂閱方案）"
+                title={t('nav_model_tooltip')}
               >
                 {models.length === 0 && (
                   <option value={model} className="bg-slate-900 text-slate-100">{model || 'gpt-4o-mini'}</option>
@@ -170,13 +171,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenProModal}
               className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-md shrink-0 ${
-                user.tier === 'pro'
+                hasPaidTier(user.tier)
                   ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 ring-1 ring-amber-400/40'
                   : 'bg-slate-800 text-amber-300 border border-amber-500/40 hover:bg-amber-500/10'
               }`}
             >
               <Crown className="h-3.5 w-3.5 shrink-0" />
-              <span className="whitespace-nowrap">{user.tier === 'pro' ? `👑 ${t('pro_badge')}` : t('upgrade_pro')}</span>
+              <span className="whitespace-nowrap">{hasPaidTier(user.tier) ? `👑 ${t('pro_badge')}` : t('upgrade_pro')}</span>
             </button>
 
           </div>

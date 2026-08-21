@@ -1,0 +1,50 @@
+{
+  "tier_preprint": {
+    "zh_hant": "Preprint (未經 peer review)",
+    "zh_hans": "Preprint (未经 peer review)",
+    "en": "Preprint (not peer-reviewed)",
+    "ja": "プレプリント（査読前）"
+  },
+  "tier_top": {
+    "zh_hant": "頂級期刊 (Nature/Science/Cell 級)",
+    "zh_hans": "顶级期刊 (Nature/Science/Cell 级)",
+    "en": "Top-tier journal (Nature/Science/Cell level)",
+    "ja": "トップジャーナル（Nature/Science/Cell 級）"
+  },
+  "tier_ccf_a": {
+    "zh_hant": "CCF-A / 領域頂會頂刊",
+    "zh_hans": "CCF-A / 领域顶会顶刊",
+    "en": "CCF-A / Top venue & conference",
+    "ja": "CCF-A / 分野トップ会議・ジャーナル"
+  },
+  "tier_ccf_b": {
+    "zh_hant": "CCF-B / 優良期刊",
+    "zh_hans": "CCF-B / 优良期刊",
+    "en": "CCF-B / Quality journal",
+    "ja": "CCF-B / 優良ジャーナル"
+  },
+  "tier_ccf_c": {
+    "zh_hant": "CCF-C / 認可期刊",
+    "zh_hans": "CCF-C / 认可期刊",
+    "en": "CCF-C / Recognized journal",
+    "ja": "CCF-C / 認定ジャーナル"
+  },
+  "tier_q1": {
+    "zh_hant": "Q1 / 高影響力期刊",
+    "zh_hans": "Q1 / 高影响力期刊",
+    "en": "Q1 / High-impact journal",
+    "ja": "Q1 / 高インパクトジャーナル"
+  },
+  "tier_general": {
+    "zh_hant": "Peer-reviewed (一般期刊)",
+    "zh_hans": "Peer-reviewed (一般期刊)",
+    "en": "Peer-reviewed (general journal)",
+    "ja": "査読済み（一般ジャーナル）"
+  },
+  "tier_peer": {
+    "zh_hant": "Peer-reviewed",
+    "zh_hans": "Peer-reviewed",
+    "en": "Peer-reviewed",
+    "ja": "査読済み"
+  }
+}
