@@ -144,7 +144,7 @@ export async function initTables(): Promise<void> {
   await q(`INSERT OR IGNORE INTO users (user_id) VALUES (?)`, [SEED_USER_ID]);
   await q(
     `INSERT OR IGNORE INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
-     VALUES (?, 'free', 20, 5, 3, 3, 10, 2)`,
+     VALUES (?, 'free', 20, 5, 3, 3, 10, 1)`,
     [SEED_USER_ID]
   );
 }
@@ -154,7 +154,7 @@ export async function ensureUser(userId: number): Promise<void> {
   await q(`INSERT OR IGNORE INTO users (user_id) VALUES (?)`, [userId]);
   await q(
     `INSERT OR IGNORE INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
-     VALUES (?, 'free', 20, 5, 3, 3, 10, 2)`,
+     VALUES (?, 'free', 20, 5, 3, 3, 10, 1)`,
     [userId]
   );
 }
@@ -199,11 +199,11 @@ export async function setUserLang(lang: string): Promise<void> {
 
 export async function setTier(tier: string): Promise<void> {
   const LIMITS: Record<string, Record<string, number>> = {
-    free:     { daily_search_limit: 20, daily_deep_limit: 5, daily_litreview_limit: 3, daily_gap_analysis_limit: 3, daily_export_limit: 10, daily_digest_limit: 2 },
-    basic:    { daily_search_limit: 50, daily_deep_limit: 15, daily_litreview_limit: 10, daily_gap_analysis_limit: 10, daily_export_limit: 25, daily_digest_limit: 5 },
-    standard: { daily_search_limit: 150, daily_deep_limit: 50, daily_litreview_limit: 25, daily_gap_analysis_limit: 25, daily_export_limit: 80, daily_digest_limit: 10 },
-    premium:  { daily_search_limit: 300, daily_deep_limit: 150, daily_litreview_limit: 100, daily_gap_analysis_limit: 100, daily_export_limit: 250, daily_digest_limit: 20 },
-    ultra:    { daily_search_limit: 500, daily_deep_limit: 300, daily_litreview_limit: 999999, daily_gap_analysis_limit: 999999, daily_export_limit: 999999, daily_digest_limit: 50 },
+    free:     { daily_search_limit: 20, daily_deep_limit: 5, daily_litreview_limit: 3, daily_gap_analysis_limit: 3, daily_export_limit: 10, daily_digest_limit: 1 },
+    basic:    { daily_search_limit: 50, daily_deep_limit: 15, daily_litreview_limit: 10, daily_gap_analysis_limit: 10, daily_export_limit: 25, daily_digest_limit: 3 },
+    standard: { daily_search_limit: 150, daily_deep_limit: 50, daily_litreview_limit: 25, daily_gap_analysis_limit: 25, daily_export_limit: 80, daily_digest_limit: 5 },
+    premium:  { daily_search_limit: 300, daily_deep_limit: 150, daily_litreview_limit: 100, daily_gap_analysis_limit: 100, daily_export_limit: 250, daily_digest_limit: 7 },
+    ultra:    { daily_search_limit: 500, daily_deep_limit: 300, daily_litreview_limit: 999999, daily_gap_analysis_limit: 999999, daily_export_limit: 999999, daily_digest_limit: 999999 },
     lab:      { daily_search_limit: 999999, daily_deep_limit: 999999, daily_litreview_limit: 999999, daily_gap_analysis_limit: 999999, daily_export_limit: 999999, daily_digest_limit: 999999 },
   };
   const l = LIMITS[tier] || LIMITS.free;

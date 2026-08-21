@@ -1238,6 +1238,7 @@ ${bibtexStr}`;
                       <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /><span>{t('tier_drive')}：{isUnlimited(d.drive_monthly_limit) ? t('tier_drive_unlimited') : t('tier_drive_limit', { count: d.drive_monthly_limit })}</span></li>
                       <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /><span>{t('tier_chat')}：{fmt(d.daily_chat_limit)}</span></li>
                       <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /><span>{t('tier_follow')}：{fmt(d.follow_limit)}</span></li>
+                      <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /><span>{t('tier_report')}：{isUnlimited(d.daily_digest_limit) ? t('tier_report_unlimited') : t('tier_report_weekly_n', { count: d.daily_digest_limit })}</span></li>
                     </ul>
                   </div>
                   <button

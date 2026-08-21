@@ -1,4 +1,4 @@
-"""arXiv + PubMed + Semantic Scholar + CrossRef 全球權威論文多源檢索引擎
+"""arXiv + PubMed + Semantic Scholar + CrossRef + OpenAlex 全球權威論文多源檢索引擎
 支援：
 1. 檢索模式自訂 (filter_mode):
    - 'top_tier': 頂刊權威優先模式

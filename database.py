@@ -407,7 +407,7 @@ class Database:
         "free": {
             "daily_search_limit": 20, "daily_deep_limit": 5,
             "daily_litreview_limit": 3, "daily_gap_analysis_limit": 3,
-            "daily_export_limit": 10, "daily_digest_limit": 2,
+            "daily_export_limit": 10, "daily_digest_limit": 1,
             "daily_chat_limit": 3,
             "drive_monthly_limit": 20,
             "follow_limit": 3, "category_limit": 5,
@@ -415,7 +415,7 @@ class Database:
         "basic": {
             "daily_search_limit": 50, "daily_deep_limit": 15,
             "daily_litreview_limit": 10, "daily_gap_analysis_limit": 10,
-            "daily_export_limit": 25, "daily_digest_limit": 5,
+            "daily_export_limit": 25, "daily_digest_limit": 3,
             "daily_chat_limit": 10,
             "drive_monthly_limit": 50,
             "follow_limit": 10, "category_limit": 20,
@@ -423,7 +423,7 @@ class Database:
         "standard": {
             "daily_search_limit": 150, "daily_deep_limit": 50,
             "daily_litreview_limit": 25, "daily_gap_analysis_limit": 25,
-            "daily_export_limit": 80, "daily_digest_limit": 10,
+            "daily_export_limit": 80, "daily_digest_limit": 5,
             "daily_chat_limit": 25,
             "drive_monthly_limit": 100,
             "follow_limit": 30, "category_limit": 999999,
@@ -431,7 +431,7 @@ class Database:
         "premium": {
             "daily_search_limit": 300, "daily_deep_limit": 150,
             "daily_litreview_limit": 100, "daily_gap_analysis_limit": 100,
-            "daily_export_limit": 250, "daily_digest_limit": 20,
+            "daily_export_limit": 250, "daily_digest_limit": 7,
             "daily_chat_limit": 100,
             "drive_monthly_limit": 999999,
             "follow_limit": 999999, "category_limit": 999999,
@@ -439,7 +439,7 @@ class Database:
         "ultra": {
             "daily_search_limit": 500, "daily_deep_limit": 300,
             "daily_litreview_limit": 999999, "daily_gap_analysis_limit": 999999,
-            "daily_export_limit": 999999, "daily_digest_limit": 50,
+            "daily_export_limit": 999999, "daily_digest_limit": 999999,
             "daily_chat_limit": 999999,
             "drive_monthly_limit": 999999,
             "follow_limit": 999999, "category_limit": 999999,
@@ -605,9 +605,12 @@ class Database:
         self.conn.commit()
 
     def check_quota(self, user_id: int, action: str) -> tuple[bool, str]:
-        """檢查用戶是否還有配額。回傳 (是否允許, 錯誤訊息)"""
-        from datetime import date
-        today = date.today().isoformat()
+        """檢查用戶是否還有配額。回傳 (是否允許, 錯誤訊息)
+        digest 以週計（週一 00:00 重置）：Free 1 / Basic 3 / Standard 5 / Premium 7 / Ultra+Lab 無限。
+        """
+        from datetime import date, timedelta
+        today = date.today()
+        today_s = today.isoformat()
         tier_info = self.get_user_tier(user_id)
         limit_map = {
             "search": ("searches", tier_info["daily_search_limit"]),
@@ -623,7 +626,20 @@ class Database:
         col, limit = limit_map[action]
         if limit <= 0:
             return False, f"您的方案 ({tier_info['tier']}) 不支援此功能，請升級訂閱。"
-        self.cursor.execute(f"SELECT {col} FROM usage_tracking WHERE user_id = ? AND date = ?", (user_id, today))
+        if limit >= 999999:
+            return True, ""
+        if action == "digest":
+            week_start = (today - timedelta(days=today.weekday())).isoformat()
+            self.cursor.execute(
+                f"SELECT COALESCE(SUM({col}), 0) FROM usage_tracking WHERE user_id = ? AND date >= ?",
+                (user_id, week_start),
+            )
+            row = self.cursor.fetchone()
+            used = row[0] if row else 0
+            if used >= limit:
+                return False, f"本週 AI Report 配額已用盡 ({used}/{limit})，下週一重置或升級方案。"
+            return True, ""
+        self.cursor.execute(f"SELECT {col} FROM usage_tracking WHERE user_id = ? AND date = ?", (user_id, today_s))
         row = self.cursor.fetchone()
         used = row[0] if row else 0
         if used >= limit:

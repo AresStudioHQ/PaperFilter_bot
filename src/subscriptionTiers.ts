@@ -1,5 +1,6 @@
 // 訂閱等級單一資料源：數值與 bot 端 database.py 的 TIER_DEFS / TIER_PRICES / TIER_RANK 完全一致。
 // 前端 Pro 專區與 Navbar 都從這裡讀，避免前後端額度不同步。
+// daily_digest_limit = 每週 AI Report 次數（週一重置）。Ultra / Lab = 無限制。
 
 export type TierCode = 'free' | 'basic' | 'standard' | 'premium' | 'ultra' | 'lab';
 
@@ -17,23 +18,23 @@ export function hasPaidTier(tier: string): boolean {
 export const TIER_DEFS: Record<TierCode, Record<string, number>> = {
   free: {
     daily_search_limit: 20, daily_deep_limit: 5, daily_litreview_limit: 3, daily_gap_analysis_limit: 3,
-    daily_export_limit: 10, daily_digest_limit: 2, daily_chat_limit: 3, drive_monthly_limit: 20, follow_limit: 3, category_limit: 5,
+    daily_export_limit: 10, daily_digest_limit: 1, daily_chat_limit: 3, drive_monthly_limit: 20, follow_limit: 3, category_limit: 5,
   },
   basic: {
     daily_search_limit: 50, daily_deep_limit: 15, daily_litreview_limit: 10, daily_gap_analysis_limit: 10,
-    daily_export_limit: 25, daily_digest_limit: 5, daily_chat_limit: 10, drive_monthly_limit: 50, follow_limit: 10, category_limit: 20,
+    daily_export_limit: 25, daily_digest_limit: 3, daily_chat_limit: 10, drive_monthly_limit: 50, follow_limit: 10, category_limit: 20,
   },
   standard: {
     daily_search_limit: 150, daily_deep_limit: 50, daily_litreview_limit: 25, daily_gap_analysis_limit: 25,
-    daily_export_limit: 80, daily_digest_limit: 10, daily_chat_limit: 25, drive_monthly_limit: 100, follow_limit: 30, category_limit: UNLIMITED,
+    daily_export_limit: 80, daily_digest_limit: 5, daily_chat_limit: 25, drive_monthly_limit: 100, follow_limit: 30, category_limit: UNLIMITED,
   },
   premium: {
     daily_search_limit: 300, daily_deep_limit: 150, daily_litreview_limit: 100, daily_gap_analysis_limit: 100,
-    daily_export_limit: 250, daily_digest_limit: 20, daily_chat_limit: 100, drive_monthly_limit: UNLIMITED, follow_limit: UNLIMITED, category_limit: UNLIMITED,
+    daily_export_limit: 250, daily_digest_limit: 7, daily_chat_limit: 100, drive_monthly_limit: UNLIMITED, follow_limit: UNLIMITED, category_limit: UNLIMITED,
   },
   ultra: {
     daily_search_limit: 500, daily_deep_limit: 300, daily_litreview_limit: UNLIMITED, daily_gap_analysis_limit: UNLIMITED,
-    daily_export_limit: UNLIMITED, daily_digest_limit: 50, daily_chat_limit: UNLIMITED, drive_monthly_limit: UNLIMITED, follow_limit: UNLIMITED, category_limit: UNLIMITED,
+    daily_export_limit: UNLIMITED, daily_digest_limit: UNLIMITED, daily_chat_limit: UNLIMITED, drive_monthly_limit: UNLIMITED, follow_limit: UNLIMITED, category_limit: UNLIMITED,
   },
   lab: {
     daily_search_limit: UNLIMITED, daily_deep_limit: UNLIMITED, daily_litreview_limit: UNLIMITED, daily_gap_analysis_limit: UNLIMITED,

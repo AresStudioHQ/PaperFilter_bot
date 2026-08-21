@@ -212,7 +212,7 @@ function getGeminiClient(): any {
   return { models: { generateContent: (args: any) => generateAIContent(args) } };
 }
 
-// 4 大官方學術庫即時查詢 (arXiv, PubMed, Semantic Scholar, CrossRef)
+// 5 大官方學術庫即時查詢 (arXiv, PubMed, Semantic Scholar, CrossRef, OpenAlex)
 async function fetchAcademicPapers(query: string, mode: string = "smart") {
   const words = query.trim().split(/\s+/).filter(Boolean);
   const results: PaperItem[] = [];
@@ -750,7 +750,7 @@ app.post("/api/search", async (req, res) => {
       action: "search",
       paper_title: `搜尋主題：${query}`,
       timestamp: new Date().toISOString(),
-      details: `以 [${searchMode}] 策略跨 4 大庫進行檢索`
+      details: `以 [${searchMode}] 策略跨 5 大庫進行檢索`
     });
 
     const papers = await fetchAcademicPapers(query, searchMode);
@@ -1304,7 +1304,7 @@ function parseLangArg(arg: string): SimLang | null {
 }
 const SIM: Record<SimLang, Record<string, string>> = {
   en: {
-    start: "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n🔬 <b>Core Features</b>:\n• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\n• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\n• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\n\n👇 Choose a shortcut below or send <b>keywords</b> directly to search:",
+    start: "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n🔬 <b>What only PaperFilterBot does</b>:\n• Cross-search <b>5</b> scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef, OpenAlex)\n• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n• 🔄 Telegram ↔ Web HQ two-way sync — same library on phone and desktop\n• 👁 Seen vs Skip dual filter: ranking learns what you actually want (most tools only save or delete)\n• ☁️ Google Drive dual archive with auto-maintained <code>references.bib</code>\n• 👤 Follow a scholar — their new papers get +50 ranking weight in every search\n\n👇 Choose a shortcut below or send <b>keywords</b> directly to search:",
     help: "📖 <b>PaperFilterBot Command Suite</b>\n\n🔍 <b>Search</b>: Send keywords directly (e.g. LLM Agent)\n💬 <b>/chat</b> - Toggle cross-paper Q&A\n📚 <b>/my</b> - View library, folders & Drive\n🔗 <b>/bind</b> - 6-digit sync code to link Telegram\n💎 <b>/pro</b> - Plans & upgrade info\n📂 <b>/following</b> · ➕ <code>/follow Name</code> · ➖ <code>/unfollow Name</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend Field</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - Open the live Telegram bot (this is the web simulator)\n\nSlash commands are never treated as search.",
     bind: "🔗 <b>Bind web HQ to Telegram</b>\n\nYour sync code: <code>{code}</code>\n\nOpen the website, click <b>Bind TG</b>, and enter this code.",
     pro_head: "📊 <b>PaperFilterBot plans</b>\n\n👤 Current plan: <b>{tier}</b>\n\n",
@@ -1337,7 +1337,13 @@ const SIM: Record<SimLang, Record<string, string>> = {
     gap_hint: "🔍 Gap analysis runs in Pro Suite → Research Gap Scanner. /gap is not a search keyword.",
     trend_need: "Usage: <code>/trend quantum computing</code>",
     unlimited: "unlimited",
-    welcome: "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n🔬 <b>Core Features</b>:\n• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\n• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\n• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\n\n👇 Choose a shortcut below or send <b>keywords</b> directly to search:",
+    pro_search: "{n}/day search",
+    pro_deep: "{n}/day deep read",
+    pro_combo: "{n}/day /review + /gap + /chat",
+    pro_drive: "Drive: {n}/mo",
+    pro_report: "AI Report: {n}/week",
+    pro_report_unlim: "AI Report: unlimited",
+    welcome: "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n🔬 <b>What only PaperFilterBot does</b>:\n• Cross-search <b>5</b> scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef, OpenAlex)\n• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n• 🔄 Telegram ↔ Web HQ two-way sync — same library on phone and desktop\n• 👁 Seen vs Skip dual filter: ranking learns what you actually want (most tools only save or delete)\n• ☁️ Google Drive dual archive with auto-maintained <code>references.bib</code>\n• 👤 Follow a scholar — their new papers get +50 ranking weight in every search\n\n👇 Choose a shortcut below or send <b>keywords</b> directly to search:",
     btn_hot_transformer: "🔍 Hot: Transformer",
     btn_hot_crispr: "🧬 Hot: CRISPR",
     btn_bind: "🔗 Bind Telegram",
@@ -1352,7 +1358,7 @@ const SIM: Record<SimLang, Record<string, string>> = {
     mode_free: "🟢 Open Access only",
   },
   zh_hant: {
-    start: "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n🔬 <b>核心科研特權</b>：\n• 4 大官方學術庫交叉檢索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n• 💡 4 維 AI 深度導讀（研究動機、核心方法、關鍵結論、技術限制）\n• 💬 跨論文 RAG 智慧問答（<code>/chat [問題]</code>）\n• ☁️ Google Drive 雙軌自動歸檔 + <code>references.bib</code> 即時生成\n\n👇 請選擇下方快捷功能，或直接在聊天室發送<b>論文關鍵字</b>進行檢索：",
+    start: "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n🔬 <b>只有這裡才有的科研特權</b>：\n• 5 大學術庫交叉檢索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n• 💡 4 維 AI 深度導讀（動機、方法、發現、限制）\n• 🔄 Telegram ↔ 網頁大總部雙向同步：手機與電腦同一文獻庫\n• 👁 看過 / 沒興趣雙軌學習：排序會記住你真正要的論文（多數工具只有收藏或刪除）\n• ☁️ Google Drive 雙軌歸檔，資料夾自動維護 <code>references.bib</code>\n• 👤 追蹤學者：其新作在每次搜尋中權重 +50\n\n👇 請選擇下方快捷功能，或直接在聊天室發送<b>論文關鍵字</b>進行檢索：",
     help: "📖 <b>PaperFilterBot 全指令導覽</b>\n\n🔍 <b>論文檢索</b>：直接發送關鍵字（例如：LLM Agent）\n💬 <b>/chat</b> - 跨文獻問答\n📚 <b>/my</b> - 文獻庫、資料夾與 Drive\n🔗 <b>/bind</b> - 產生同步碼以綁定 Telegram\n💎 <b>/pro</b> - 方案比較\n📂 <b>/following</b> · ➕ <code>/follow 學者</code> · ➖ <code>/unfollow 學者</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend 領域</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - 開啟真實 Telegram 機器人（此處為網頁模擬器）\n\n以 / 開頭的指令不會被當成搜尋。",
     bind: "🔗 <b>綁定網頁大總部</b>\n\n同步碼：<code>{code}</code>\n\n請在網頁點擊「綁定 TG」後輸入此代碼。",
     pro_head: "📊 <b>方案比較</b>\n\n👤 目前方案：<b>{tier}</b>\n\n",
@@ -1385,6 +1391,12 @@ const SIM: Record<SimLang, Record<string, string>> = {
     gap_hint: "🔍 缺口分析請到 Pro 專區的 Gap Scanner。/gap 不是搜尋關鍵字。",
     trend_need: "用法：<code>/trend quantum computing</code>",
     unlimited: "無限",
+    pro_search: "搜尋 {n}/日",
+    pro_deep: "深度導讀 {n}/日",
+    pro_combo: "/review + /gap + /chat 各 {n}/日",
+    pro_drive: "Drive：{n}/月",
+    pro_report: "AI 分析報告：每週 {n} 次",
+    pro_report_unlim: "AI 分析報告：無限制",
     btn_hot_transformer: "🔍 熱門：Transformer",
     btn_hot_crispr: "🧬 熱門：CRISPR",
     btn_bind: "🔗 綁定 Telegram",
@@ -1399,7 +1411,7 @@ const SIM: Record<SimLang, Record<string, string>> = {
     mode_free: "🟢 僅免費全文",
   },
   zh_hans: {
-    start: "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n🔬 <b>核心科研特权</b>：\n• 4 大官方学术库交叉检索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n• 💡 4 维 AI 深度导读\n• 💬 跨论文 RAG 问答（<code>/chat [问题]</code>）\n• ☁️ Google Drive 双轨归档 + <code>references.bib</code>\n\n👇 请选择下方快捷功能，或直接发送<b>论文关键字</b>检索：",
+    start: "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n🔬 <b>只有这里才有的科研特权</b>：\n• 5 大学术库交叉检索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n• 💡 4 维 AI 深度导读（动机、方法、发现、限制）\n• 🔄 Telegram ↔ 网页大总部双向同步：手机与电脑同一文献库\n• 👁 看过 / 没兴趣双轨学习：排序会记住你真正要的论文（多数工具只有收藏或删除）\n• ☁️ Google Drive 双轨归档，文件夹自动维护 <code>references.bib</code>\n• 👤 追踪学者：其新作在每次搜索中权重 +50\n\n👇 请选择下方快捷功能，或直接发送<b>论文关键字</b>检索：",
     help: "📖 <b>PaperFilterBot 全指令导览</b>\n\n🔍 直接发送关键字检索\n💬 <b>/chat</b> · 📚 <b>/my</b> · 🔗 <b>/bind</b> · 💎 <b>/pro</b>\n📂 <b>/following</b> · ➕ <code>/follow 学者</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend 领域</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - 打开真实 Telegram 机器人（此处为网页模拟器）\n\n以 / 开头的指令不会被当成搜索。",
     bind: "🔗 <b>绑定网页总部</b>\n\n同步码：<code>{code}</code>\n\n请在网页点击「绑定 TG」后输入此代码。",
     pro_head: "📊 <b>方案比较</b>\n\n👤 当前方案：<b>{tier}</b>\n\n",
@@ -1432,6 +1444,12 @@ const SIM: Record<SimLang, Record<string, string>> = {
     gap_hint: "🔍 缺口分析请到 Pro 专区。/gap 不是搜索关键字。",
     trend_need: "用法：<code>/trend quantum computing</code>",
     unlimited: "无限",
+    pro_search: "搜索 {n}/日",
+    pro_deep: "深度导读 {n}/日",
+    pro_combo: "/review + /gap + /chat 各 {n}/日",
+    pro_drive: "Drive：{n}/月",
+    pro_report: "AI 分析报告：每周 {n} 次",
+    pro_report_unlim: "AI 分析报告：无限制",
     btn_hot_transformer: "🔍 热门：Transformer",
     btn_hot_crispr: "🧬 热门：CRISPR",
     btn_bind: "🔗 绑定 Telegram",
@@ -1446,7 +1464,7 @@ const SIM: Record<SimLang, Record<string, string>> = {
     mode_free: "🟢 仅免费全文",
   },
   ja: {
-    start: "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot HQ</b> へようこそ！\n\n🔬 <b>主な機能</b>：\n• 4大学術リポジトリ横断検索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n• 💡 4次元 AI ディープ読解\n• 💬 複数論文 RAG Q&A（<code>/chat [質問]</code>）\n• ☁️ Google Drive 保存と <code>references.bib</code> 同期\n\n👇 下のショートカットを選ぶか、<b>キーワード</b>を送って検索：",
+    start: "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot HQ</b> へようこそ！\n\n🔬 <b>ここだけの研究特権</b>：\n• 5大学術DB横断検索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n• 💡 4次元 AI ディープ読解（動機・手法・発見・限界）\n• 🔄 Telegram ↔ Web HQ 双方向同期：スマホとPCで同じ文献庫\n• 👁 既読 / 興味なしの二重学習：順位が本当に欲しい論文を覚える\n• ☁️ Google Drive 二重保存と <code>references.bib</code> 自動更新\n• 👤 学者フォロー：新著が毎回の検索で +50 加点\n\n👇 下のショートカットを選ぶか、<b>キーワード</b>を送って検索：",
     help: "📖 <b>PaperFilterBot コマンド一覧</b>\n\n🔍 キーワードを直接送信\n💬 <b>/chat</b> · 📚 <b>/my</b> · 🔗 <b>/bind</b> · 💎 <b>/pro</b>\n📂 <b>/following</b> · ➕ <code>/follow 名前</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend 分野</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - 本番 Telegram bot を開く（ここは Web シミュレータ）\n\n/ で始まるコマンドは検索しません。",
     bind: "🔗 <b>Web HQ を Telegram に連携</b>\n\n同期コード：<code>{code}</code>\n\nサイトで「Bind TG」を押し、このコードを入力してください。",
     pro_head: "📊 <b>プラン比較</b>\n\n👤 現在のプラン：<b>{tier}</b>\n\n",
@@ -1479,6 +1497,12 @@ const SIM: Record<SimLang, Record<string, string>> = {
     gap_hint: "🔍 ギャップ分析は Pro Suite の Gap Scanner です。/gap は検索しません。",
     trend_need: "使い方：<code>/trend quantum computing</code>",
     unlimited: "無制限",
+    pro_search: "検索 {n}/日",
+    pro_deep: "詳細解説 {n}/日",
+    pro_combo: "/review + /gap + /chat 各 {n}/日",
+    pro_drive: "Drive：{n}/月",
+    pro_report: "AI レポート：週 {n} 回",
+    pro_report_unlim: "AI レポート：無制限",
     btn_hot_transformer: "🔍 人気：Transformer",
     btn_hot_crispr: "🧬 人気：CRISPR",
     btn_bind: "🔗 Telegram を連携",
@@ -1591,7 +1615,10 @@ app.post("/api/simulate-bot", async (req, res) => {
         const fmtN = (n: number) => isUnlimited(n) ? st(lang, "unlimited") : String(n);
         const blocks = TIER_ORDER.map((tc) => {
           const d = TIER_DEFS[tc];
-          return `<b>${tc}</b>\n• search ${fmtN(d.daily_search_limit)}/day · deep ${fmtN(d.daily_deep_limit)}/day\n• chat ${fmtN(d.daily_chat_limit)}/day · follow ${fmtN(d.follow_limit)} · Drive ${fmtN(d.drive_monthly_limit)}/mo`;
+          const report = isUnlimited(d.daily_digest_limit)
+            ? st(lang, "pro_report_unlim")
+            : st(lang, "pro_report", { n: d.daily_digest_limit });
+          return `<b>${tc}</b>\n• ${st(lang, "pro_search", { n: fmtN(d.daily_search_limit) })}\n• ${st(lang, "pro_deep", { n: fmtN(d.daily_deep_limit) })}\n• ${st(lang, "pro_combo", { n: fmtN(d.daily_chat_limit) })}\n• ${st(lang, "pro_drive", { n: fmtN(d.drive_monthly_limit) })}\n• ${report}`;
         }).join("\n\n");
         return res.json({ type: "text", text: st(lang, "pro_head", { tier: profile.tier }) + blocks + st(lang, "pro_foot") });
       }

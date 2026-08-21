@@ -49,11 +49,13 @@ MESSAGES = {
     "zh_hant": {
         "welcome": (
             "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n"
-            "🔬 <b>核心科研特權</b>：\n"
-            "• 4 大官方學術庫交叉檢索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
-            "• 💡 4 維 AI 深度導讀（研究動機、核心方法、關鍵結論、技術限制）\n"
-            "• 💬 跨論文 RAG 智慧問答（<code>/chat [問題]</code>）\n"
-            "• ☁️ Google Drive 雙軌自動歸檔 + <code>references.bib</code> 即時生成\n\n"
+            "🔬 <b>只有這裡才有的科研特權</b>：\n"
+            "• 5 大學術庫交叉檢索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
+            "• 💡 4 維 AI 深度導讀（動機、方法、發現、限制）\n"
+            "• 🔄 Telegram ↔ 網頁大總部雙向同步：手機與電腦同一文獻庫\n"
+            "• 👁 看過 / 沒興趣雙軌學習：排序會記住你真正要的論文（多數工具只有收藏或刪除）\n"
+            "• ☁️ Google Drive 雙軌歸檔，資料夾自動維護 <code>references.bib</code>\n"
+            "• 👤 追蹤學者：其新作在每次搜尋中權重 +50\n\n"
             "👇 請選擇下方快捷功能，或直接在聊天室發送<b>論文關鍵字</b>進行檢索："
         ),
         "help": (
@@ -147,6 +149,11 @@ MESSAGES = {
         "tier_report_monthly": "每月 1 份",
         "tier_report_weekly": "每週 1 份",
         "tier_report_daily": "每日 1 份",
+        "tier_report_weekly_n": "每週 {count} 次",
+        "tier_report_unlimited": "無限制",
+        "pro_combo_rgc": "/review + /gap + /chat：各 {count}/日",
+        "pro_text_header": "📊 <b>PaperFilterBot 方案比較</b>\n\n👤 您目前方案：{tier}\n",
+        "pro_text_footer": "💡 可在科研大總部一鍵升級！",
         "tier_ads": "網頁端廣告",
         "tier_ads_none": "無廣告",
         "tier_ads_show": "有廣告",
@@ -247,43 +254,7 @@ MESSAGES = {
         "lang_switched_confirm": "✅ 語言已切換為 {lang}",
         "mark_seen_callback": "👁 已標記為已讀",
         "mark_skip_callback": "❌ 已略過",
-        "pro_text": (
-            "📊 <b>PaperFilterBot 方案比較</b>\n\n"
-            "👤 您目前方案：{tier}\n\n"
-            "🆓 <b>Free 免費版（測試期）</b>\n"
-            "• 搜尋：20 次/日\n"
-            "• 深度導讀：5 次/日\n"
-            "• /review + /gap + /chat：各 3 次/日\n"
-            "• Drive：20 篇/日\n"
-            "• 廣告：有\n\n"
-            "🔧 <b>Basic</b>\n"
-            "• 搜尋：50 次/日\n"
-            "• 深度導讀：15 次/日\n"
-            "• /review + /gap + /chat：各 10 次/日\n"
-            "• Drive：50 篇/日\n"
-            "• 無廣告\n\n"
-            "⭐ <b>Standard</b>\n"
-            "• 搜尋：150 次/日\n"
-            "• 深度導讀：50 次/日\n"
-            "• /review + /gap + /chat：各 25 次/日\n"
-            "• Drive：100 篇/日\n"
-            "• 每月 AI 分析報告\n\n"
-            "💎 <b>Premium</b>\n"
-            "• 搜尋：300 次/日\n"
-            "• 深度導讀：150 次/日\n"
-            "• /review + /gap + /chat：各 100 次/日\n"
-            "• Drive：無限\n"
-            "• 每週 AI 分析報告\n\n"
-            "👑 <b>Ultra</b>\n"
-            "• 搜尋：500 次/日\n"
-            "• 深度導讀：300 次/日\n"
-            "• 所有功能無限\n"
-            "• 每日 AI 分析報告\n\n"
-            "🧪 <b>實驗室方案（團隊）</b>\n"
-            "• 全部功能無限制\n"
-            "• 適合研究團隊\n\n"
-            "💡 可在科研大總部一鍵升級！"
-        ),
+        "pro_text": "",
         "promo_generated": "🎫 測試碼已生成：<code>{code}</code>\n備註：{note}\n⏳ 請在 72 小時內兌換（/redeem {code}）",
         "promo_admin_only": "⛔ 此指令僅限管理員使用。",
         "promo_redeem_ok": "🎉 兌換成功！全功能已開通至 <b>{expires}</b>（7 天）。\n👑 感謝你成為 Beta 測試員——測試過程中任何想法都歡迎直接傳訊告訴我！",
@@ -301,11 +272,13 @@ MESSAGES = {
     "zh_hans": {
         "welcome": (
             "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n"
-            "🔬 <b>核心科研特权</b>：\n"
-            "• 4 大官方学术库交叉检索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
-            "• 💡 4 维 AI 深度导读（研究动机、核心方法、关键结论、技术限制）\n"
-            "• 💬 跨论文 RAG 智能问答（<code>/chat [问题]</code>）\n"
-            "• ☁️ Google Drive 双轨自动归档 + <code>references.bib</code> 实时生成\n\n"
+            "🔬 <b>只有这里才有的科研特权</b>：\n"
+            "• 5 大学术库交叉检索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
+            "• 💡 4 维 AI 深度导读（动机、方法、发现、限制）\n"
+            "• 🔄 Telegram ↔ 网页大总部双向同步：手机与电脑同一文献库\n"
+            "• 👁 看过 / 没兴趣双轨学习：排序会记住你真正要的论文（多数工具只有收藏或删除）\n"
+            "• ☁️ Google Drive 双轨归档，文件夹自动维护 <code>references.bib</code>\n"
+            "• 👤 追踪学者：其新作在每次搜索中权重 +50\n\n"
             "👇 请选择下方快捷功能，或直接在聊天室发送<b>论文关键词</b>进行检索："
         ),
         "help": (
@@ -399,6 +372,11 @@ MESSAGES = {
         "tier_report_monthly": "每月 1 份",
         "tier_report_weekly": "每周 1 份",
         "tier_report_daily": "每日 1 份",
+        "tier_report_weekly_n": "每周 {count} 次",
+        "tier_report_unlimited": "无限制",
+        "pro_combo_rgc": "/review + /gap + /chat：各 {count}/日",
+        "pro_text_header": "📊 <b>PaperFilterBot 方案比较</b>\n\n👤 您目前方案：{tier}\n",
+        "pro_text_footer": "💡 可在科研大总部一键升级！",
         "tier_ads": "网页端广告",
         "tier_ads_none": "无广告",
         "tier_ads_show": "有广告",
@@ -499,43 +477,7 @@ MESSAGES = {
         "lang_switched_confirm": "✅ 语言已切换为 {lang}",
         "mark_seen_callback": "👁 已标记为已读",
         "mark_skip_callback": "❌ 已跳过",
-        "pro_text": (
-            "📊 <b>PaperFilterBot 方案比较</b>\n\n"
-            "👤 您目前方案：{tier}\n\n"
-            "🆓 <b>Free 免费版（测试期）</b>\n"
-            "• 搜索：20 次/日\n"
-            "• 深度导读：5 次/日\n"
-            "• /review + /gap + /chat：各 3 次/日\n"
-            "• Drive：20 篇/日\n"
-            "• 广告：有\n\n"
-            "🔧 <b>Basic</b>\n"
-            "• 搜索：50 次/日\n"
-            "• 深度导读：15 次/日\n"
-            "• /review + /gap + /chat：各 10 次/日\n"
-            "• Drive：50 篇/日\n"
-            "• 无广告\n\n"
-            "⭐ <b>Standard</b>\n"
-            "• 搜索：150 次/日\n"
-            "• 深度导读：50 次/日\n"
-            "• /review + /gap + /chat：各 25 次/日\n"
-            "• Drive：100 篇/日\n"
-            "• 每月 AI 分析报告\n\n"
-            "💎 <b>Premium</b>\n"
-            "• 搜索：300 次/日\n"
-            "• 深度导读：150 次/日\n"
-            "• /review + /gap + /chat：各 100 次/日\n"
-            "• Drive：无限\n"
-            "• 每周 AI 分析报告\n\n"
-            "👑 <b>Ultra</b>\n"
-            "• 搜索：500 次/日\n"
-            "• 深度导读：300 次/日\n"
-            "• 所有功能无限\n"
-            "• 每日 AI 分析报告\n\n"
-            "🧪 <b>实验室方案（团队）</b>\n"
-            "• 全部功能无限制\n"
-            "• 适合研究团队\n\n"
-            "💡 可在科研大总部一键升级！"
-        ),
+        "pro_text": "",
         "promo_generated": "🎫 测试码已生成：<code>{code}</code>\n备注：{note}\n⏳ 请在 72 小时内兑换（/redeem {code}）",
         "promo_admin_only": "⛔ 此指令仅限管理员使用。",
         "promo_redeem_ok": "🎉 兑换成功！全功能已开通至 <b>{expires}</b>（7 天）。\n👑 感谢你成为 Beta 测试员——测试过程中任何想法都欢迎直接传讯告诉我！",
@@ -553,11 +495,13 @@ MESSAGES = {
     "en": {
         "welcome": (
             "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n"
-            "🔬 <b>Core Features</b>:\n"
-            "• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\n"
+            "🔬 <b>What only PaperFilterBot does</b>:\n"
+            "• Cross-search <b>5</b> scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef, OpenAlex)\n"
             "• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n"
-            "• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\n"
-            "• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\n\n"
+            "• 🔄 Telegram ↔ Web HQ two-way sync — same library on phone and desktop\n"
+            "• 👁 Seen vs Skip dual filter: ranking learns what you actually want (most tools only save or delete)\n"
+            "• ☁️ Google Drive dual archive with auto-maintained <code>references.bib</code>\n"
+            "• 👤 Follow a scholar — their new papers get +50 ranking weight in every search\n\n"
             "👇 Choose a shortcut below or send <b>keywords</b> directly to search:"
         ),
         "help": (
@@ -651,6 +595,11 @@ MESSAGES = {
         "tier_report_monthly": "1/month",
         "tier_report_weekly": "1/week",
         "tier_report_daily": "1/day",
+        "tier_report_weekly_n": "{count}/week",
+        "tier_report_unlimited": "Unlimited",
+        "pro_combo_rgc": "/review + /gap + /chat: {count}/day each",
+        "pro_text_header": "📊 <b>PaperFilterBot Plan Comparison</b>\n\n👤 Your current plan: {tier}\n",
+        "pro_text_footer": "💡 Upgrade now at Web Research HQ!",
         "tier_ads": "Web Ads",
         "tier_ads_none": "Ad-Free",
         "tier_ads_show": "With Ads",
@@ -751,43 +700,7 @@ MESSAGES = {
         "lang_switched_confirm": "✅ Language set to {lang}",
         "mark_seen_callback": "👁 Marked as read",
         "mark_skip_callback": "❌ Skipped",
-        "pro_text": (
-            "📊 <b>PaperFilterBot Plan Comparison</b>\n\n"
-            "👤 Your current plan: {tier}\n\n"
-            "🆓 <b>Free (Beta)</b>\n"
-            "• Search: 20/day\n"
-            "• Deep Reading: 5/day\n"
-            "• /review + /gap + /chat: 3/day each\n"
-            "• Drive: 20 papers/day\n"
-            "• Ads: Yes\n\n"
-            "🔧 <b>Basic</b>\n"
-            "• Search: 50/day\n"
-            "• Deep Reading: 15/day\n"
-            "• /review + /gap + /chat: 10/day each\n"
-            "• Drive: 50 papers/day\n"
-            "• Ad-Free\n\n"
-            "⭐ <b>Standard</b>\n"
-            "• Search: 150/day\n"
-            "• Deep Reading: 50/day\n"
-            "• /review + /gap + /chat: 25/day each\n"
-            "• Drive: 100 papers/day\n"
-            "• Monthly AI Report\n\n"
-            "💎 <b>Premium</b>\n"
-            "• Search: 300/day\n"
-            "• Deep Reading: 150/day\n"
-            "• /review + /gap + /chat: 100/day each\n"
-            "• Drive: Unlimited\n"
-            "• Weekly AI Report\n\n"
-            "👑 <b>Ultra</b>\n"
-            "• Search: 500/day\n"
-            "• Deep Reading: 300/day\n"
-            "• All features unlimited\n"
-            "• Daily AI Report\n\n"
-            "🧪 <b>Lab Plan (Team)</b>\n"
-            "• Everything unlimited\n"
-            "• For research groups\n\n"
-            "💡 Upgrade now at Web Research HQ!"
-        ),
+        "pro_text": "",
         "promo_generated": "🎫 Test code generated: <code>{code}</code>\nNote: {note}\n⏳ Must be redeemed within 72 hours (/redeem {code})",
         "promo_admin_only": "⛔ Admin only.",
         "promo_redeem_ok": "🎉 Redeemed! Full access unlocked until <b>{expires}</b> (7 days).\n👑 Thanks for joining the beta — feel free to message me anytime with feedback!",
@@ -805,11 +718,13 @@ MESSAGES = {
     "ja": {
         "welcome": (
             "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot 研究総本部</b>へようこそ！\n\n"
-            "🔬 <b>主な機能</b>：\n"
-            "• 4大学術リポジトリ横断検索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n"
-            "• 💡 4次元AI詳細解説（動機・手法・結論・限界）\n"
-            "• 💬 論文横断RAG質問（<code>/chat [質問]</code>）\n"
-            "• ☁️ Google Drive自動保存 & <code>references.bib</code> 同期\n\n"
+            "🔬 <b>ここだけの研究特権</b>：\n"
+            "• 5大学術DB横断検索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
+            "• 💡 4次元 AI 詳細解説（動機・手法・発見・限界）\n"
+            "• 🔄 Telegram ↔ Web HQ 双方向同期：スマホとPCで同じ文献庫\n"
+            "• 👁 既読 / 興味なしの二重学習：順位が本当に欲しい論文を覚える（多くのツールは保存か削除だけ）\n"
+            "• ☁️ Google Drive 二重保存、フォルダの <code>references.bib</code> を自動更新\n"
+            "• 👤 学者フォロー：新著が毎回の検索で +50 加点\n\n"
             "👇 以下のメニューを選択するか、<b>キーワード</b>を直接送信して検索してください："
         ),
         "help": (
@@ -903,6 +818,11 @@ MESSAGES = {
         "tier_report_monthly": "月1回",
         "tier_report_weekly": "週1回",
         "tier_report_daily": "日1回",
+        "tier_report_weekly_n": "週 {count} 回",
+        "tier_report_unlimited": "無制限",
+        "pro_combo_rgc": "/review + /gap + /chat：各 {count}/日",
+        "pro_text_header": "📊 <b>PaperFilterBot プラン比較</b>\n\n👤 現在のプラン：{tier}\n",
+        "pro_text_footer": "💡 Web研究総本部で今すぐアップグレード！",
         "tier_ads": "ウェブ広告",
         "tier_ads_none": "広告なし",
         "tier_ads_show": "広告あり",
@@ -1003,43 +923,7 @@ MESSAGES = {
         "lang_switched_confirm": "✅ 言語を {lang} に設定しました",
         "mark_seen_callback": "👁 既読に設定",
         "mark_skip_callback": "❌ スキップ済み",
-        "pro_text": (
-            "📊 <b>PaperFilterBot プラン比較</b>\n\n"
-            "👤 現在のプラン：{tier}\n\n"
-            "🆓 <b>Free 無料版（ベータ）</b>\n"
-            "• 検索：20 回/日\n"
-            "• 詳細解説：5 回/日\n"
-            "• /review + /gap + /chat：各 3 回/日\n"
-            "• Drive：20 本/日\n"
-            "• 広告：あり\n\n"
-            "🔧 <b>Basic</b>\n"
-            "• 検索：50 回/日\n"
-            "• 詳細解説：15 回/日\n"
-            "• /review + /gap + /chat：各 10 回/日\n"
-            "• Drive：50 本/日\n"
-            "• 広告なし\n\n"
-            "⭐ <b>Standard</b>\n"
-            "• 検索：150 回/日\n"
-            "• 詳細解説：50 回/日\n"
-            "• /review + /gap + /chat：各 25 回/日\n"
-            "• Drive：100 本/日\n"
-            "• 月次 AI レポート\n\n"
-            "💎 <b>Premium</b>\n"
-            "• 検索：300 回/日\n"
-            "• 詳細解説：150 回/日\n"
-            "• /review + /gap + /chat：各 100 回/日\n"
-            "• Drive：無制限\n"
-            "• 週次 AI レポート\n\n"
-            "👑 <b>Ultra</b>\n"
-            "• 検索：500 回/日\n"
-            "• 詳細解説：300 回/日\n"
-            "• 全機能無制限\n"
-            "• 日次 AI レポート\n\n"
-            "🧪 <b>Lab プラン（チーム）</b>\n"
-            "• 全機能無制限\n"
-            "• 研究グループ向け\n\n"
-            "💡 Web研究総本部で今すぐアップグレード！"
-        ),
+        "pro_text": "",
         "promo_generated": "🎫 テストコードを生成しました：<code>{code}</code>\nメモ：{note}\n⏳ 72 時間以内に引き換えてください（/redeem {code}）",
         "promo_admin_only": "⛔ 管理者専用コマンドです。",
         "promo_redeem_ok": "🎉 引き換え完了！全機能が <b>{expires}</b> まで利用可能（7 日間）。\n👑 ベータテスターへの参加ありがとうございます——フィードバックはいつでもメッセージでどうぞ！",
@@ -1136,6 +1020,46 @@ def make_main_menu(user_id):
         InlineKeyboardButton(t("btn_lang"), callback_data="cmd_lang")
     )
     return markup
+
+def _fmt_quota(user_id, n):
+    if not n or n >= 999999:
+        return _t(user_id, "tier_drive_unlimited")
+    return str(n)
+
+def _report_quota(user_id, n):
+    if not n or n >= 999999:
+        return _t(user_id, "tier_report_unlimited")
+    return _t(user_id, "tier_report_weekly_n", count=n)
+
+def _build_pro_text(user_id, current_label):
+    """方案比較：無廣告欄；AI Report 為每週 1/3/5/7/無限。"""
+    emojis = {
+        "free": "🆓", "basic": "🔧", "standard": "⭐",
+        "premium": "💎", "ultra": "👑", "lab": "🧪",
+    }
+    parts = [_t(user_id, "pro_text_header", tier=current_label)]
+    for tc in ("free", "basic", "standard", "premium", "ultra", "lab"):
+        d = db.TIER_DEFS[tc]
+        name = _t(user_id, f"tier_{tc}")
+        search_n = _fmt_quota(user_id, d["daily_search_limit"])
+        deep_n = _fmt_quota(user_id, d["daily_deep_limit"])
+        combo_n = _fmt_quota(user_id, d.get("daily_chat_limit", d["daily_litreview_limit"]))
+        drive_n = d["drive_monthly_limit"]
+        if drive_n >= 999999:
+            drive_line = f"• {_t(user_id, 'tier_drive')}：{_t(user_id, 'tier_drive_unlimited')}"
+        else:
+            drive_line = f"• {_t(user_id, 'tier_drive')}：{_t(user_id, 'tier_drive_limit', count=drive_n)}"
+        report_line = f"• {_t(user_id, 'tier_report')}：{_report_quota(user_id, d['daily_digest_limit'])}"
+        parts.append(
+            f"{emojis[tc]} <b>{name}</b>\n"
+            f"• {_t(user_id, 'tier_search_daily', count=search_n)}\n"
+            f"• {_t(user_id, 'tier_deep_daily', count=deep_n)}\n"
+            f"• {_t(user_id, 'pro_combo_rgc', count=combo_n)}\n"
+            f"{drive_line}\n"
+            f"{report_line}\n"
+        )
+    parts.append(_t(user_id, "pro_text_footer"))
+    return "\n".join(parts)
 
 def _build_folder_keyboard(user_id: int, paper_id: str, lang: str) -> types.InlineKeyboardMarkup:
     custom_cats = db.get_user_categories(user_id)
@@ -1329,7 +1253,7 @@ def handle_pro_command(message, override_user_id=None):
     tier = tier_info.get("tier", "free")
     tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra"), "lab": _t(user_id, "tier_lab")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
-    text = _t(user_id, "pro_text", tier=tier_badge)
+    text = _build_pro_text(user_id, tier_badge)
     # 👑 Founding Member 終身徽章
     if tier_info.get("is_founder"):
         text += _t(user_id, "founder_badge_line")

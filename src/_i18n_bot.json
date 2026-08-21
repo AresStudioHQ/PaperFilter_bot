@@ -19,5 +19,5 @@
   "bot_transport_input_box": {"zh_hant": "輸入欄", "zh_hans": "输入框", "en": "Input Box", "ja": "輸入欄"}, 
   "bot_transport_send": {"zh_hant": "傳送", "zh_hans": "发送", "en": "Send", "ja": "送信"}, 
   "bot_transport_welcome": {"zh_hant": "歡迎使用 PaperFilterBot 學術智慧雷達與雲端文獻總庫！", "zh_hans": "欢迎使用 PaperFilterBot 学术智能雷达与云端文献库！", "en":"Welcome to PaperFilterBot Academic Intelligence HQ!", "ja": "PaperFilterBot学術インテリジェンス司令部へようこそ！"}, 
-  "bot_transport_welcome_setup": {"zh_hant": "全球 4 大官方庫直連：Semantic Scholar、CrossRef、PubMed、arXiv", "zh_hans": "全球 4 大官方库直连：Semantic Scholar、CrossRef、PubMed、arXiv", "en": "Connects to 4 major databases worldwide: Semantic Scholar, CrossRef, PubMed, arXiv", "ja": "4つの主要なデータベースに接続しています：Semantic Scholar、CrossRef、PubMed、arXiv"} 
+  "bot_transport_welcome_setup": {"zh_hant": "全球 5 大官方庫直連：Semantic Scholar、CrossRef、PubMed、arXiv、OpenAlex", "zh_hans": "全球 5 大官方库直连：Semantic Scholar、CrossRef、PubMed、arXiv、OpenAlex", "en": "Connects to 5 major databases worldwide: Semantic Scholar, CrossRef, PubMed, arXiv, OpenAlex", "ja": "5つの主要なデータベースに接続しています：Semantic Scholar、CrossRef、PubMed、arXiv、OpenAlex"} 
 }
