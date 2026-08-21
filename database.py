@@ -122,6 +122,19 @@ class Database:
             )
         ''')
 
+        # 7.5 Telegram ↔ Web 綁定關聯表（驗證碼僅為暫時憑證，資料跟 telegram_user_id 走）
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS telegram_links (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                link_code TEXT UNIQUE,
+                web_uid TEXT,
+                telegram_user_id INTEGER,
+                status TEXT DEFAULT 'pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                expires_at TIMESTAMP
+            )
+        ''')
+
         # 8. 用戶論文收藏庫 (用於批量操作：文獻綜述、缺口分析、匯出、RAG 跨文獻問答)
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_paper_library (
@@ -658,10 +671,76 @@ class Database:
         return reports
 
     # --- 13. 網頁大總部同步碼 ---
-    def generate_sync_code(self, user_id: int) -> str:
+    # --- 11.5 Telegram ↔ Web 綁定（驗證碼為暫時憑證，資料跟 telegram_user_id 走）---
+    def create_bind_code(self, web_uid: str, ttl_minutes: int = 10) -> str:
+        """為某個 web session 產生一組唯一、有時效的綁定碼，存入 telegram_links。"""
         import random
-        code = f"PF{random.randint(1000, 9999)}"
-        return code
+        from datetime import datetime, timedelta
+        # 先讓同一 web_uid 的舊 pending 碼失效，避免堆積
+        self.cursor.execute(
+            "UPDATE telegram_links SET status='expired' WHERE web_uid=? AND status='pending'",
+            (web_uid,),
+        )
+        for _ in range(20):
+            code = f"PF{random.randint(100000, 999999)}"
+            try:
+                expires = (datetime.now() + timedelta(minutes=ttl_minutes)).strftime("%Y-%m-%d %H:%M:%S")
+                self.cursor.execute(
+                    "INSERT INTO telegram_links (link_code, web_uid, status, expires_at) VALUES (?, ?, 'pending', ?)",
+                    (code, web_uid, expires),
+                )
+                self.conn.commit()
+                return code
+            except Exception:
+                # link_code UNIQUE 衝突 → 重試
+                continue
+        raise RuntimeError("無法產生唯一綁定碼")
+
+    def resolve_bind_code(self, code: str):
+        """解析尚未過期、仍 pending 的綁定碼，回傳該筆 row 或 None。"""
+        from datetime import datetime
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.cursor.execute(
+            "SELECT id, link_code, web_uid, telegram_user_id, status, expires_at FROM telegram_links "
+            "WHERE link_code=? AND status='pending' AND expires_at > ?",
+            (code, now),
+        )
+        return self.cursor.fetchone()
+
+    def link_telegram(self, code: str, telegram_user_id: int) -> bool:
+        """用驗證碼把 telegram_user_id 與 web_uid 綁定。只更新關聯表，絕不動用戶資料表。"""
+        row = self.resolve_bind_code(code)
+        if not row:
+            return False
+        web_uid = row[2]
+        # 同一 telegram 帳號若已有舊連結，先標為 superseded（資料不刪）
+        self.cursor.execute(
+            "UPDATE telegram_links SET status='superseded' WHERE telegram_user_id=? AND status='linked'",
+            (telegram_user_id,),
+        )
+        # 啟用這組碼對應的連結
+        self.cursor.execute(
+            "UPDATE telegram_links SET telegram_user_id=?, status='linked' WHERE link_code=?",
+            (telegram_user_id, code),
+        )
+        self.conn.commit()
+        return True
+
+    def get_link_by_telegram(self, telegram_user_id: int):
+        self.cursor.execute(
+            "SELECT id, link_code, web_uid, telegram_user_id, status FROM telegram_links "
+            "WHERE telegram_user_id=? AND status='linked' ORDER BY id DESC LIMIT 1",
+            (telegram_user_id,),
+        )
+        return self.cursor.fetchone()
+
+    def get_link_by_web(self, web_uid: str):
+        self.cursor.execute(
+            "SELECT id, link_code, web_uid, telegram_user_id, status FROM telegram_links "
+            "WHERE web_uid=? AND status='linked' ORDER BY id DESC LIMIT 1",
+            (web_uid,),
+        )
+        return self.cursor.fetchone()
 
     # --- 12. 摘要設定 ---
     def get_digest_settings(self, user_id: int) -> dict:

@@ -91,6 +91,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 熱門：Transformer",
         "btn_hot_crispr": "🧬 熱門：CRISPR",
         "btn_bind_web": "🔗 綁定網頁端",
+        "btn_open_web": "🌐 開啟研究大總部",
         "btn_view_pro": "👑 查看 Pro 特權",
         "btn_full_help": "📖 完整指令幫助",
         "read_paper": "查看原始文獻",
@@ -229,6 +230,9 @@ MESSAGES = {
         "bind_title": "🔗 <b>網頁科研大總部同步帳號綁定</b>\n\n",
         "bind_code": "您的專屬 6 位數同步碼為：<code>{code}</code>\n\n",
         "bind_instructions": "💻 請在瀏覽器打開 PaperFilterBot 科研大總部，點擊右上角<b>【綁定 Telegram】</b>輸入此代碼。\n綁定後，您在 Telegram 的所有標記（看過/略過/歸檔/筆記）將與網頁端全功能儀表板雙向同步！",
+        "bind_no_code": "請先開啟網頁端「研究大總部」，點「連接 Telegram」取得 6 位驗證碼，再輸入 <code>/bind 你的碼</code> 完成綁定。",
+        "bind_success": "✅ 已與網頁端綁定！你的文獻庫、歷史與方案現在雙向同步，且資料始終跟著你的 Telegram 帳號。",
+        "bind_invalid": "❌ 驗證碼無效或已過期，請在網頁端重新產生一組驗證碼。",
         "help_bind_button": "🔗 綁定網頁端",
         "help_pro_button": "👑 查看 Pro 特權",
         "unknown_command": "❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。",
@@ -326,6 +330,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 热门：Transformer",
         "btn_hot_crispr": "🧬 热门：CRISPR",
         "btn_bind_web": "🔗 绑定网页端",
+        "btn_open_web": "🌐 打开研究总部",
         "btn_view_pro": "👑 查看 Pro 特权",
         "btn_full_help": "📖 完整指令帮助",
         "read_paper": "查看原始文献",
@@ -464,6 +469,9 @@ MESSAGES = {
         "bind_title": "🔗 <b>网页科研大总部同步帐号绑定</b>\n\n",
         "bind_code": "您的专属 6 位数同步码为：<code>{code}</code>\n\n",
         "bind_instructions": "💻 请在浏览器打开 PaperFilterBot 科研大总部，点击右上角<b>【绑定 Telegram】</b>输入此代码。\n绑定后，您在 Telegram 的所有标记（看过/跳过/归档/笔记）将与网页端全功能仪表板双向同步！",
+        "bind_no_code": "请先打开网页端「研究大总部」，点「连接 Telegram」取得 6 位验证码，再输入 <code>/bind 你的码</code> 完成绑定。",
+        "bind_success": "✅ 已与网页端绑定！你的文献库、历史与方案现在双向同步，且数据始终跟着你的 Telegram 账号。",
+        "bind_invalid": "❌ 验证码无效或已过期，请在网页端重新生成一组验证码。",
         "help_bind_button": "🔗 绑定网页端",
         "help_pro_button": "👑 查看 Pro 特权",
         "unknown_command": "❌ 没有此指令：{cmd}\n请输入 /help 查看所有可用指令。",
@@ -561,6 +569,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 Hot: Transformer",
         "btn_hot_crispr": "🧬 Hot: CRISPR",
         "btn_bind_web": "🔗 Bind to Web HQ",
+        "btn_open_web": "🌐 Open Web HQ",
         "btn_view_pro": "👑 View Pro Features",
         "btn_full_help": "📖 Full Command Guide",
         "read_paper": "Read Full Paper",
@@ -699,6 +708,9 @@ MESSAGES = {
         "bind_title": "🔗 <b>Web Research HQ Account Binding</b>\n\n",
         "bind_code": "Your 6-digit sync code: <code>{code}</code>\n\n",
         "bind_instructions": "💻 Open PaperFilterBot Web HQ and click <b>【Bind Telegram】</b> to enter this code.\nAll your marks (seen/skip/archive/notes) will sync bidirectionally!",
+        "bind_no_code": "Open the Web Research HQ, click Connect Telegram to get a 6-digit code, then send <code>/bind YOURCODE</code> to link.",
+        "bind_success": "✅ Linked to the Web app! Your library, history and plan are now synced both ways, and your data always stays with your Telegram account.",
+        "bind_invalid": "❌ Invalid or expired code. Generate a new one in the Web app.",
         "help_bind_button": "🔗 Bind to Web",
         "help_pro_button": "👑 View Pro Features",
         "unknown_command": "❌ Unknown command: {cmd}\nType /help to see all commands.",
@@ -796,6 +808,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 人気：Transformer",
         "btn_hot_crispr": "🧬 人気：CRISPR",
         "btn_bind_web": "🔗 Web本部と連携",
+        "btn_open_web": "🌐 Web 研究総本部を開く",
         "btn_view_pro": "👑 Pro機能を見る",
         "btn_full_help": "📖 コマンド一覧",
         "read_paper": "原著論文を読む",
@@ -934,6 +947,9 @@ MESSAGES = {
         "bind_title": "🔗 <b>Web研究総本部 アカウント連携</b>\n\n",
         "bind_code": "6桁同期コード：<code>{code}</code>\n\n",
         "bind_instructions": "💻 Web研究総本部を開き、<b>【Telegram連携】</b>をクリックしてこのコードを入力。\nすべてのマーク（既読/スキップ/保存/メモ）が双方向同期されます！",
+        "bind_no_code": "Web 研究総本部を開き「Telegram 連携」で 6 桁のコードを取得し、<code>/bind あなたのコード</code> を送信して連携。",
+        "bind_success": "✅ Web アプリと連携しました！文献庫・履歴・プランが双方向同期され、データは常にあなたの Telegram アカウントに紐づきます。",
+        "bind_invalid": "❌ コードが無効または期限切れです。Web アプリで新しいコードを生成してください。",
         "help_bind_button": "🔗 Web連携",
         "help_pro_button": "👑 Pro機能を見る",
         "unknown_command": "❌ 未知のコマンド：{cmd}\n/help で利用可能なコマンド一覧を確認できます。",
@@ -1037,6 +1053,7 @@ def fetch_user_papers(user_id: int) -> list:
 # ===================== 3. Bot 初始化 =====================
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
+WEB_APP_URL = os.getenv("WEB_APP_URL", "")
 PORT = int(os.getenv("PORT", 10000))
 
 if not TELEGRAM_TOKEN:
@@ -1101,6 +1118,10 @@ def handle_start(message):
     markup.add(
         types.InlineKeyboardButton(_t(user_id, "btn_full_help"), callback_data="cmd_help")
     )
+    if WEB_APP_URL:
+        markup.add(
+            types.InlineKeyboardButton(_t(user_id, "btn_open_web"), url=WEB_APP_URL)
+        )
     bot.send_message(message.chat.id, welcome_text, reply_markup=markup, parse_mode="HTML")
 
 @bot.message_handler(commands=['help', 'h', 'guide'])
@@ -1214,9 +1235,16 @@ def _process_chat_query(message, query):
 @bot.message_handler(commands=['bind', 'web'])
 def handle_bind_command(message, override_user_id=None):
     user_id = override_user_id or message.from_user.id
-    code = db.generate_sync_code(user_id)
-    text = _t(user_id, "bind_title") + _t(user_id, "bind_code", code=code) + _t(user_id, "bind_instructions")
-    bot.reply_to(message, text, parse_mode="HTML")
+    # 使用者從網頁端取得驗證碼後，在此輸入：/bind PF123456
+    parts = (message.text or "").split(maxsplit=1)
+    code = parts[1].strip().upper() if len(parts) > 1 and parts[1].strip() else ""
+    if not code:
+        bot.reply_to(message, _t(user_id, "bind_no_code"), parse_mode="HTML")
+        return
+    if db.link_telegram(code, user_id):
+        bot.reply_to(message, _t(user_id, "bind_success"), parse_mode="HTML")
+    else:
+        bot.reply_to(message, _t(user_id, "bind_invalid"), parse_mode="HTML")
 
 @bot.message_handler(commands=['pro'])
 def handle_pro_command(message, override_user_id=None):

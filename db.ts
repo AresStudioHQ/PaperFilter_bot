@@ -102,6 +102,16 @@ export async function initTables(): Promise<void> {
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  await q(`CREATE TABLE IF NOT EXISTS telegram_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    link_code TEXT UNIQUE,
+    web_uid TEXT,
+    telegram_user_id INTEGER,
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP
+  )`);
+
   await q(`CREATE TABLE IF NOT EXISTS user_paper_library (
     user_id INTEGER,
     paper_id TEXT,
@@ -340,4 +350,79 @@ export async function removeAuthor(name: string): Promise<void> {
     `DELETE FROM author_tracking WHERE user_id = ? AND author_name = ?`,
     [currentUserId(), name.trim()]
   );
+}
+
+// ===================== Telegram ↔ Web 綁定 =====================
+// 驗證碼僅為暫時憑證；用戶資料始終以 telegram_user_id 為鍵，與碼無關。
+// Bot 端的 /bind <code> 會呼叫對應的 link 邏輯，把 telegram_user_id 寫入同一張表。
+export async function createBindCode(webUid: number, ttlMinutes = 10): Promise<string> {
+  await q(
+    `UPDATE telegram_links SET status='expired' WHERE web_uid=? AND status='pending'`,
+    [webUid]
+  );
+  for (let i = 0; i < 20; i++) {
+    const code = "PF" + Math.floor(100000 + Math.random() * 900000);
+    try {
+      await q(
+        `INSERT INTO telegram_links (link_code, web_uid, status, expires_at)
+         VALUES (?, ?, 'pending', datetime('now', '+${ttlMinutes} minutes'))`,
+        [code, webUid]
+      );
+      return code;
+    } catch (e) {
+      continue; // link_code UNIQUE 衝突 → 重試
+    }
+  }
+  throw new Error("無法產生唯一綁定碼");
+}
+
+export async function getPendingCode(webUid: number): Promise<string | null> {
+  const r = await q(
+    `SELECT link_code FROM telegram_links
+     WHERE web_uid=? AND status='pending' AND expires_at > datetime('now')
+     ORDER BY id DESC LIMIT 1`,
+    [webUid]
+  );
+  return (r.rows[0]?.link_code as string) || null;
+}
+
+export async function getLinkByWeb(webUid: number): Promise<any> {
+  const r = await q(
+    `SELECT id, link_code, web_uid, telegram_user_id, status
+     FROM telegram_links WHERE (web_uid=? OR telegram_user_id=?) AND status='linked' ORDER BY id DESC LIMIT 1`,
+    [webUid, webUid]
+  );
+  return r.rows[0] || null;
+}
+
+// 綁定後把網頁端（webUid）既有的資料併入 Telegram 帳號（tgUid），衝突者忽略
+export async function migrateWebToTelegram(webUid: number, tgUid: number): Promise<void> {
+  if (webUid === tgUid) return;
+  await q(
+    `INSERT OR IGNORE INTO user_paper_library
+       (user_id, fingerprint, title, authors, year, venue, citation_count, link, abstract,
+        category, note, is_read, is_skipped, read_at, archived, relevance_score, created_at)
+     SELECT ?, fingerprint, title, authors, year, venue, citation_count, link, abstract,
+        category, note, is_read, is_skipped, read_at, archived, relevance_score, created_at
+     FROM user_paper_library WHERE user_id=?`,
+    [tgUid, webUid]
+  );
+  await q(`DELETE FROM user_paper_library WHERE user_id=?`, [webUid]);
+  await q(
+    `INSERT OR IGNORE INTO user_categories (user_id, category_name)
+     SELECT ?, category_name FROM user_categories WHERE user_id=?`,
+    [tgUid, webUid]
+  );
+  await q(`DELETE FROM user_categories WHERE user_id=?`, [webUid]);
+  await q(
+    `INSERT OR IGNORE INTO author_tracking (user_id, author_name)
+     SELECT ?, author_name FROM author_tracking WHERE user_id=?`,
+    [tgUid, webUid]
+  );
+  await q(`DELETE FROM author_tracking WHERE user_id=?`, [webUid]);
+  await q(
+    `UPDATE user_tier SET user_id=? WHERE user_id=? AND NOT EXISTS (SELECT 1 FROM user_tier t WHERE t.user_id=?)`,
+    [tgUid, webUid, tgUid]
+  );
+  await q(`DELETE FROM user_tier WHERE user_id=?`, [webUid]);
 }

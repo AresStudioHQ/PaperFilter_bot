@@ -24,6 +24,10 @@ import {
   removeAuthor,
   setUserContext,
   currentUserId,
+  createBindCode,
+  getLinkByWeb,
+  getPendingCode,
+  migrateWebToTelegram,
   type PaperItem,
 } from "./db";
 import { getVenueTier, credibilityBadge, isPreprint } from "./src/academicTiers";
@@ -110,8 +114,6 @@ interface HistoryItem {
   details?: string;
 }
 
-let syncCode = "PF8892";
-let isTelegramLinked = true;
 let telegramHandle = "@ares_researcher";
 const baseProfile = {
   username: "Ares (科研總監)",
@@ -204,11 +206,15 @@ const paperOverlay: Record<string, { user_notes?: string; tags?: string[]; is_st
 // ================= Profile builder =================
 async function buildProfile() {
   const dbp = await getProfile();
+  const webUid = currentUserId();
+  const link = await getLinkByWeb(webUid);
+  const syncCode = (await getPendingCode(webUid)) || (await createBindCode(webUid));
   return {
-    user_id: currentUserId(),
+    user_id: webUid,
     username: baseProfile.username,
     telegram_handle: telegramHandle,
-    is_telegram_linked: isTelegramLinked,
+    is_telegram_linked: !!link,
+    telegram_id: link ? link.telegram_user_id : null,
     sync_code: syncCode,
     tier: dbp.tier,
     pro_expires_at: baseProfile.pro_expires_at,
@@ -604,6 +610,10 @@ function generateBibTeX(paper: PaperItem): string {
 app.get("/api/auth/profile", async (req, res) => {
   try {
     const user = await buildProfile();
+    // 綁定後讓網頁採用 Telegram 的 user_id，確保論文庫雙向同步對得上同一把鍵
+    if (user.is_telegram_linked && user.telegram_id && user.telegram_id !== currentUserId()) {
+      res.cookie("uid", String(user.telegram_id), { httpOnly: true, sameSite: "lax", maxAge: 30 * 86400 * 1000 });
+    }
     const uname = getCookie(req, "uname");
     if (uname) user.username = uname;
     const categories = await getCategories();
@@ -622,26 +632,35 @@ app.get("/api/auth/profile", async (req, res) => {
   }
 });
 
-app.post("/api/auth/generate-code", (req, res) => {
-  syncCode = "PF" + Math.floor(1000 + Math.random() * 9000);
-  res.json({ success: true, sync_code: syncCode });
+app.post("/api/auth/generate-code", async (req, res) => {
+  const webUid = getUid(req);
+  if (!webUid) return res.status(401).json({ success: false, error: "請先開啟網頁端" });
+  try {
+    const code = await createBindCode(webUid);
+    res.json({ success: true, sync_code: code });
+  } catch (e: any) {
+    res.status(500).json({ success: false, error: e.message || "產生驗證碼失敗" });
+  }
 });
 
 app.post("/api/auth/bind-telegram", async (req, res) => {
-  const { code, telegram_handle } = req.body;
-  if (!code) return res.status(400).json({ error: "請輸入 6 位數同步碼" });
-
-  isTelegramLinked = true;
-  if (telegram_handle) telegramHandle = telegram_handle;
-  const username = `${telegramHandle.replace("@", "")} (已同步)`;
-
+  const webUid = getUid(req);
+  const link = webUid ? await getLinkByWeb(webUid) : null;
   const user = await buildProfile();
+  // 綁定後讓網頁採用 Telegram 的 user_id，確保論文庫雙向同步對得上同一把鍵
+  if (link && link.telegram_user_id !== webUid) {
+    await migrateWebToTelegram(webUid, link.telegram_user_id);
+    res.cookie("uid", String(link.telegram_user_id), { httpOnly: true, sameSite: "lax", maxAge: 30 * 86400 * 1000 });
+  }
   res.json({
     success: true,
-    message: "🎉 Telegram 帳號已成功綁定！所有歷史紀錄與文獻庫將雙向即時同步。",
-      user: { ...user, username }
-    });
+    linked: !!link,
+    message: link
+      ? "🎉 Telegram 帳號已成功綁定！所有歷史紀錄與文獻庫將雙向即時同步。"
+      : "尚未綁定，請在 Telegram 輸入 /bind 你的驗證碼。",
+    user: link ? { ...user, telegram_id: link.telegram_user_id } : user,
   });
+});
 
 // Telegram Login Widget 驗證與登入
 app.post("/api/auth/telegram-login", async (req, res) => {
@@ -1330,11 +1349,12 @@ app.post("/api/simulate-bot", async (req, res) => {
     }
 
     if (trimmed === "/bind" || trimmed === "/web") {
+      const code = (await getPendingCode(user_id)) || (await createBindCode(user_id));
       return res.json({
         type: "text",
         text: `🔗 <b>電腦科研大總部同步帳號綁定</b>
 
-您的專屬 6 位數同步碼為：<code>${syncCode}</code>
+您的專屬 6 位數同步碼為：<code>${code}</code>
 
 🖥️ 請打開電腦瀏覽器大總部網頁，點擊右上角 <b>【綁定 Telegram】</b> 並輸入此代碼，即可將所有論文庫、標記已讀/沒興趣記錄與筆記進行雙向即時同步！`
       });

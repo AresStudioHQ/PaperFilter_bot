@@ -39,7 +39,7 @@ Entrez.email = os.getenv("ENTREZ_EMAIL", "paperfilter-bot@example.com")
 ARXIV_API = "https://export.arxiv.org/api/query"
 USER_AGENT = "PaperFilterBot/3.0 (academic-paper-filter; mailto:paperfilter-bot@example.com)"
 ARXIV_ID_RE = re.compile(r"(\d{4}\.\d{4,5})(?:v\d+)?", re.IGNORECASE)
-REQUEST_TIMEOUT = 6
+REQUEST_TIMEOUT = 8
 
 KEYWORD_ALIASES: dict[str, list[str]] = {
     "psycology": ["psychology", "psychological", "psychologist"],
@@ -472,7 +472,7 @@ def fetch_paper_multi_source(
             executor.submit(search_openalex, user_input, 8): "oa",
         }
         s2_list, cr_list, pubmed_list, arxiv_list, oa_list = [], [], [], [], []
-        for future in concurrent.futures.as_completed(futures, timeout=8):
+        for future in concurrent.futures.as_completed(futures, timeout=10):
             src = futures[future]
             try:
                 result = future.result()
