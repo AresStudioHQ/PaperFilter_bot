@@ -29,12 +29,6 @@ from Bio import Entrez
 from openai import OpenAI
 from database import db
 
-# 學術期刊/會議權威分級資料庫
-try:
-    import academic_tiers
-except ImportError:
-    academic_tiers = None
-
 Entrez.email = os.getenv("ENTREZ_EMAIL", "paperfilter-bot@example.com")
 ARXIV_API = "https://export.arxiv.org/api/query"
 USER_AGENT = "PaperFilterBot/3.0 (academic-paper-filter; mailto:paperfilter-bot@example.com)"
@@ -271,76 +265,6 @@ def search_crossref(query: str, max_results=6) -> list[dict]:
     return papers
 
 
-# ===================== 2.5 OpenAlex =====================
-def search_openalex(query: str, max_results=8) -> list[dict]:
-    """OpenAlex：免費、無需 API key、學術權威元數據（含期刊/會議、引用數、領域）"""
-    url = "https://api.openalex.org/works"
-    params = {
-        "search": query,
-        "per_page": max_results,
-        "select": "id,title,abstract_inverted_index,authorships,publication_year,cited_by_count,primary_location,type,open_access",
-        "sort": "cited_by_count:desc",
-    }
-    headers = {"User-Agent": USER_AGENT, "mailto": "paperfilter-bot@example.com"}
-    papers = []
-    try:
-        res = requests.get(url, params=params, headers=headers, timeout=REQUEST_TIMEOUT)
-        if res.status_code == 200:
-            data = res.json()
-            for w in data.get("results", []):
-                title = (w.get("title") or "").strip()
-                if not title:
-                    continue
-                # 還原摘要
-                inv = w.get("abstract_inverted_index")
-                abstract = ""
-                if inv:
-                    pos = []
-                    for word, positions in inv.items():
-                        for p in positions:
-                            pos.append((p, word))
-                    pos.sort()
-                    abstract = " ".join(w for _, w in pos)
-                if not abstract:
-                    continue
-                authors = []
-                for a in w.get("authorships", [])[:10]:
-                    name = a.get("author", {}).get("display_name", "")
-                    if name:
-                        authors.append(name)
-                loc = w.get("primary_location") or {}
-                src = loc.get("source") or {}
-                venue_name = src.get("display_name", "")
-                is_oa = bool(w.get("open_access", {}).get("is_oa"))
-                link = loc.get("landing_page_url") or w.get("id") or ""
-                if not link and venue_name:
-                    link = f"https://api.openalex.org/works/{w.get('id','').split('/')[-1]}"
-                oa_url = w.get("open_access", {}).get("oa_url")
-                if oa_url:
-                    link = oa_url
-                year = str(w.get("publication_year") or datetime.now().year)
-                citations = w.get("cited_by_count", 0) or 0
-                work_type = w.get("type", "")
-                papers.append({
-                    "source": f"OpenAlex · {venue_name[:24]}" if venue_name else "OpenAlex (權威庫)",
-                    "title": title,
-                    "summary": abstract,
-                    "link": link,
-                    "id": f"oa_{w.get('id','').split('/')[-1]}",
-                    "fingerprint": normalize_title_fingerprint(title),
-                    "year": year,
-                    "authors": authors,
-                    "citations": citations,
-                    "is_open_access": is_oa,
-                    "venue_name": venue_name,
-                    "work_type": work_type,
-                    "is_top_journal": False,
-                })
-    except Exception as e:
-        print(f"OpenAlex 檢索異常: {e}", file=sys.stderr)
-    return papers
-
-
 # ===================== 3. PubMed =====================
 def search_pubmed(query: str, max_results=6) -> list[dict]:
     papers = []
@@ -457,16 +381,15 @@ def fetch_paper_multi_source(
     if not words:
         return None, None, None, None, False, [], "", "2024", "Academic", False, ""
 
-    # 並行搜尋 5 個資料源（提速）
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    # 並行搜尋 4 個資料源（提速 3-4 倍）
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         futures = {
             executor.submit(search_semantic_scholar, user_input, 6): "s2",
             executor.submit(search_crossref, user_input, 6): "cr",
             executor.submit(search_pubmed, user_input, 5): "pubmed",
             executor.submit(search_arxiv_candidates, words, 5): "arxiv",
-            executor.submit(search_openalex, user_input, 8): "oa",
         }
-        s2_list, cr_list, pubmed_list, arxiv_list, oa_list = [], [], [], [], []
+        s2_list, cr_list, pubmed_list, arxiv_list = [], [], [], []
         for future in concurrent.futures.as_completed(futures, timeout=12):
             src = futures[future]
             try:
@@ -479,11 +402,9 @@ def fetch_paper_multi_source(
                     pubmed_list = result
                 elif src == "arxiv":
                     arxiv_list = result
-                elif src == "oa":
-                    oa_list = result
             except Exception:
                 pass
-    raw_list = s2_list + cr_list + pubmed_list + arxiv_list + oa_list
+    raw_list = s2_list + cr_list + pubmed_list + arxiv_list
 
     if not raw_list:
         return None, None, None, None, False, [], "", "2024", "Academic", False, ""
@@ -505,15 +426,6 @@ def fetch_paper_multi_source(
         citations = p.get("citations", 0)
         is_oa = p.get("is_open_access", False)
         is_top = p.get("is_top_journal", False)
-        venue_name = p.get("venue_name") or ""
-        source_label = p.get("source", "")
-        # 真實權威等級（取代虛假 is_top_journal）
-        tier = None
-        if academic_tiers:
-            tier = academic_tiers.get_venue_tier(venue_name) or (
-                None if not academic_tiers.is_preprint(source_label) else None
-            )
-        is_preprint = academic_tiers.is_preprint(source_label) if academic_tiers else ("arxiv" in source_label.lower())
         text_lower = (title + " " + summary).lower()
 
         match_score = 0
@@ -526,26 +438,20 @@ def fetch_paper_multi_source(
 
         recency_score = calculate_recency_score(p.get("year", "2020"))
 
-        # 真實可信度加權（基於期刊/會議等級）
-        tier_bonus = {
-            "TOP": 60, "CCF-A": 50, "CCF-B": 35, "CCF-C": 25,
-            "Q1": 40,
-        }.get(tier, 0)
-        if is_preprint:
-            tier_bonus = -10  # 預印本不懲罰太重，但權威性較低
-
         mode_score = 0
         if filter_mode == "top_tier":
             citation_weight = min(int(citations) // 3, 50)
-            mode_score = citation_weight + tier_bonus
+            top_journal_bonus = 30 if is_top else 0
+            mode_score = citation_weight + top_journal_bonus
         elif filter_mode == "free_only":
             citation_weight = min(int(citations) // 10, 15)
             oa_bonus = 30 if is_oa else -20
             mode_score = citation_weight + oa_bonus
         else:
             citation_weight = min(int(citations) // 5, 30)
+            top_journal_bonus = 15 if is_top else 0
             oa_bonus = 10 if is_oa else 0
-            mode_score = citation_weight + tier_bonus + oa_bonus
+            mode_score = citation_weight + top_journal_bonus + oa_bonus
 
         pref_score = 0
         for w, weight in pos_bias.items():
@@ -573,14 +479,11 @@ def fetch_paper_multi_source(
             "id": str(p["id"]),
             "fingerprint": p.get("fingerprint"),
             "source": p["source"],
-            "venue_name": venue_name,
-            "tier": tier,
-            "is_preprint": is_preprint,
             "year": p["year"],
             "authors": authors,
             "citations": citations,
             "is_open_access": is_oa,
-            "is_top_journal": bool(tier in ("TOP", "CCF-A", "CCF-B", "Q1")),
+            "is_top_journal": is_top,
         })
 
     all_candidates.sort(key=lambda x: x["score"], reverse=True)
@@ -616,11 +519,7 @@ def fetch_paper_multi_source(
         selected["year"],
         selected["source"],
         selected.get("is_open_access", False),
-        selected.get("fingerprint", ""),
-        selected.get("venue_name", ""),
-        selected.get("tier"),
-        selected.get("is_preprint", False),
-        selected.get("citations", 0),
+        selected.get("fingerprint", "")
     )
 
 

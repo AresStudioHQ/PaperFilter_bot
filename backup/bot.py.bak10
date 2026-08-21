@@ -16,14 +16,6 @@ load_dotenv()
 import search_engine
 from database import db
 
-# 學術權威分級
-try:
-    import academic_tiers
-    academic_tiers_imported = True
-except ImportError:
-    academic_tiers = None
-    academic_tiers_imported = False
-
 # 引用 Google Drive 模組 (安全容錯)
 try:
     from gdrive_sync import drive_manager
@@ -1521,26 +1513,17 @@ def handle_export_callback(call):
         finally:
             os.unlink(temp_path)
         return
-def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint, lang, venue_name="", tier=None, is_preprint=False, citations=0):
+def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint, lang):
     authors_str = ", ".join(authors[:3]) if authors else "Unknown"
     if len(authors) > 3:
         authors_str += " " + _t(user_id, "paper_et_al", count=len(authors))
     seen_badge = _t(user_id, "paper_seen_badge") if already_seen else ""
     oa_badge = "🟢 OA" if is_open_access else ""
-    # 可信度徽章
-    cred_badge = ""
-    if academic_tiers_imported:
-        emoji, label = academic_tiers.credibility_badge(venue_name, source)
-        cred_badge = f"{emoji} {label}"
-    citation_text = f" | 📑 {citations} 引用" if citations else ""
     text = (
         f"📄 <b>{title}</b> {seen_badge}\n\n"
-        f"👥 {authors_str}\n"
-        f"📅 {year} | 🗂 {source}{citation_text} {oa_badge}\n"
-        f"{('🏅 ' + cred_badge + '\n') if cred_badge else ''}"
+        f"👥 {authors_str} | 📅 {year} | 🗂 {source} {oa_badge}\n\n"
         f"{_t(user_id, 'paper_ai_summary', text=ai_summary)}\n\n"
-        f"🔗 <a href='{link}'>{_t(user_id, 'read_paper')}</a>\n"
-        f"<i>⚠️ AI 摘要僅供快速理解，正式引用請核對原文。</i>"
+        f"🔗 <a href='{link}'>{_t(user_id, 'read_paper')}</a>"
     )
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
@@ -1560,8 +1543,6 @@ def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, alread
         "title": title, "summary": raw_summary, "link": link,
         "authors": authors, "year": year, "source": source,
         "fingerprint": fingerprint, "id": paper_id,
-        "venue_name": venue_name, "tier": tier, "is_preprint": is_preprint,
-        "citations": citations,
     }
 
 def _do_search(message, user_id: int, query: str):
@@ -1584,7 +1565,7 @@ def _do_search(message, user_id: int, query: str):
             followed_authors=followed_authors,
             filter_mode=filter_mode
         )
-        title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint, venue_name, tier, is_preprint, citations = result
+        title, ai_summary, link, paper_id, already_seen, authors, raw_summary, year, source, is_open_access, fingerprint = result
         if not title:
             bot.edit_message_text(_t(user_id, "not_found", query=query), chat_id=loading_msg.chat.id, message_id=loading_msg.message_id)
             return
@@ -1607,11 +1588,7 @@ def _do_search(message, user_id: int, query: str):
             source=source,
             is_open_access=is_open_access,
             fingerprint=fingerprint,
-            lang=lang,
-            venue_name=venue_name,
-            tier=tier,
-            is_preprint=is_preprint,
-            citations=citations,
+            lang=lang
         )
     except Exception as e:
         print(f"搜尋錯誤: {e}", file=sys.stderr)
