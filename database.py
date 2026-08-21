@@ -379,34 +379,34 @@ class Database:
             "follow_limit": 5, "category_limit": 10,
         },
         "basic": {
-            "daily_search_limit": 30, "daily_deep_limit": 5,
-            "daily_litreview_limit": 0, "daily_gap_analysis_limit": 0,
-            "daily_export_limit": 10, "daily_digest_limit": 0,
-            "daily_chat_limit": 10,
-            "drive_monthly_limit": 30,
-            "follow_limit": 3, "category_limit": 10,
-        },
-        "standard": {
-            "daily_search_limit": 100, "daily_deep_limit": 15,
-            "daily_litreview_limit": 3, "daily_gap_analysis_limit": 3,
-            "daily_export_limit": 30, "daily_digest_limit": 1,
+            "daily_search_limit": 150, "daily_deep_limit": 30,
+            "daily_litreview_limit": 15, "daily_gap_analysis_limit": 15,
+            "daily_export_limit": 60, "daily_digest_limit": 5,
             "daily_chat_limit": 30,
             "drive_monthly_limit": 100,
-            "follow_limit": 10, "category_limit": 50,
+            "follow_limit": 15, "category_limit": 30,
         },
-        "premium": {
-            "daily_search_limit": 200, "daily_deep_limit": 30,
-            "daily_litreview_limit": 10, "daily_gap_analysis_limit": 10,
-            "daily_export_limit": 60, "daily_digest_limit": 3,
-            "daily_chat_limit": 50,
-            "drive_monthly_limit": 999999,
+        "standard": {
+            "daily_search_limit": 400, "daily_deep_limit": 80,
+            "daily_litreview_limit": 40, "daily_gap_analysis_limit": 40,
+            "daily_export_limit": 150, "daily_digest_limit": 10,
+            "daily_chat_limit": 80,
+            "drive_monthly_limit": 500,
             "follow_limit": 50, "category_limit": 999999,
         },
+        "premium": {
+            "daily_search_limit": 1000, "daily_deep_limit": 200,
+            "daily_litreview_limit": 100, "daily_gap_analysis_limit": 100,
+            "daily_export_limit": 400, "daily_digest_limit": 25,
+            "daily_chat_limit": 200,
+            "drive_monthly_limit": 999999,
+            "follow_limit": 999999, "category_limit": 999999,
+        },
         "ultra": {
-            "daily_search_limit": 500, "daily_deep_limit": 50,
-            "daily_litreview_limit": 20, "daily_gap_analysis_limit": 20,
-            "daily_export_limit": 999999, "daily_digest_limit": 7,
-            "daily_chat_limit": 100,
+            "daily_search_limit": 999999, "daily_deep_limit": 500,
+            "daily_litreview_limit": 999999, "daily_gap_analysis_limit": 999999,
+            "daily_export_limit": 999999, "daily_digest_limit": 60,
+            "daily_chat_limit": 999999,
             "drive_monthly_limit": 999999,
             "follow_limit": 999999, "category_limit": 999999,
         },
@@ -428,11 +428,9 @@ class Database:
             self.conn.commit()
             return {"tier": "ultra", **d}
         tier = row[0]
-        # Beta: free tier always reads live TIER_DEFS so limit adjustments apply instantly
-        if tier == "free":
-            d = self.TIER_DEFS["free"]
-            return {"tier": "free", **d}
-        return {"tier": tier, "daily_search_limit": row[1], "daily_deep_limit": row[2], "daily_litreview_limit": row[3], "daily_gap_analysis_limit": row[4], "daily_export_limit": row[5], "daily_digest_limit": row[6]}
+        # Serve live TIER_DEFS limits for every tier so plan changes apply instantly
+        d = self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
+        return {"tier": tier, **d}
 
     def set_user_tier(self, user_id: int, tier: str, limits: dict = None):
         d = limits or self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
