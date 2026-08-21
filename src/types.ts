@@ -60,7 +60,7 @@ export interface BotMessage {
   sender: 'bot' | 'user';
   text: string;
   paper?: Paper;
-  buttons?: { label: string; action: string }[];
+  buttons?: { label: string; action: string; url?: string }[];
   timestamp: string;
 }
 

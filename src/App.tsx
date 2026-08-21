@@ -19,22 +19,22 @@ import { BrainCircuit, X, Copy, Check } from 'lucide-react';
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [user, setUser] = useState<UserProfile>({
-    user_id: 88921473,
-    username: 'Ares (Research Director)',
-    telegram_handle: '@ares_researcher',
-    is_telegram_linked: true,
-    sync_code: 'PF8892',
-    tier: 'ultra',
+    user_id: 0,
+    username: '',
+    telegram_handle: '',
+    is_telegram_linked: false,
+    sync_code: '',
+    tier: 'free',
     filter_mode: 'smart',
     user_lang: 'en',
-    total_read_count: 86,
-    total_archived_count: 24,
-    total_skipped_count: 42,
-    total_deep_read_count: 18,
+    total_read_count: 0,
+    total_archived_count: 0,
+    total_skipped_count: 0,
+    total_deep_read_count: 0,
   });
   const { t } = useI18n(user.user_lang);
-  const [categories, setCategories] = useState<string[]>([t('app_cat_ai'), t('app_cat_life'), t('app_cat_quantum'), t('app_cat_general'), t('app_cat_genome')]);
-  const [followedAuthors, setFollowedAuthors] = useState<string[]>(['Yann LeCun', 'Geoffrey Hinton', 'Jennifer Doudna', 'Yoshua Bengio', 'Kaiming He']);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [followedAuthors, setFollowedAuthors] = useState<string[]>([]);
   const [library, setLibrary] = useState<Paper[]>([]);
   const [history, setHistory] = useState<HistoryRecord[]>([]);
 
@@ -77,8 +77,8 @@ export default function App() {
     fetch('/api/auth/profile').then(r => r.json()).then(d => {
       if (d.success && d.user) {
         setUser(d.user);
-        if (d.categories) setCategories(d.categories);
-        if (d.followed_authors) setFollowedAuthors(d.followed_authors);
+        setCategories(d.categories || []);
+        setFollowedAuthors(d.followed_authors || []);
       }
     }).catch(() => {});
   };
@@ -90,8 +90,8 @@ export default function App() {
       if (res.status === 401 && data.loginRequired) { setAuthed(false); return; }
       if (data.success && data.user) {
         setUser(data.user);
-        if (data.categories) setCategories(data.categories);
-        if (data.followed_authors) setFollowedAuthors(data.followed_authors);
+        setCategories(data.categories || []);
+        setFollowedAuthors(data.followed_authors || []);
         setAuthed(true);
         loadData();
       } else {
@@ -104,8 +104,8 @@ export default function App() {
     fetch('/api/auth/profile').then(r => r.json()).then(d => {
       if (d.success && d.user) {
         setUser(d.user);
-        if (d.categories) setCategories(d.categories);
-        if (d.followed_authors) setFollowedAuthors(d.followed_authors);
+        setCategories(d.categories || []);
+        setFollowedAuthors(d.followed_authors || []);
         setAuthed(true);
         loadData();
       } else {
@@ -423,6 +423,7 @@ export default function App() {
         {activeTab === 'simulator' && (
           <BotSimulator
             userLang={user.user_lang}
+            botUsername={botUsername}
             onLanguageChange={handleLanguageChange}
             onOpenDeep={handleOpenDeep}
             onAddToLibrary={handleAddToLibrary}

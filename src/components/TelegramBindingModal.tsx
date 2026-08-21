@@ -16,9 +16,9 @@ export const TelegramBindingModal: React.FC<TelegramBindingModalProps> = ({
   onClose,
   onBindSuccess
 }) => {
-  const { t } = useI18n();
+  const { t } = useI18n(user.user_lang);
   const [syncCodeInput, setSyncCodeInput] = useState(user.sync_code || '');
-  const [handleInput, setHandleInput] = useState(user.telegram_handle || '@ares_researcher');
+  const [handleInput, setHandleInput] = useState(user.telegram_handle || '');
   const [copiedCode, setCopiedCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export const TelegramBindingModal: React.FC<TelegramBindingModalProps> = ({
   if (!isOpen) return null;
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(user.sync_code || 'PF8892');
+    navigator.clipboard.writeText(user.sync_code || '');
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
@@ -103,7 +103,7 @@ export const TelegramBindingModal: React.FC<TelegramBindingModalProps> = ({
           <div>
             <span className="text-[11px] text-slate-400 block">{t('bind_current_code')}</span>
             <span className="text-2xl font-mono font-extrabold text-sky-400 tracking-wider">
-              {user.sync_code || 'PF8892'}
+              {user.sync_code || '—'}
             </span>
           </div>
           <button

@@ -49,6 +49,18 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     pie_card_title: '文獻庫領域分佈',
     pie_card_sub: '依 Google Drive 分類資料夾統計',
     no_activity: '暫無調研軌跡，在檢索頁面或 Telegram 中開始探索吧！',
+    dash_live_sync: 'Telegram 即時同步',
+    dash_sync_code: '同步碼',
+    dash_drive_synced: 'Drive 已同步',
+    dash_noise_filter: '噪音過濾',
+    dash_4d_insights: '4D 洞察',
+    dash_search_author: '搜尋',
+    dash_tg_follow_hint: 'Telegram：',
+    authors_empty: '尚未追蹤學者。新帳號從空白開始，不會預載示範名單。',
+    filter_drive: '📥 Drive',
+    filter_deep: '🔍 4D 導讀',
+    filter_seen: '👁️ 已讀',
+    filter_skip: '❌ 略過',
 
     // Library Management
     lib_title: '個人科研文獻總庫',
@@ -343,6 +355,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_price_unit: ' / 月',
     pro_lab_contact: '已為您的實驗室建立專屬諮詢工單，將有科研專員與您聯絡！',
     pro_lab_contact_btn: '聯絡實驗室團體授權',
+    pro_btn_view_plans: '查看方案與價值計算機',
+    pro_current_plan: '目前方案',
+    pro_lab_inquiry_title: '實驗室團體授權洽詢',
+    pro_lab_inquiry_desc: 'Lab 方案走業務洽詢，不會一鍵解鎖。送出後我們會記下需求（測試階段寫入伺服器紀錄）。測試員若要 7 天全功能，請在真實 Telegram bot 使用 /redeem 測試碼。',
+    pro_lab_inquiry_org: '實驗室 / 機構名稱',
+    pro_lab_inquiry_email: '聯絡 Email',
+    pro_lab_inquiry_note: '需求說明（人數、用途）',
+    pro_lab_inquiry_submit: '送出洽詢',
+    pro_lab_inquiry_thanks: '已收到洽詢。正式上線後會由專人聯絡；現階段不會自動開通 Lab。',
+    pro_lab_inquiry_cancel: '取消',
+    pro_beta_unlock_note: 'Beta：下列方案按鈕為模擬升級（不收款）。Lab 除外，需洽詢。',
+    pro_radar_empty: '尚未追蹤學者。新帳號從空白開始。',
+    pro_digest_topics_empty: '尚未加入主題。',
     pro_pricing_soon: '定價徵集中 · 歡迎提供建議',
     pro_pricing_cta: '價格尚未公佈，歡迎在測試回饋中告訴我們你認為合理的定價 💡',
     pro_hero_desc: '整合全球 4 大頂刊文獻庫、多篇結構化橫向比較矩陣、LaTeX / Overleaf 論文段落起草器、研究盲點與計畫書掃描器，以及每週 Telegram 頂刊情報推播。',
@@ -472,6 +497,18 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     pie_card_title: '文献库领域分布',
     pie_card_sub: '依 Google Drive 分类文件夹统计',
     no_activity: '暂无调研轨迹，在检索页面或 Telegram 中开始探索吧！',
+    dash_live_sync: 'Telegram 即时同步',
+    dash_sync_code: '同步码',
+    dash_drive_synced: 'Drive 已同步',
+    dash_noise_filter: '噪音过滤',
+    dash_4d_insights: '4D 洞察',
+    dash_search_author: '搜索',
+    dash_tg_follow_hint: 'Telegram：',
+    authors_empty: '尚未追踪学者。新账号从空白开始，不会预载示范名单。',
+    filter_drive: '📥 Drive',
+    filter_deep: '🔍 4D 导读',
+    filter_seen: '👁️ 已读',
+    filter_skip: '❌ 跳过',
 
     // Library Management
     lib_title: '个人科研文献总库',
@@ -766,6 +803,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_price_unit: ' / 月',
     pro_lab_contact: '已为您的实验室建立专属咨询工单，将有科研专员与您联络！',
     pro_lab_contact_btn: '联络实验室团体授权',
+    pro_btn_view_plans: '查看方案与价值计算器',
+    pro_current_plan: '当前方案',
+    pro_lab_inquiry_title: '实验室团体授权洽询',
+    pro_lab_inquiry_desc: 'Lab 方案走商务洽询，不会一键解锁。测试员若要 7 天全功能，请在真实 Telegram bot 使用 /redeem。',
+    pro_lab_inquiry_org: '实验室 / 机构名称',
+    pro_lab_inquiry_email: '联络 Email',
+    pro_lab_inquiry_note: '需求说明（人数、用途）',
+    pro_lab_inquiry_submit: '送出洽询',
+    pro_lab_inquiry_thanks: '已收到洽询。正式上线后会由专人联络；现阶段不会自动开通 Lab。',
+    pro_lab_inquiry_cancel: '取消',
+    pro_beta_unlock_note: 'Beta：下列方案按钮为模拟升级（不收款）。Lab 除外，需洽询。',
+    pro_radar_empty: '尚未追踪学者。新账号从空白开始。',
+    pro_digest_topics_empty: '尚未加入主题。',
     pro_pricing_soon: '定价征集中 · 欢迎提供建议',
     pro_pricing_cta: '价格尚未公布，欢迎在测试回馈中告诉我们你认为合理的定价 💡',
     pro_hero_desc: '整合全球 4 大顶刊文献库、多篇结构化横向对比矩阵、LaTeX / Overleaf 论文段落起草器、研究盲点与计划书扫描器，以及每周 Telegram 顶刊情报推送。',
@@ -895,6 +945,18 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     pie_card_title: 'Library Domain Breakdown',
     pie_card_sub: 'Distribution by Google Drive Category Folders',
     no_activity: 'No research activity yet. Start exploring in 4-DB Search or Telegram!',
+    dash_live_sync: 'Telegram Live Sync',
+    dash_sync_code: 'Sync Code',
+    dash_drive_synced: 'Drive Synced',
+    dash_noise_filter: 'Noise Filter',
+    dash_4d_insights: '4D Insights',
+    dash_search_author: 'Search',
+    dash_tg_follow_hint: 'Telegram:',
+    authors_empty: 'No scholars followed yet. New accounts start empty — no demo names are preloaded.',
+    filter_drive: '📥 Drive',
+    filter_deep: '🔍 4D Deep',
+    filter_seen: '👁️ Seen',
+    filter_skip: '❌ Skip',
 
     // Library Management
     lib_title: 'Central Research Library',
@@ -1189,6 +1251,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_price_unit: ' /mo',
     pro_lab_contact: 'A dedicated lab consultation ticket has been created; our research specialist will contact you!',
     pro_lab_contact_btn: 'Contact Lab Licensing',
+    pro_btn_view_plans: 'View plans & ROI calculator',
+    pro_current_plan: 'Current plan',
+    pro_lab_inquiry_title: 'Lab / group licensing inquiry',
+    pro_lab_inquiry_desc: 'Lab is sales-assisted and does not instant-unlock. We log your request (beta). For 7-day full access, redeem a test code with /redeem on the real Telegram bot.',
+    pro_lab_inquiry_org: 'Lab / institution',
+    pro_lab_inquiry_email: 'Contact email',
+    pro_lab_inquiry_note: 'Needs (seats, use case)',
+    pro_lab_inquiry_submit: 'Send inquiry',
+    pro_lab_inquiry_thanks: 'Inquiry recorded. After launch a specialist will follow up. Lab is not auto-unlocked.',
+    pro_lab_inquiry_cancel: 'Cancel',
+    pro_beta_unlock_note: 'Beta: plan buttons below simulate an upgrade (no payment). Lab is inquiry-only.',
+    pro_radar_empty: 'No scholars tracked yet. New accounts start empty.',
+    pro_digest_topics_empty: 'No topics yet.',
     pro_pricing_soon: 'Pricing TBD · we welcome your feedback',
     pro_pricing_cta: 'Pricing not yet announced — tell us what you would pay in your test feedback 💡',
     pro_hero_desc: 'Integrates the world\'s 4 top journal databases, multi-paper structured comparison matrices, LaTeX / Overleaf draft writer, research-gap & grant scanner, and weekly Telegram top-paper alerts.',
@@ -1318,6 +1393,18 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     pie_card_title: '文献ライブラリ分野内訳',
     pie_card_sub: 'Google Drive フォルダ別統計',
     no_activity: 'アクティビティはまだありません。検索または Telegram で論文を探しましょう！',
+    dash_live_sync: 'Telegram ライブ同期',
+    dash_sync_code: '同期コード',
+    dash_drive_synced: 'Drive 同期済',
+    dash_noise_filter: 'ノイズフィルタ',
+    dash_4d_insights: '4D 洞察',
+    dash_search_author: '検索',
+    dash_tg_follow_hint: 'Telegram:',
+    authors_empty: 'フォロー中の学者はいません。新規アカウントは空の状態から始まります。',
+    filter_drive: '📥 Drive',
+    filter_deep: '🔍 4D 読解',
+    filter_seen: '👁️ 既読',
+    filter_skip: '❌ スキップ',
 
     // Library Management
     lib_title: '学術文献ライブラリ総本部',
@@ -1612,6 +1699,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     tier_price_unit: ' /月',
     pro_lab_contact: '研究室用の相談チケットを作成しました。専門員が連絡いたします！',
     pro_lab_contact_btn: '研究室ライセンスへ連絡',
+    pro_btn_view_plans: 'プランと ROI 計算機を見る',
+    pro_current_plan: '現在のプラン',
+    pro_lab_inquiry_title: '研究室ライセンスのお問い合わせ',
+    pro_lab_inquiry_desc: 'Lab は営業相談で、ワンクリック解除はありません。7日間の全機能は本番 bot の /redeem をご利用ください。',
+    pro_lab_inquiry_org: '研究室 / 機関名',
+    pro_lab_inquiry_email: '連絡先メール',
+    pro_lab_inquiry_note: '要件（人数・用途）',
+    pro_lab_inquiry_submit: '問い合わせを送る',
+    pro_lab_inquiry_thanks: '受け付けました。正式公開後に担当から連絡します。Lab は自動解除されません。',
+    pro_lab_inquiry_cancel: 'キャンセル',
+    pro_beta_unlock_note: 'Beta：以下のプランボタンは模擬アップグレード（課金なし）。Lab は問い合わせのみ。',
+    pro_radar_empty: '追跡中の学者はいません。新規は空の状態です。',
+    pro_digest_topics_empty: 'トピックはまだありません。',
     pro_pricing_soon: '価格検討中 · ご意見募集中',
     pro_pricing_cta: '価格は未発表です。テストの感想で妥当だと思う価格を教えてください 💡',
     pro_hero_desc: '世界4大トップジャーナル文献庫、複数論文の構造化比較マトリクス、LaTeX / Overleaf 起草ツール、研究ギャップ・助成金スキャナー、週次 Telegram トップ論文アラートを統合。',
@@ -1694,12 +1794,19 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   }
 };
 
+export function localeFromLang(lang: string = 'en'): string {
+  if (lang === 'ja') return 'ja-JP';
+  if (lang === 'zh_hans') return 'zh-CN';
+  if (lang === 'zh_hant') return 'zh-TW';
+  return 'en-US';
+}
+
 export function useI18n(lang: string = 'en') {
   const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'en') as Language;
   
   const t = (key: string, params: Record<string, string | number> = {}): string => {
-    const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.zh_hant;
-    let text = dict[key] || TRANSLATIONS.zh_hant[key] || key;
+    const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+    let text = dict[key] || TRANSLATIONS.en[key] || key;
     for (const [k, v] of Object.entries(params)) {
       text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
     }
@@ -1709,9 +1816,9 @@ export function useI18n(lang: string = 'en') {
   return { t, currentLang };
 }
 
-export function getLocalizedCategory(catName: string, lang: string = 'zh_hant'): string {
+export function getLocalizedCategory(catName: string, lang: string = 'en'): string {
   if (!catName) return '';
-  const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'zh_hant') as Language;
+  const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'en') as Language;
   
   const categoryDictionary: Record<string, Record<Language, string>> = {
     '人工智慧': { zh_hant: '人工智慧', zh_hans: '人工智能', en: 'Artificial Intelligence', ja: '人工知能' },
@@ -1742,7 +1849,7 @@ export function getLocalizedCategory(catName: string, lang: string = 'zh_hant'):
 
   for (const [key, mapping] of Object.entries(categoryDictionary)) {
     if (catName.toLowerCase() === key.toLowerCase() || catName.includes(key) || key.includes(catName)) {
-      return mapping[currentLang] || mapping.zh_hant;
+      return mapping[currentLang] || mapping.en;
     }
   }
 
@@ -1756,7 +1863,7 @@ export function getLocalizedActivityDetail(
   lang: string = 'en'
 ): string {
   const currentLang = (['zh_hant', 'zh_hans', 'en', 'ja'].includes(lang) ? lang : 'en') as Language;
-  const locCat = getLocalizedCategory(category || '人工智慧', currentLang);
+  const locCat = getLocalizedCategory(category || 'AI', currentLang);
 
   if (action === 'archive') {
     if (currentLang === 'en') return `Archived to Google Drive [${locCat}] & appended to references.bib`;

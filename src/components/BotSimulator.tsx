@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, RefreshCw, Link as LinkIcon, Globe, FolderPlus, ListOrdered, UserPlus, HelpCircle } from 'lucide-react';
 import { BotMessage, Paper } from '../types';
-import { useI18n } from '../i18n';
+import { useI18n, localeFromLang } from '../i18n';
 
 interface BotSimulatorProps {
   userLang: string;
+  botUsername?: string;
   onLanguageChange: (lang: string) => void;
   onOpenDeep: (paper: Paper) => void;
   onAddToLibrary: (paper: Paper) => void;
@@ -14,6 +15,7 @@ interface BotSimulatorProps {
 
 export const BotSimulator: React.FC<BotSimulatorProps> = ({ 
   userLang,
+  botUsername = 'paper_filter_bot',
   onLanguageChange,
   onOpenDeep, 
   onAddToLibrary,
@@ -21,30 +23,38 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
   onOpenProModal
 }) => {
   const { t } = useI18n(userLang);
-  const getInitialMessage = (lang: string): string => {
-    switch (lang) {
-      case 'en':
-        return `👋 <b>Welcome to PaperFilterBot Academic Intelligence HQ!</b> 🤖\n\n🌐 <b>Live Connections</b>: Semantic Scholar (200M+), CrossRef, PubMed, arXiv & Google Drive.\n\n💡 <b>Highlights (Supports 4 Languages)</b>:\n• Direct search: Type any keyword (e.g. <code>CRISPR</code> or <code>Transformer</code>)\n• <code>/folders</code> or <code>my folders</code>: View & manage cloud folders\n• <code>add folder &lt;name&gt;</code>: Create new category folder\n• <code>rename &lt;old&gt; -&gt; &lt;new&gt;</code>: Rename category\n• <code>delete folder &lt;name&gt;</code>: Remove category\n• <code>/following</code> & <code>/follow &lt;name&gt;</code>: Track elite authors (+50 score bonus)\n• <code>/help</code>, <code>/bind</code>, <code>/pro</code>, <code>/mode</code>, <code>/lang</code>, <code>/review</code>, <code>/gap</code>, <code>/trend</code>\n\nType a command or click a quick prompt below to test!`;
-      case 'ja':
-        return `👋 <b>PaperFilterBot 学術インテリジェンス司令部へようこそ！</b> 🤖\n\n🌐 <b>接続データベース</b>：Semantic Scholar、CrossRef、PubMed、arXiv ＆ Google Drive\n\n💡 <b>主な機能（4ヶ国語コマンド対応）</b>：\n• キーワード直接検索（例：<code>CRISPR</code>、<code>Transformer</code>）\n• <code>/folders</code> または <code>マイフォルダ</code>：現在のカテゴリフォルダ一覧\n• <code>追加 フォルダ名</code>：新しいカテゴリフォルダの作成\n• <code>改名 旧 -&gt; 新</code>：フォルダ名の変更\n• <code>削除 フォルダ名</code>：フォルダの削除\n• <code>/following</code> ＆ <code>/follow 著者名</code>：注目著者を追跡（+50点優先推薦）\n• <code>/help</code>、<code>/bind</code>、<code>/pro</code>、<code>/lang</code>、<code>/mode</code>、<code>/review</code>、<code>/gap</code>\n\n下の入力欄からメッセージを送信またはクイックコマンドをお試しください！`;
-      case 'zh_hans':
-        return `👋 <b>欢迎使用 PaperFilterBot 学术智能雷达与云端文献库！</b> 🤖\n\n🌐 <b>全球 4 大官方库直连</b>：Semantic Scholar、CrossRef、PubMed、arXiv\n\n💡 <b>核心指令（全面支持中英日 4 国语言输入）</b>：\n• 直接发送关键词检索（如：<code>CRISPR</code> 或 <code>Transformer</code>）\n• <code>/folders</code> 或 <code>我的文件夹</code>：查看文献分类文件夹\n• <code>添加 文件夹名</code>：新建分类文件夹\n• <code>改名 旧 -&gt; 新</code>：重命名分类文件夹\n• <code>删除 文件夹名</code>：移除分类文件夹\n• <code>/following</code> 与 <code>/follow 学者名</code>：追踪重点学者（+50分加权）\n• <code>/help</code>、<code>/bind</code>、<code>/pro</code>、<code>/lang</code>、<code>/mode</code>、<code>/review</code>、<code>/gap</code>\n\n请在下方输入指令或点击快捷标签进行测试！`;
-      default:
-        return `👋 <b>歡迎使用 PaperFilterBot 學術智慧雷達與雲端文獻總庫！</b> 🤖\n\n🌐 <b>全球 4 大官方庫直連</b>：Semantic Scholar、CrossRef、PubMed、arXiv\n\n💡 <b>核心亮點（全面支援中英日 4 國語言指令輸入）</b>：\n• 直接傳送關鍵字搜尋論文（例如：<code>CRISPR</code> 或 <code>Transformer</code>）\n• <code>/folders</code> 或 <code>我的資料夾</code>：查看當前文獻分類資料夾\n• <code>新增 資料夾名</code> 或 <code>add folder 名稱</code>：建立新分類\n• <code>改名 舊 -&gt; 新</code> 或 <code>rename 舊 -&gt; 新</code>：更名資料夾\n• <code>刪除 資料夾名</code> 或 <code>delete folder 名稱</code>：移除分類\n• <code>/following</code> 與 <code>/follow 學者名</code>：追蹤重點學者（+50分加權）\n• <code>/help</code>、<code>/bind</code>、<code>/pro</code>、<code>/lang</code>、<code>/mode</code>、<code>/review</code>、<code>/gap</code>\n\n請在下方輸入指令或點擊快速標籤進行測試！`;
-    }
-  };
+  const tgUrl = `https://t.me/${String(botUsername).replace(/^@/, '')}`;
+  const clock = () => new Date().toLocaleTimeString(localeFromLang(userLang), { hour: '2-digit', minute: '2-digit' });
 
-  const [messages, setMessages] = useState<BotMessage[]>([
-    {
-      id: '1',
-      sender: 'bot',
-      text: getInitialMessage(userLang),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    }
-  ]);
+  const [messages, setMessages] = useState<BotMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const loadStart = async () => {
+    try {
+      const res = await fetch('/api/simulate-bot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: '/start', lang: userLang }),
+      });
+      const data = await res.json();
+      setMessages([{
+        id: String(Date.now()),
+        sender: 'bot',
+        text: data.text || '',
+        buttons: data.buttons,
+        timestamp: clock(),
+      }]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    loadStart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,7 +68,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
       id: String(Date.now()),
       sender: 'user',
       text: txt,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: clock(),
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -84,7 +94,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
         text: data.text || 'Error processing command',
         paper: data.paper,
         buttons: data.buttons,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: clock(),
       };
       setMessages((prev) => [...prev, botReply]);
     } catch (err) {
@@ -94,7 +104,11 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
     }
   };
 
-  const handleButtonClick = (action: string, paper?: Paper) => {
+  const handleButtonClick = (action: string, paper?: Paper, url?: string) => {
+    if (action === 'open_telegram') {
+      window.open(tgUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
     if (action === 'bind') {
       onOpenSyncModal();
       return;
@@ -103,10 +117,27 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
       onOpenProModal();
       return;
     }
+    if (action === 'help') {
+      handleSendMessage('/help');
+      return;
+    }
+    if (action.startsWith('search:')) {
+      handleSendMessage(action.slice('search:'.length));
+      return;
+    }
+    if (action.startsWith('mode:')) {
+      handleSendMessage(`/mode ${action.slice('mode:'.length)}`);
+      return;
+    }
     if (action.startsWith('lang_')) {
       const selectedLang = action.replace('lang_', '');
       onLanguageChange(selectedLang);
       handleSendMessage(`/lang ${selectedLang}`);
+      return;
+    }
+    if (action === 'oa' || action === 'doi') {
+      const href = url || paper?.link;
+      if (href) window.open(href, '_blank', 'noopener,noreferrer');
       return;
     }
 
@@ -117,20 +148,9 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
     } else if (action === 'archive' || action === 'seen') {
       onAddToLibrary(paper);
       const isSeen = action === 'seen';
-      let confirmText = '';
-      if (userLang === 'en') {
-        confirmText = isSeen
-          ? `👁️ <b>Marked as Seen</b> (+12 domain positive preference score):\n${paper.title}`
-          : `✅ <b>Archived to 【${paper.category || 'AI'}】!</b>\n\n📄 Note embedded with BibTeX.\n📚 Synced to Google Drive <code>references.bib</code>!\n\n📌 ${paper.title}`;
-      } else if (userLang === 'ja') {
-        confirmText = isSeen
-          ? `👁️ <b>既読に設定しました</b>（関心スコア +12点）：\n${paper.title}`
-          : `✅ <b>【${paper.category || '人工知能'}】に保存しました！</b>\n\n📄 単一ノートに BibTeX を埋め込みました。\n📚 Google Drive の <code>references.bib</code> に同期しました！\n\n📌 ${paper.title}`;
-      } else {
-        confirmText = isSeen
-          ? `👁️ <b>已標記為已讀</b>（保留此領域正向偏好 +12分）：\n${paper.title}`
-          : `✅ 已成功歸檔至【<b>${paper.category || '人工智慧'}</b>】！\n\n📄 單篇筆記已內嵌 BibTeX\n📚 雲端 <code>references.bib</code> 引用總庫已同步追加！\n\n📌 ${paper.title}`;
-      }
+      const confirmText = isSeen
+        ? `👁️ <b>${t('sim_seen_marked')}</b>\n${paper.title}`
+        : `✅ <b>${t('sim_archive_success', { cat: paper.category || 'AI' })}</b>\n📌 ${paper.title}`;
 
       setMessages(prev => [
         ...prev,
@@ -138,23 +158,17 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
           id: String(Date.now()),
           sender: 'bot',
           text: confirmText,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          timestamp: clock(),
         }
       ]);
     } else if (action === 'skip') {
-      const skipText = userLang === 'en'
-        ? `🗑 <b>Skipped paper</b> (Recommendation weight adjusted -6 pts):\n${paper.title}`
-        : userLang === 'ja'
-        ? `🗑 <b>スキップしました</b>（推薦スコア -6点）：\n${paper.title}`
-        : `🗑 <b>已略過並減少此類推薦</b>（調降權重 -6分）：\n${paper.title}`;
-
       setMessages(prev => [
         ...prev,
         {
           id: String(Date.now()),
           sender: 'bot',
-          text: skipText,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          text: `🗑 <b>${t('sim_skip_marked')}</b>\n${paper.title}`,
+          timestamp: clock(),
         }
       ]);
     }
@@ -185,7 +199,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
     },
     {
       titleKey: 'sim_quick_group_flagship',
-      items: ['/pro', '/bind', '/mode', '/review', '/gap', 'CRISPR Cas9', 'Attention Transformer']
+      items: ['/pro', '/bind', '/web', '/mode', '/review', '/gap', 'CRISPR Cas9', 'Attention Transformer']
     }
   ];
 
@@ -199,7 +213,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h3 className="font-bold text-white text-sm">PaperFilterBot (@paper_filter_bot)</h3>
+              <h3 className="font-bold text-white text-sm">PaperFilterBot (@{botUsername.replace(/^@/, '')})</h3>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </div>
             <p className="text-xs text-slate-400 font-mono">
@@ -237,7 +251,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
           </button>
 
           <button
-            onClick={() => setMessages([{ id: String(Date.now()), sender: 'bot', text: getInitialMessage(userLang), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }])}
+            onClick={() => loadStart()}
             className="flex items-center space-x-1 text-xs text-slate-400 hover:text-white px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -277,7 +291,7 @@ export const BotSimulator: React.FC<BotSimulatorProps> = ({
                   {msg.buttons.map((btn, bidx) => (
                     <button
                       key={bidx}
-                      onClick={() => handleButtonClick(btn.action, msg.paper)}
+                      onClick={() => handleButtonClick(btn.action, msg.paper, btn.url)}
                       className="px-3 py-2 bg-slate-800 hover:bg-indigo-700 text-slate-200 hover:text-white rounded-lg text-xs font-medium border border-slate-700 transition-all text-center cursor-pointer shadow-sm"
                     >
                       {btn.label}

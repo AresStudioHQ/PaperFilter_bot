@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   Crown, 
@@ -40,7 +40,7 @@ import {
   GrantOpportunity,
   ScholarDetail
 } from '../types';
-import { useI18n } from '../i18n';
+import { useI18n, localeFromLang } from '../i18n';
 import { TIER_DEFS, TIER_PRICES, TIER_ORDER, TIER_RANK, hasPaidTier, isUnlimited, type TierCode } from '../subscriptionTiers';
 
 interface ProFeaturesHubProps {
@@ -62,6 +62,8 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
 }) => {
   const { t } = useI18n(userLang);
   const fmt = (n: number) => isUnlimited(n) ? t('tier_drive_unlimited') : String(n);
+  const timeLocale = localeFromLang(userLang);
+  const nowTime = () => new Date().toLocaleTimeString(timeLocale);
 
   const [activeProTab, setActiveProTab] = useState<
     'chat' | 'matrix' | 'writer' | 'gaps' | 'radar' | 'digest' | 'roi_plan'
@@ -73,7 +75,7 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
       id: 'm1',
       role: 'assistant',
       content: t('pro_chat_welcome', { count: library.length }),
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: nowTime()
     }
   ]);
   const [chatInput, setChatInput] = useState('');
@@ -104,48 +106,15 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
   } | null>(null);
 
   // 5. Scholar Radar Surveillance State
-  const [monitoredScholars, setMonitoredScholars] = useState<ScholarDetail[]>([
-    {
-      name: 'Yann LeCun',
-      institution: 'NYU / Meta FAIR',
-      h_index: 148,
-      total_citations: 452000,
-      is_alert_enabled: true,
-      recent_preprints: [
-        { title: 'World Models and Joint Embedding Predictive Architectures (JEPA)', date: '2024-08', venue: 'arXiv', link: 'https://arxiv.org' },
-        { title: 'Self-Supervised Learning from High-Dimensional Video Signals', date: '2024-05', venue: 'CVPR', link: 'https://arxiv.org' }
-      ]
-    },
-    {
-      name: 'Demis Hassabis',
-      institution: 'Google DeepMind',
-      h_index: 92,
-      total_citations: 184000,
-      is_alert_enabled: true,
-      recent_preprints: [
-        { title: 'AlphaFold 3: Accurate Structure Prediction for Biomolecular Interactions', date: '2024-05', venue: 'Nature', link: 'https://nature.com' },
-        { title: 'Scaling Autonomous Agent Verification via Formal Proof Checkers', date: '2024-07', venue: 'ICLR', link: 'https://arxiv.org' }
-      ]
-    },
-    {
-      name: 'Jennifer Doudna',
-      institution: 'UC Berkeley / IGI',
-      h_index: 154,
-      total_citations: 210000,
-      is_alert_enabled: true,
-      recent_preprints: [
-        { title: 'Compact RNA-guided nucleases for precise therapeutic editing', date: '2024-06', venue: 'Science', link: 'https://science.org' }
-      ]
-    }
-  ]);
+  const [monitoredScholars, setMonitoredScholars] = useState<ScholarDetail[]>([]);
   const [newScholarName, setNewScholarName] = useState('');
 
   // 6. Digest Schedule State
   const [digestConfig, setDigestConfig] = useState<DigestConfig>({
-    is_active: true,
+    is_active: false,
     frequency: 'weekly',
     push_time: '08:30',
-    topics: ['Transformer', 'CRISPR', 'LLM Alignment', 'Quantum Computing', 'Diffusion Models'],
+    topics: [],
     include_deep: true
   });
   const [newDigestTopic, setNewDigestTopic] = useState('');
@@ -166,7 +135,7 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
       id: `u_${Date.now()}`,
       role: 'user',
       content: userQ,
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: nowTime()
     };
     setChatMessages(prev => [...prev, userMsg]);
     setIsChatLoading(true);
@@ -186,7 +155,7 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
             role: 'assistant',
             content: data.answer,
             cited_papers: data.cited_papers,
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: nowTime()
           }
         ]);
       }
@@ -380,13 +349,41 @@ ${bibtexStr}`;
     }
   };
 
+  const [labOpen, setLabOpen] = useState(false);
+  const [labOrg, setLabOrg] = useState('');
+  const [labEmail, setLabEmail] = useState('');
+  const [labNote, setLabNote] = useState('');
+  const [labThanks, setLabThanks] = useState(false);
+  const [labSending, setLabSending] = useState(false);
+
   const handleUpgradeWithConfetti = (tier: string = 'premium') => {
+    if (tier === 'lab') {
+      setLabOpen(true);
+      setLabThanks(false);
+      return;
+    }
     confetti({
       particleCount: 140,
       spread: 80,
       origin: { y: 0.55 }
     });
     onUpgradePro(tier);
+  };
+
+  const submitLabInquiry = async () => {
+    setLabSending(true);
+    try {
+      await fetch('/api/lab-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ org: labOrg, email: labEmail, note: labNote })
+      });
+      setLabThanks(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLabSending(false);
+    }
   };
 
   // Calculate ROI
@@ -420,21 +417,19 @@ ${bibtexStr}`;
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            {hasPaidTier(user.tier) ? (
-              <div className="px-4 py-3 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-lg">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span>{t('pro_already_pro')}</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => handleUpgradeWithConfetti('premium')}
-                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-sm shadow-xl shadow-amber-500/30 transition-all flex items-center gap-2 cursor-pointer transform hover:scale-[1.02]"
-              >
-                <Crown className="h-4 w-4" />
-                <span>{t('pro_btn_upgrade_now')}</span>
-              </button>
+          <div className="flex flex-col items-stretch sm:items-end gap-2">
+            {hasPaidTier(user.tier) && (
+              <span className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                {t('pro_current_plan')}: {t('tier_' + user.tier)}
+              </span>
             )}
+            <button
+              onClick={() => setActiveProTab('roi_plan')}
+              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold text-sm shadow-xl shadow-amber-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.02]"
+            >
+              <Crown className="h-4 w-4" />
+              <span>{t('pro_btn_view_plans')}</span>
+            </button>
           </div>
         </div>
 
@@ -510,18 +505,6 @@ ${bibtexStr}`;
           >
             <Bell className="h-3.5 w-3.5" />
             <span>{t('tab_digest')}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveProTab('roi_plan')}
-            className={`px-3.5 py-2 rounded-xl font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeProTab === 'roi_plan'
-                ? 'bg-amber-500 text-white shadow-md'
-                : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
-            <span>{t('tab_roi')}</span>
           </button>
         </div>
       </div>
@@ -985,6 +968,11 @@ ${bibtexStr}`;
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {monitoredScholars.length === 0 && (
+              <div className="md:col-span-3 p-8 text-center text-xs text-slate-500 bg-slate-950/60 border border-slate-800 rounded-xl">
+                {t('pro_radar_empty')}
+              </div>
+            )}
             {monitoredScholars.map((scholar, idx) => (
               <div key={idx} className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 text-xs">
                 <div className="flex items-start justify-between">
@@ -1013,7 +1001,7 @@ ${bibtexStr}`;
                   </div>
                   <div>
                     <span className="text-slate-500 block">{t('pro_total_citations')}</span>
-                    <span className="text-amber-400 font-mono font-bold">{scholar.total_citations.toLocaleString()}</span>
+                    <span className="text-amber-400 font-mono font-bold">{scholar.total_citations.toLocaleString(timeLocale)}</span>
                   </div>
                 </div>
 
@@ -1073,14 +1061,17 @@ ${bibtexStr}`;
           <div className="space-y-2 text-xs">
             <label className="text-slate-300 font-semibold block">{t('pro_digest_topics_label')}</label>
             <div className="flex flex-wrap gap-2">
-              {digestConfig.topics.map((t) => (
+              {digestConfig.topics.length === 0 && (
+                <span className="text-slate-500">{t('pro_digest_topics_empty')}</span>
+              )}
+              {digestConfig.topics.map((topicName) => (
                 <span
-                  key={t}
+                  key={topicName}
                   className="px-3 py-1 bg-indigo-950/70 border border-indigo-500/30 text-indigo-300 rounded-lg text-xs flex items-center gap-1.5"
                 >
-                  #{t}
+                  #{topicName}
                   <button
-                    onClick={() => setDigestConfig({ ...digestConfig, topics: digestConfig.topics.filter(item => item !== t) })}
+                    onClick={() => setDigestConfig({ ...digestConfig, topics: digestConfig.topics.filter(item => item !== topicName) })}
                     className="hover:text-rose-400 font-bold cursor-pointer"
                   >
                     ×
@@ -1193,7 +1184,7 @@ ${bibtexStr}`;
                     </div>
                     <div className="text-xs text-slate-300">
                       {t('pro_roi_value')}：
-                      <span className="text-emerald-400 font-bold ml-1">${moneyValueSaved.toLocaleString()}</span>
+                      <span className="text-emerald-400 font-bold ml-1">${moneyValueSaved.toLocaleString(timeLocale)}</span>
                     </div>
                   </div>
 
@@ -1208,6 +1199,7 @@ ${bibtexStr}`;
           </div>
 
           {/* Pricing Tiers Grid (data-driven from subscriptionTiers, synced with bot) */}
+          <p className="text-xs text-amber-300/90 text-center">{t('pro_beta_unlock_note')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {TIER_ORDER.map((tc) => {
               const isCurrent = (TIER_RANK[tc] ?? 0) === curRank;
@@ -1249,10 +1241,10 @@ ${bibtexStr}`;
                     </ul>
                   </div>
                   <button
-                    onClick={tc === 'lab' ? () => alert(t('pro_lab_contact')) : () => handleUpgradeWithConfetti(tc)}
-                    className={`w-full py-3 rounded-xl text-xs font-bold shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-3 ${isCurrent ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white'}`}
+                    onClick={() => { if (!isCurrent) handleUpgradeWithConfetti(tc); }}
+                    className={`w-full py-3 rounded-xl text-xs font-bold shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer mt-3 ${isCurrent ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : tc === 'lab' ? 'bg-indigo-600 hover:bg-indigo-500 text-white' : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white'}`}
                   >
-                    {isCurrent ? t('tier_current') : (tc === 'lab' ? t('pro_lab_contact_btn') : t('tier_upgrade'))}
+                    {isCurrent ? t('tier_current') : tc === 'lab' ? t('pro_lab_contact_btn') : t('tier_upgrade')}
                   </button>
                 </div>
               );
@@ -1261,6 +1253,57 @@ ${bibtexStr}`;
 
           <p className="text-center text-xs text-slate-400 mt-2">{t('pro_pricing_cta')}</p>
 
+        </div>
+      )}
+
+      {labOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-indigo-500/40 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 className="text-base font-bold text-white">{t('pro_lab_inquiry_title')}</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">{t('pro_lab_inquiry_desc')}</p>
+            {labThanks ? (
+              <p className="text-sm text-emerald-300">{t('pro_lab_inquiry_thanks')}</p>
+            ) : (
+              <div className="space-y-3">
+                <input
+                  value={labOrg}
+                  onChange={(e) => setLabOrg(e.target.value)}
+                  placeholder={t('pro_lab_inquiry_org')}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+                />
+                <input
+                  value={labEmail}
+                  onChange={(e) => setLabEmail(e.target.value)}
+                  placeholder={t('pro_lab_inquiry_email')}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+                />
+                <textarea
+                  value={labNote}
+                  onChange={(e) => setLabNote(e.target.value)}
+                  placeholder={t('pro_lab_inquiry_note')}
+                  rows={3}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none resize-none"
+                />
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                onClick={() => setLabOpen(false)}
+                className="px-3 py-2 rounded-lg bg-slate-800 text-slate-200 text-xs font-semibold cursor-pointer"
+              >
+                {t('pro_lab_inquiry_cancel')}
+              </button>
+              {!labThanks && (
+                <button
+                  onClick={submitLabInquiry}
+                  disabled={labSending}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer disabled:opacity-50"
+                >
+                  {t('pro_lab_inquiry_submit')}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

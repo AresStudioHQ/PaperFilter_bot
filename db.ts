@@ -92,7 +92,7 @@ export async function initTables(): Promise<void> {
 
   await q(`CREATE TABLE IF NOT EXISTS user_tier (
     user_id INTEGER PRIMARY KEY,
-    tier TEXT DEFAULT 'ultra',
+    tier TEXT DEFAULT 'free',
     daily_search_limit INTEGER DEFAULT 500,
     daily_deep_limit INTEGER DEFAULT 50,
     daily_litreview_limit INTEGER DEFAULT 20,
@@ -144,8 +144,18 @@ export async function initTables(): Promise<void> {
   await q(`INSERT OR IGNORE INTO users (user_id) VALUES (?)`, [SEED_USER_ID]);
   await q(
     `INSERT OR IGNORE INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
-     VALUES (?, 'free', 10, 1, 0, 0, 3, 0)`,
+     VALUES (?, 'free', 20, 5, 3, 3, 10, 2)`,
     [SEED_USER_ID]
+  );
+}
+
+/** Create a free-tier row for a newly logged-in user so they never inherit demo Ultra data. */
+export async function ensureUser(userId: number): Promise<void> {
+  await q(`INSERT OR IGNORE INTO users (user_id) VALUES (?)`, [userId]);
+  await q(
+    `INSERT OR IGNORE INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
+     VALUES (?, 'free', 20, 5, 3, 3, 10, 2)`,
+    [userId]
   );
 }
 
@@ -167,7 +177,7 @@ export async function getProfile(): Promise<DbProfile> {
     user_id: currentUserId(),
     tier: (t.rows[0]?.tier as string) || "free",
     filter_mode: (u.rows[0]?.filter_mode as string) || "smart",
-    user_lang: (u.rows[0]?.user_lang as string) || "zh_hant",
+    user_lang: (u.rows[0]?.user_lang as string) || "en",
   };
 }
 
@@ -231,7 +241,7 @@ function rowToPaper(row: any): PaperItem {
     credibility_emoji: row.credibility_emoji || "",
     credibility_label: row.credibility_label || "",
     bibtex: row.bibtex || "",
-    category: row.category || "人工智慧",
+    category: row.category || "AI",
     user_notes: "",
     tags: ["已收藏"],
     is_starred: false,
@@ -257,9 +267,9 @@ export async function addPaper(paper: PaperItem): Promise<void> {
      ON CONFLICT(user_id, paper_id) DO UPDATE SET
        title = ?, authors = ?, year = ?, source = ?, link = ?, abstract = ?, fingerprint = ?, bibtex = ?, category = ?, venue_name = ?, tier = ?, is_preprint = ?, credibility_emoji = ?, credibility_label = ?`,
     [
-      currentUserId(), paper_id, paper.title, authors, paper.year, paper.source, paper.link, paper.summary, paper.fingerprint, paper.bibtex, paper.category || "人工智慧",
+      currentUserId(), paper_id, paper.title, authors, paper.year, paper.source, paper.link, paper.summary, paper.fingerprint, paper.bibtex, paper.category || "AI",
       paper.venue_name || "", paper.tier || null, paper.is_preprint ? 1 : 0, paper.credibility_emoji || "", paper.credibility_label || "",
-      paper.title, authors, paper.year, paper.source, paper.link, paper.summary, paper.fingerprint, paper.bibtex, paper.category || "人工智慧",
+      paper.title, authors, paper.year, paper.source, paper.link, paper.summary, paper.fingerprint, paper.bibtex, paper.category || "AI",
       paper.venue_name || "", paper.tier || null, paper.is_preprint ? 1 : 0, paper.credibility_emoji || "", paper.credibility_label || "",
     ]
   );

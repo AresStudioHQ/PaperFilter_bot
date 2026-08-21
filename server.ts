@@ -28,6 +28,7 @@ import {
   getLinkByWeb,
   getPendingCode,
   migrateWebToTelegram,
+  ensureUser,
   type PaperItem,
 } from "./db";
 import { getVenueTier, credibilityBadge, isPreprint } from "./src/academicTiers";
@@ -115,90 +116,33 @@ interface HistoryItem {
   details?: string;
 }
 
-let telegramHandle = "@ares_researcher";
-const baseProfile = {
-  username: "Ares (科研總監)",
-  pro_expires_at: "2026-12-31",
-};
-let totalReadCount = 86;
-let totalArchivedCount = 24;
-let totalSkippedCount = 42;
-let totalDeepReadCount = 18;
-
-let userHistory: HistoryItem[] = [
-  {
-    id: "h_1",
-    action: "archive",
-    paper_id: "s2_dpo_preference",
-    paper_title: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
-    authors: ["Rafael Rafailov", "Chelsea Finn"],
-    year: "2023",
-    source: "NeurIPS",
-    category: "人工智慧",
-    timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-    details: "雙軌歸檔至 Google Drive [人工智慧] & references.bib"
-  },
-  {
-    id: "h_2",
-    action: "deep_read",
-    paper_id: "s2_dpo_preference",
-    paper_title: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
-    authors: ["Rafael Rafailov", "Chelsea Finn"],
-    year: "2023",
-    source: "NeurIPS",
-    category: "人工智慧",
-    timestamp: new Date(Date.now() - 3600000 * 3).toISOString(),
-    details: "完成 AI 4 大維度深度導讀與 BibTeX 提取"
-  },
-  {
-    id: "h_3",
-    action: "seen",
-    paper_id: "s2_llama3",
-    paper_title: "The Llama 3 Herd of Models",
-    authors: ["Meta AI Research Team"],
-    year: "2024",
-    source: "arXiv (開源預印本)",
-    category: "人工智慧",
-    timestamp: new Date(Date.now() - 3600000 * 12).toISOString(),
-    details: "標記為已讀，保留領域偏好 (+12分)"
-  },
-  {
-    id: "h_4",
-    action: "skip",
-    paper_id: "s2_nft_rendering",
-    paper_title: "NFT Rendering on Mobile GPUs",
-    authors: ["Anonymous"],
-    year: "2022",
-    source: "IEEE Trans",
-    category: "電腦圖形",
-    timestamp: new Date(Date.now() - 3600000 * 24).toISOString(),
-    details: "標記沒興趣，調降 rendering / nft 相關權重 (-6分)"
-  },
-  {
-    id: "h_5",
-    action: "archive",
-    paper_id: "pmid_crispr_cas9",
-    paper_title: "A programmable dual-RNA-guided DNA endonuclease in adaptive bacterial immunity",
-    authors: ["Jennifer A Doudna", "Emmanuelle Charpentier"],
-    year: "2012",
-    source: "Science (頂刊 35.8 IF)",
-    category: "生命科學",
-    timestamp: new Date(Date.now() - 86400000 * 3).toISOString(),
-    details: "歸檔至 Google Drive [生命科學]"
+interface UserMem {
+  history: HistoryItem[];
+  read: number;
+  archived: number;
+  skipped: number;
+  deep: number;
+}
+const memByUser: Record<number, UserMem> = {};
+function mem(): UserMem {
+  const uid = currentUserId();
+  if (!memByUser[uid]) {
+    memByUser[uid] = { history: [], read: 0, archived: 0, skipped: 0, deep: 0 };
   }
-];
+  return memByUser[uid];
+}
 
 let digestConfig = {
-  is_active: true,
+  is_active: false,
   frequency: "weekly" as "daily" | "weekly",
   push_time: "08:30",
-  topics: ["Transformer", "CRISPR", "LLM Alignment", "Quantum Computing"],
+  topics: [] as string[],
   include_deep: true
 };
 
 let userBias = {
-  positive: { transformer: 5, crispr: 4, alignment: 3, dpo: 3 } as Record<string, number>,
-  negative: { animation: 2, rendering: 1, crypto: 3 } as Record<string, number>
+  positive: {} as Record<string, number>,
+  negative: {} as Record<string, number>
 };
 
 // 網頁端 UI 專用欄位（starred / notes / tags）Turso 目前未儲存，先用 overlay 保留於程序記憶體
@@ -212,19 +156,19 @@ async function buildProfile() {
   const syncCode = (await getPendingCode(webUid)) || (await createBindCode(webUid));
   return {
     user_id: webUid,
-    username: baseProfile.username,
-    telegram_handle: telegramHandle,
+    username: "",
+    telegram_handle: "",
     is_telegram_linked: !!link,
     telegram_id: link ? link.telegram_user_id : null,
     sync_code: syncCode,
     tier: dbp.tier,
-    pro_expires_at: baseProfile.pro_expires_at,
+    pro_expires_at: "",
     filter_mode: dbp.filter_mode,
     user_lang: dbp.user_lang,
-    total_read_count: totalReadCount,
-    total_archived_count: totalArchivedCount,
-    total_skipped_count: totalSkippedCount,
-    total_deep_read_count: totalDeepReadCount,
+    total_read_count: mem().read,
+    total_archived_count: mem().archived,
+    total_skipped_count: mem().skipped,
+    total_deep_read_count: mem().deep,
   };
 }
 
@@ -616,7 +560,12 @@ app.get("/api/auth/profile", async (req, res) => {
       res.cookie("uid", String(user.telegram_id), { httpOnly: true, sameSite: "lax", maxAge: 30 * 86400 * 1000 });
     }
     const uname = getCookie(req, "uname");
-    if (uname) user.username = uname;
+    if (uname) {
+      user.username = uname;
+      user.telegram_handle = user.is_telegram_linked
+        ? (uname.startsWith("@") ? uname : `@${uname}`)
+        : "";
+    }
     const categories = await getCategories();
     const authors = await getAuthors();
     const library = await loadLibrary();
@@ -626,7 +575,7 @@ app.get("/api/auth/profile", async (req, res) => {
       categories,
       followed_authors: authors,
       library_count: library.length,
-      history_count: userHistory.length
+      history_count: mem().history.length
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "取得個人檔案失敗" });
@@ -672,6 +621,7 @@ app.post("/api/auth/telegram-login", async (req, res) => {
     }
     const id = Number(data.id);
     const uname = data.username || data.first_name || `user${id}`;
+    await setUserContext(id, async () => { await ensureUser(id); });
     res.cookie("uid", String(id), { httpOnly: true, sameSite: "lax", maxAge: 30 * 86400 * 1000 });
     res.cookie("uname", uname, { httpOnly: false, sameSite: "lax", maxAge: 30 * 86400 * 1000 });
     res.json({ success: true });
@@ -692,16 +642,37 @@ app.post("/api/auth/logout", (req, res) => {
 
 app.post("/api/auth/upgrade-tier", async (req, res) => {
   const { tier } = req.body;
-  const validTiers = ["free", "basic", "standard", "premium", "ultra", "lab"];
+  const validTiers = ["free", "basic", "standard", "premium", "ultra"];
   if (!tier || !validTiers.includes(tier)) {
-    return res.status(400).json({ error: "無效的方案，請選擇 basic/standard/premium/ultra" });
+    return res.status(400).json({ error: "Invalid plan. Lab licensing uses /api/lab-inquiry." });
   }
   await setTier(tier);
   res.json({
     success: true,
-    message: `✅ 已成功升級至 ${tier} 方案！`,
+    message: `Upgraded to ${tier} (beta simulated — no payment collected).`,
     user: await buildProfile()
   });
+});
+
+const labInquiries: Array<{ uid: number; username: string; org?: string; email?: string; note?: string; at: string }> = [];
+app.post("/api/lab-inquiry", async (req, res) => {
+  try {
+    const { org, email, note } = req.body || {};
+    const profile = await buildProfile();
+    const row = {
+      uid: currentUserId(),
+      username: profile.username,
+      org: String(org || "").slice(0, 200),
+      email: String(email || "").slice(0, 200),
+      note: String(note || "").slice(0, 1000),
+      at: new Date().toISOString()
+    };
+    labInquiries.push(row);
+    console.log("[Lab licensing inquiry]", row);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 app.post("/api/auth/update-mode", async (req, res) => {
@@ -721,7 +692,7 @@ app.get("/api/history", async (req, res) => {
   const user = await buildProfile();
   res.json({
     success: true,
-    history: userHistory,
+    history: mem().history,
     stats: {
       read: user.total_read_count,
       archived: user.total_archived_count,
@@ -736,20 +707,23 @@ app.get("/api/analytics/charts", async (req, res) => {
 
   const categoryCounts: Record<string, number> = {};
   for (const p of library) {
-    const c = p.category || "未分類";
+    const c = p.category || "Uncategorized";
     categoryCounts[c] = (categoryCounts[c] || 0) + 1;
   }
 
+  // 真實統計：由歷史紀錄彙計近 7 天（無紀錄 = 全 0，圖表貼地）
   const now = new Date();
   const readingTrend = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 86400000);
+    const dayKey = d.toISOString().slice(0, 10);
     const dayLabel = `${d.getMonth() + 1}/${d.getDate()}`;
+    const hist = mem().history;
     readingTrend.push({
       date: dayLabel,
-      searches: 8 + Math.floor(Math.sin(i) * 4 + (7 - i) * 2),
-      archived: 2 + (i % 3 === 0 ? 3 : 1),
-      deep_reads: 1 + (i % 2 === 0 ? 2 : 0)
+      searches: hist.filter(h => h.action === "search" && h.timestamp.slice(0, 10) === dayKey).length,
+      archived: hist.filter(h => h.action === "archive" && h.timestamp.slice(0, 10) === dayKey).length,
+      deep_reads: hist.filter(h => h.action === "deep_read" && h.timestamp.slice(0, 10) === dayKey).length
     });
   }
 
@@ -757,12 +731,7 @@ app.get("/api/analytics/charts", async (req, res) => {
     success: true,
     category_distribution: Object.entries(categoryCounts).map(([name, value]) => ({ name, value })),
     reading_trend: readingTrend,
-    top_sources: [
-      { name: "NeurIPS / ICML", count: 12 },
-      { name: "Science / Nature", count: 8 },
-      { name: "arXiv CS/AI", count: 15 },
-      { name: "PubMed 生醫", count: 9 }
-    ]
+    top_sources: []
   });
 });
 
@@ -775,8 +744,8 @@ app.post("/api/search", async (req, res) => {
     const profile = await buildProfile();
     const searchMode = mode || profile.filter_mode;
 
-    totalReadCount += 1;
-    userHistory.unshift({
+    mem().read += 1;
+    mem().history.unshift({
       id: `h_${Date.now()}`,
       action: "search",
       paper_title: `搜尋主題：${query}`,
@@ -797,8 +766,8 @@ app.post("/api/deep", async (req, res) => {
     const { title, summary, authors = [], year = "2024", link = "", source = "" } = req.body;
     if (!title) return res.status(400).json({ error: "缺少論文標題" });
 
-    totalDeepReadCount += 1;
-    userHistory.unshift({
+    mem().deep += 1;
+    mem().history.unshift({
       id: `h_${Date.now()}`,
       action: "deep_read",
       paper_title: title,
@@ -1135,19 +1104,19 @@ app.post("/api/library/add", async (req, res) => {
     const item: PaperItem = {
       ...paper,
       bibtex,
-      category: paper.category || "人工智慧",
+      category: paper.category || "AI",
       user_notes: paper.user_notes || "",
-      tags: paper.tags || ["已收藏"],
+      tags: paper.tags || ["saved"],
       is_starred: paper.is_starred ?? false,
       added_at: new Date().toISOString()
     };
 
     await addPaper(item);
     if (!existing) {
-      totalArchivedCount += 1;
+      mem().archived += 1;
     }
 
-    userHistory.unshift({
+    mem().history.unshift({
       id: `h_${Date.now()}`,
       action: "archive",
       paper_id: item.id,
@@ -1316,172 +1285,412 @@ ${papers.slice(0, 10).map(p => `- ${p.title} (${p.year})`).join("\n")}
   }
 });
 
-// 13. Telegram Bot Simulator Route (with instant sync to web history)
+type SimLang = "en" | "zh_hant" | "zh_hans" | "ja";
+function normSimLang(l?: string): SimLang {
+  const s = String(l || "").toLowerCase().replace(/-/g, "_");
+  if (s === "zh_hant" || s === "zh_tw") return "zh_hant";
+  if (s === "zh_hans" || s === "zh_cn" || s === "zh") return "zh_hans";
+  if (s === "ja" || s === "jp") return "ja";
+  return "en";
+}
+function parseLangArg(arg: string): SimLang | null {
+  const s = arg.trim().toLowerCase().replace(/-/g, "_");
+  if (!s) return null;
+  if (["en", "eng", "english"].includes(s)) return "en";
+  if (["ja", "jp", "japanese", "日本語"].includes(s)) return "ja";
+  if (["zh_hans", "zh_cn", "cn", "simplified"].includes(s) || s.includes("简")) return "zh_hans";
+  if (["zh_hant", "zh_tw", "tw", "traditional"].includes(s) || s.includes("繁")) return "zh_hant";
+  return null;
+}
+const SIM: Record<SimLang, Record<string, string>> = {
+  en: {
+    start: "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n🔬 <b>Core Features</b>:\n• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\n• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\n• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\n\n👇 Choose a shortcut below or send <b>keywords</b> directly to search:",
+    help: "📖 <b>PaperFilterBot Command Suite</b>\n\n🔍 <b>Search</b>: Send keywords directly (e.g. LLM Agent)\n💬 <b>/chat</b> - Toggle cross-paper Q&A\n📚 <b>/my</b> - View library, folders & Drive\n🔗 <b>/bind</b> - 6-digit sync code to link Telegram\n💎 <b>/pro</b> - Plans & upgrade info\n📂 <b>/following</b> · ➕ <code>/follow Name</code> · ➖ <code>/unfollow Name</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend Field</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - Open the live Telegram bot (this is the web simulator)\n\nSlash commands are never treated as search.",
+    bind: "🔗 <b>Bind web HQ to Telegram</b>\n\nYour sync code: <code>{code}</code>\n\nOpen the website, click <b>Bind TG</b>, and enter this code.",
+    pro_head: "📊 <b>PaperFilterBot plans</b>\n\n👤 Current plan: <b>{tier}</b>\n\n",
+    pro_foot: "\n\n<i>Pricing is not live yet. Testers: use a /redeem code on the real Telegram bot for 7-day full access. Lab is sales-assisted, not instant unlock.</i>",
+    lang_pick: "🌐 <b>Interface language</b>\n\nCurrent: <b>{current}</b>\n\nTap a button or send <code>/lang en</code>, <code>/lang ja</code>, <code>/lang zh_hant</code>, <code>/lang zh_hans</code>.",
+    lang_ok: "✅ Language set to <b>{current}</b>.",
+    mode_pick: "⚙️ <b>Filter mode</b>\n\nCurrent: <b>{current}</b>\n\nSend <code>/mode smart</code>, <code>/mode top_tier</code>, or <code>/mode free_only</code>.",
+    mode_ok: "✅ Filter mode set to <b>{mode}</b>.",
+    following: "📋 <b>Scholars you follow</b>\n\n{list}\n\n<i><code>/unfollow Name</code> to remove</i>",
+    following_empty: "(none yet)",
+    follow_ok: "🌟 Now following <code>{name}</code> (+50 ranking weight).",
+    follow_need: "Usage: <code>/follow Yann LeCun</code>",
+    unfollow_ok: "✅ Unfollowed <code>{name}</code>.",
+    unfollow_miss: "⚠️ <code>{name}</code> was not on your list.",
+    folders: "📁 <b>Your folders</b>\n\n{list}",
+    folders_empty: "(no folders yet — try <code>add folder Quantum AI</code>)",
+    folder_add: "✅ Folder created: <b>{name}</b>",
+    folder_rename: "✅ Renamed <b>{old}</b> → <b>{new}</b>",
+    folder_del: "✅ Removed folder: <b>{name}</b>",
+    unknown: "❓ Unknown command <code>{cmd}</code>. Send <code>/help</code> for the list. Keywords without / still search papers.",
+    no_papers: "😅 No papers found for [{q}]. Try another keyword.",
+    ai_label: "AI briefing:",
+    pdf_label: "Read full paper / PDF",
+    and_others: " and {n} others",
+    btn_deep: "💡 Deep Reading",
+    btn_seen: "👀 Seen",
+    btn_skip: "👎 Not Interested",
+    btn_archive: "☁️ Cloud Archive",
+    review_hint: "📑 Literature review runs on the real bot and in Pro Suite → Writer / RAG. This simulator does not treat /review as a search.",
+    gap_hint: "🔍 Gap analysis runs in Pro Suite → Research Gap Scanner. /gap is not a search keyword.",
+    trend_need: "Usage: <code>/trend quantum computing</code>",
+    unlimited: "unlimited",
+    welcome: "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n🔬 <b>Core Features</b>:\n• Cross-search 4 scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef)\n• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n• 💬 Multi-paper RAG Q&A (<code>/chat [Question]</code>)\n• ☁️ Google Drive dual archiving & automatic <code>references.bib</code> sync\n\n👇 Choose a shortcut below or send <b>keywords</b> directly to search:",
+    btn_hot_transformer: "🔍 Hot: Transformer",
+    btn_hot_crispr: "🧬 Hot: CRISPR",
+    btn_bind: "🔗 Bind Telegram",
+    btn_view_pro: "👑 View Pro Features",
+    btn_full_help: "📖 Full Command Guide",
+    btn_open_tg: "📱 Open Telegram bot",
+    btn_oa: "🟢 Open Access",
+    btn_doi: "🔗 Official DOI",
+    web_tg: "📱 You are already on Web HQ.\n\nOn the real Telegram bot this button opens the website. Here it is reversed — open the live bot:\n\nhttps://t.me/{bot}",
+    mode_top: "🏆 Top-tier",
+    mode_smart: "⚡ Smart Balanced",
+    mode_free: "🟢 Open Access only",
+  },
+  zh_hant: {
+    start: "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n🔬 <b>核心科研特權</b>：\n• 4 大官方學術庫交叉檢索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n• 💡 4 維 AI 深度導讀（研究動機、核心方法、關鍵結論、技術限制）\n• 💬 跨論文 RAG 智慧問答（<code>/chat [問題]</code>）\n• ☁️ Google Drive 雙軌自動歸檔 + <code>references.bib</code> 即時生成\n\n👇 請選擇下方快捷功能，或直接在聊天室發送<b>論文關鍵字</b>進行檢索：",
+    help: "📖 <b>PaperFilterBot 全指令導覽</b>\n\n🔍 <b>論文檢索</b>：直接發送關鍵字（例如：LLM Agent）\n💬 <b>/chat</b> - 跨文獻問答\n📚 <b>/my</b> - 文獻庫、資料夾與 Drive\n🔗 <b>/bind</b> - 產生同步碼以綁定 Telegram\n💎 <b>/pro</b> - 方案比較\n📂 <b>/following</b> · ➕ <code>/follow 學者</code> · ➖ <code>/unfollow 學者</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend 領域</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - 開啟真實 Telegram 機器人（此處為網頁模擬器）\n\n以 / 開頭的指令不會被當成搜尋。",
+    bind: "🔗 <b>綁定網頁大總部</b>\n\n同步碼：<code>{code}</code>\n\n請在網頁點擊「綁定 TG」後輸入此代碼。",
+    pro_head: "📊 <b>方案比較</b>\n\n👤 目前方案：<b>{tier}</b>\n\n",
+    pro_foot: "\n\n<i>定價尚未上線。測試員請在真實 Telegram bot 用 /redeem 兌換 7 天全功能。Lab 為業務洽詢，不會即時解鎖。</i>",
+    lang_pick: "🌐 <b>介面語言</b>\n\n目前：<b>{current}</b>\n\n請點按鈕，或傳送 <code>/lang en</code> 等。",
+    lang_ok: "✅ 語言已切換為 <b>{current}</b>。",
+    mode_pick: "⚙️ <b>過濾模式</b>\n\n目前：<b>{current}</b>\n\n傳送 <code>/mode smart</code>、<code>/mode top_tier</code> 或 <code>/mode free_only</code>。",
+    mode_ok: "✅ 過濾模式已設為 <b>{mode}</b>。",
+    following: "📋 <b>追蹤中的學者</b>\n\n{list}\n\n<i><code>/unfollow 名字</code> 可取消</i>",
+    following_empty: "（尚無）",
+    follow_ok: "🌟 已追蹤 <code>{name}</code>（+50 權重）。",
+    follow_need: "用法：<code>/follow Yann LeCun</code>",
+    unfollow_ok: "✅ 已取消追蹤 <code>{name}</code>。",
+    unfollow_miss: "⚠️ 名單中沒有 <code>{name}</code>。",
+    folders: "📁 <b>你的資料夾</b>\n\n{list}",
+    folders_empty: "（尚無資料夾 — 可試 <code>新增 量子計算</code>）",
+    folder_add: "✅ 已新增資料夾：<b>{name}</b>",
+    folder_rename: "✅ 已更名 <b>{old}</b> → <b>{new}</b>",
+    folder_del: "✅ 已刪除資料夾：<b>{name}</b>",
+    unknown: "❓ 未知指令 <code>{cmd}</code>。請用 <code>/help</code> 查看。沒有 / 的關鍵字才會搜尋論文。",
+    no_papers: "😅 找不到與【{q}】相關的論文，請換個關鍵字。",
+    ai_label: "AI 導讀：",
+    pdf_label: "閱讀完整論文 / PDF",
+    and_others: " 等 {n} 位",
+    btn_deep: "💡 深度導讀",
+    btn_seen: "👀 看過了",
+    btn_skip: "👎 沒興趣",
+    btn_archive: "☁️ 歸檔到雲端",
+    review_hint: "📑 文獻綜述請到真實 bot 或 Pro 專區。模擬器不會把 /review 當成搜尋。",
+    gap_hint: "🔍 缺口分析請到 Pro 專區的 Gap Scanner。/gap 不是搜尋關鍵字。",
+    trend_need: "用法：<code>/trend quantum computing</code>",
+    unlimited: "無限",
+    btn_hot_transformer: "🔍 熱門：Transformer",
+    btn_hot_crispr: "🧬 熱門：CRISPR",
+    btn_bind: "🔗 綁定 Telegram",
+    btn_view_pro: "👑 查看 Pro 特權",
+    btn_full_help: "📖 完整指令幫助",
+    btn_open_tg: "📱 開啟 Telegram 機器人",
+    btn_oa: "🟢 免費全文 (OA)",
+    btn_doi: "🔗 官方 DOI 頁面",
+    web_tg: "📱 你已經在網頁大總部。\n\n真實 Telegram bot 這顆按鈕會開啟網頁；模擬器則反過來——開啟真實 bot：\n\nhttps://t.me/{bot}",
+    mode_top: "🏆 頂級期刊/頂會",
+    mode_smart: "⚡ 智慧精選",
+    mode_free: "🟢 僅免費全文",
+  },
+  zh_hans: {
+    start: "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n🔬 <b>核心科研特权</b>：\n• 4 大官方学术库交叉检索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n• 💡 4 维 AI 深度导读\n• 💬 跨论文 RAG 问答（<code>/chat [问题]</code>）\n• ☁️ Google Drive 双轨归档 + <code>references.bib</code>\n\n👇 请选择下方快捷功能，或直接发送<b>论文关键字</b>检索：",
+    help: "📖 <b>PaperFilterBot 全指令导览</b>\n\n🔍 直接发送关键字检索\n💬 <b>/chat</b> · 📚 <b>/my</b> · 🔗 <b>/bind</b> · 💎 <b>/pro</b>\n📂 <b>/following</b> · ➕ <code>/follow 学者</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend 领域</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - 打开真实 Telegram 机器人（此处为网页模拟器）\n\n以 / 开头的指令不会被当成搜索。",
+    bind: "🔗 <b>绑定网页总部</b>\n\n同步码：<code>{code}</code>\n\n请在网页点击「绑定 TG」后输入此代码。",
+    pro_head: "📊 <b>方案比较</b>\n\n👤 当前方案：<b>{tier}</b>\n\n",
+    pro_foot: "\n\n<i>定价尚未上线。测试员请在真实 Telegram bot 用 /redeem 兑换 7 天全功能。Lab 为商务洽询，不会即时解锁。</i>",
+    lang_pick: "🌐 <b>界面语言</b>\n\n当前：<b>{current}</b>\n\n请点按钮，或发送 <code>/lang en</code> 等。",
+    lang_ok: "✅ 语言已切换为 <b>{current}</b>。",
+    mode_pick: "⚙️ <b>过滤模式</b>\n\n当前：<b>{current}</b>\n\n发送 <code>/mode smart</code>、<code>/mode top_tier</code> 或 <code>/mode free_only</code>。",
+    mode_ok: "✅ 过滤模式已设为 <b>{mode}</b>。",
+    following: "📋 <b>正在追踪的学者</b>\n\n{list}\n\n<i><code>/unfollow 名字</code> 可取消</i>",
+    following_empty: "（暂无）",
+    follow_ok: "🌟 已追踪 <code>{name}</code>（+50 权重）。",
+    follow_need: "用法：<code>/follow Yann LeCun</code>",
+    unfollow_ok: "✅ 已取消追踪 <code>{name}</code>。",
+    unfollow_miss: "⚠️ 名单中没有 <code>{name}</code>。",
+    folders: "📁 <b>你的文件夹</b>\n\n{list}",
+    folders_empty: "（暂无文件夹）",
+    folder_add: "✅ 已新增文件夹：<b>{name}</b>",
+    folder_rename: "✅ 已更名 <b>{old}</b> → <b>{new}</b>",
+    folder_del: "✅ 已删除文件夹：<b>{name}</b>",
+    unknown: "❓ 未知指令 <code>{cmd}</code>。请用 <code>/help</code>。没有 / 的关键字才会搜索论文。",
+    no_papers: "😅 找不到与【{q}】相关的论文，请换个关键字。",
+    ai_label: "AI 导读：",
+    pdf_label: "阅读完整论文 / PDF",
+    and_others: " 等 {n} 位",
+    btn_deep: "💡 深度导读",
+    btn_seen: "👀 看过了",
+    btn_skip: "👎 没兴趣",
+    btn_archive: "☁️ 归档到云端",
+    review_hint: "📑 文献综述请到真实 bot 或 Pro 专区。模拟器不会把 /review 当成搜索。",
+    gap_hint: "🔍 缺口分析请到 Pro 专区。/gap 不是搜索关键字。",
+    trend_need: "用法：<code>/trend quantum computing</code>",
+    unlimited: "无限",
+    btn_hot_transformer: "🔍 热门：Transformer",
+    btn_hot_crispr: "🧬 热门：CRISPR",
+    btn_bind: "🔗 绑定 Telegram",
+    btn_view_pro: "👑 查看 Pro 特权",
+    btn_full_help: "📖 完整指令帮助",
+    btn_open_tg: "📱 打开 Telegram 机器人",
+    btn_oa: "🟢 免费全文 (OA)",
+    btn_doi: "🔗 官方 DOI 页面",
+    web_tg: "📱 你已经在网页总部。\n\n真实 Telegram bot 这颗按钮会打开网页；模拟器则反过来——打开真实 bot：\n\nhttps://t.me/{bot}",
+    mode_top: "🏆 顶级期刊/顶会",
+    mode_smart: "⚡ 智慧精选",
+    mode_free: "🟢 仅免费全文",
+  },
+  ja: {
+    start: "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot HQ</b> へようこそ！\n\n🔬 <b>主な機能</b>：\n• 4大学術リポジトリ横断検索 (arXiv / PubMed / Semantic Scholar / CrossRef)\n• 💡 4次元 AI ディープ読解\n• 💬 複数論文 RAG Q&A（<code>/chat [質問]</code>）\n• ☁️ Google Drive 保存と <code>references.bib</code> 同期\n\n👇 下のショートカットを選ぶか、<b>キーワード</b>を送って検索：",
+    help: "📖 <b>PaperFilterBot コマンド一覧</b>\n\n🔍 キーワードを直接送信\n💬 <b>/chat</b> · 📚 <b>/my</b> · 🔗 <b>/bind</b> · 💎 <b>/pro</b>\n📂 <b>/following</b> · ➕ <code>/follow 名前</code>\n📑 <code>/review</code> · 🔍 <code>/gap</code> · 📈 <code>/trend 分野</code>\n⚙️ <code>/mode</code> · 🌐 <code>/lang</code>\n📱 <code>/web</code> - 本番 Telegram bot を開く（ここは Web シミュレータ）\n\n/ で始まるコマンドは検索しません。",
+    bind: "🔗 <b>Web HQ を Telegram に連携</b>\n\n同期コード：<code>{code}</code>\n\nサイトで「Bind TG」を押し、このコードを入力してください。",
+    pro_head: "📊 <b>プラン比較</b>\n\n👤 現在のプラン：<b>{tier}</b>\n\n",
+    pro_foot: "\n\n<i>価格は未公開です。テスターは本番 bot で /redeem。Lab は営業相談で即時解除されません。</i>",
+    lang_pick: "🌐 <b>表示言語</b>\n\n現在：<b>{current}</b>\n\nボタンを押すか <code>/lang en</code> などを送ってください。",
+    lang_ok: "✅ 言語を <b>{current}</b> に設定しました。",
+    mode_pick: "⚙️ <b>フィルタモード</b>\n\n現在：<b>{current}</b>\n\n<code>/mode smart</code> / <code>top_tier</code> / <code>free_only</code>",
+    mode_ok: "✅ モードを <b>{mode}</b> に設定しました。",
+    following: "📋 <b>フォロー中の学者</b>\n\n{list}\n\n<i><code>/unfollow 名前</code> で解除</i>",
+    following_empty: "（まだいません）",
+    follow_ok: "🌟 <code>{name}</code> をフォローしました（+50）。",
+    follow_need: "使い方：<code>/follow Yann LeCun</code>",
+    unfollow_ok: "✅ <code>{name}</code> のフォローを解除しました。",
+    unfollow_miss: "⚠️ <code>{name}</code> はリストにありません。",
+    folders: "📁 <b>フォルダ</b>\n\n{list}",
+    folders_empty: "（フォルダなし）",
+    folder_add: "✅ フォルダを作成：<b>{name}</b>",
+    folder_rename: "✅ 改名 <b>{old}</b> → <b>{new}</b>",
+    folder_del: "✅ フォルダ削除：<b>{name}</b>",
+    unknown: "❓ 未知のコマンド <code>{cmd}</code>。<code>/help</code> を見てください。/ なしの語句だけが検索になります。",
+    no_papers: "😅 [{q}] に一致する論文が見つかりません。",
+    ai_label: "AI ガイド：",
+    pdf_label: "全文 / PDF を読む",
+    and_others: " ほか {n} 名",
+    btn_deep: "💡 詳細解説",
+    btn_seen: "👀 閲覧済み",
+    btn_skip: "👎 興味なし",
+    btn_archive: "☁️ ドライブ保存",
+    review_hint: "📑 文献レビューは本番 bot または Pro Suite で実行します。/review は検索しません。",
+    gap_hint: "🔍 ギャップ分析は Pro Suite の Gap Scanner です。/gap は検索しません。",
+    trend_need: "使い方：<code>/trend quantum computing</code>",
+    unlimited: "無制限",
+    btn_hot_transformer: "🔍 人気：Transformer",
+    btn_hot_crispr: "🧬 人気：CRISPR",
+    btn_bind: "🔗 Telegram を連携",
+    btn_view_pro: "👑 Pro機能を見る",
+    btn_full_help: "📖 コマンド一覧",
+    btn_open_tg: "📱 Telegram bot を開く",
+    btn_oa: "🟢 オープンアクセス",
+    btn_doi: "🔗 公式DOIページ",
+    web_tg: "📱 すでに Web HQ にいます。\n\n本番 bot ではこのボタンが Web を開きます。シミュレータでは逆で、本番 bot を開きます：\n\nhttps://t.me/{bot}",
+    mode_top: "🏆 トップジャーナル",
+    mode_smart: "⚡ スマート精選",
+    mode_free: "🟢 OA のみ",
+  },
+};
+function st(lang: SimLang, key: string, vars: Record<string, string | number> = {}): string {
+  let text = SIM[lang]?.[key] || SIM.en[key] || key;
+  for (const [k, v] of Object.entries(vars)) text = text.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+  return text;
+}
+const LANG_LABEL: Record<SimLang, string> = { en: "English", zh_hant: "繁體中文", zh_hans: "简体中文", ja: "日本語" };
+
+// 13. Telegram Bot Simulator — commands are never treated as keyword search
 app.post("/api/simulate-bot", async (req, res) => {
   try {
-    const { text, user_id = currentUserId() } = req.body;
-    if (!text) return res.status(400).json({ error: "請輸入訊息" });
+    const { text, lang: bodyLang, user_id = currentUserId() } = req.body;
+    if (!text) return res.status(400).json({ error: "Message required" });
 
     const trimmed = text.trim();
     const profile = await buildProfile();
+    let lang = normSimLang(bodyLang || profile.user_lang);
     const followedAuthors = await getAuthors();
     const userCategories = await getCategories();
 
-    // Command handling
-    if (trimmed === "/start") {
-      return res.json({
-        type: "text",
-        text: `👋 您好！我是您的 <b>PaperFilterBot 全球學術研究秘書</b>。
+    const botHandle = (process.env.TELEGRAM_BOT_USERNAME || "paper_filter_bot").replace(/^@/, "");
+    const startButtons = () => [
+      { label: st(lang, "btn_hot_transformer"), action: "search:Transformer" },
+      { label: st(lang, "btn_hot_crispr"), action: "search:CRISPR" },
+      { label: st(lang, "btn_bind"), action: "bind" },
+      { label: st(lang, "btn_view_pro"), action: "pro" },
+      { label: st(lang, "btn_full_help"), action: "help" },
+      { label: st(lang, "btn_open_tg"), action: "open_telegram" },
+    ];
 
-🌐 <b>全網 4 大庫直連</b>：Semantic Scholar、CrossRef 頂刊、PubMed、arXiv
-
-💡 <b>核心亮點</b>：
-• 傳送關鍵字直接搜尋最新權威論文
-• 點擊 <b>[🔍 深度導讀]</b> 獲得 4 大解析並隨附 BibTeX 代碼
-• 支援 <b>[👁️ 我看過了]</b> 與 <b>[❌ 沒興趣]</b> 雙軌偏好過濾
-• 歸檔自動在 Drive 維護 <code>references.bib</code> 引用總庫
-• <code>/web</code> 或 <code>/bind</code>: 取得電腦科研大總部同步碼
-• <code>/pro</code>: 查看 Pro 專業版特權（AI全庫問答、對比矩陣、週刊推播）
-• <code>/mode</code>: 自訂檢索模式
-• <code>/follow 作者名</code>: 追蹤頂尖學者 (+50 分權重)
-
-輸入 <code>/help</code> 可隨時查看完整指令！`
-      });
-    }
-
-    if (trimmed === "/bind" || trimmed === "/web") {
-      const code = (await getPendingCode(user_id)) || (await createBindCode(user_id));
-      return res.json({
-        type: "text",
-        text: `🔗 <b>電腦科研大總部同步帳號綁定</b>
-
-您的專屬 6 位數同步碼為：<code>${code}</code>
-
-🖥️ 請打開電腦瀏覽器大總部網頁，點擊右上角 <b>【綁定 Telegram】</b> 並輸入此代碼，即可將所有論文庫、標記已讀/沒興趣記錄與筆記進行雙向即時同步！`
-      });
-    }
-
-    if (trimmed === "/pro") {
-      const tierNames: Record<string, string> = {
-        free: "Free (免費)", basic: "Basic", standard: "Standard",
-        premium: "Premium", ultra: "Ultra", lab: "Lab 實驗室"
+    const paperCard = (paper: PaperItem) => {
+      const extra = paper.authors.length > 3 ? st(lang, "and_others", { n: paper.authors.length - 3 }) : "";
+      const authorsStr = paper.authors.slice(0, 3).join(", ") + extra;
+      const oa = paper.is_open_access ? "🟢 OA" : "";
+      const summary = (paper.summary || "").slice(0, 200);
+      return {
+        type: "paper_card",
+        paper,
+        text: `📄 <b>${paper.title}</b>\n\n👥 ${authorsStr} | 📅 ${paper.year} | 🗂 ${paper.source} ${oa}\n\n🧠 <b>${st(lang, "ai_label")}</b>\n${summary}...\n\n🔗 <a href="${paper.link}">${st(lang, "pdf_label")}</a>`,
+        buttons: [
+          { label: st(lang, "btn_deep"), action: "deep" },
+          { label: st(lang, "btn_seen"), action: "seen" },
+          { label: st(lang, "btn_skip"), action: "skip" },
+          { label: st(lang, "btn_archive"), action: "archive" },
+          {
+            label: paper.is_open_access ? st(lang, "btn_oa") : st(lang, "btn_doi"),
+            action: paper.is_open_access ? "oa" : "doi",
+            url: paper.link,
+          },
+        ],
       };
-      const fmtN = (n: number) => isUnlimited(n) ? "無限" : String(n);
-      const tierBlocks = TIER_ORDER.map((tc) => {
-        const d = TIER_DEFS[tc];
-        return `<b>${tierNames[tc]}</b>${TIER_PRICES[tc] > 0 ? `（定價徵集中）` : ""}
-• 搜尋：${fmtN(d.daily_search_limit)} 次/日、深度導讀：${fmtN(d.daily_deep_limit)} 次/日
-• 跨文獻問答：${fmtN(d.daily_chat_limit)} 次/日、追蹤學者：${fmtN(d.follow_limit)} 位
-• Google Drive：${fmtN(d.drive_monthly_limit)} 篇/月`;
-      }).join("\n\n");
+    };
 
-      return res.json({
-        type: "text",
-        text: `📊 <b>PaperFilterBot 方案比較</b>
+    const doSearch = async (q: string) => {
+      const papers = await fetchAcademicPapers(q, profile.filter_mode);
+      if (!papers.length) return res.json({ type: "text", text: st(lang, "no_papers", { q }) });
+      return res.json(paperCard(papers[0]));
+    };
 
-👤 您目前的方案：<b>${tierNames[profile.tier] || profile.tier}</b>
+    const isSlash = trimmed.startsWith("/");
+    const [rawCmd, ...restParts] = isSlash ? trimmed.slice(1).split(/\s+/) : ["", ""];
+    const cmd = rawCmd.toLowerCase();
+    const arg = isSlash ? restParts.join(" ").trim() : "";
 
-${tierBlocks}
-
-<i>💡 定價尚未公佈，歡迎在測試回饋中告訴我們你認為合理的定價！</i>`
-      });
-    }
-
-    if (trimmed === "/help") {
-      return res.json({
-        type: "text",
-        text: `📖 <b>PaperFilterBot 功能指南</b>
-
-🔍 <b>論文搜尋與閱讀</b>
-• 直接傳送關鍵字（如 <code>CRISPR</code>、<code>transformer</code>）或使用 <code>/search 關鍵字</code>
-• 點擊 <b>[🔍 深度導讀]</b> 獲得 4 大解析，並附帶 <b>BibTeX 引用格式</b>
-
-🎯 <b>看過/略過雙軌操作</b>
-• <b>[👁️ 我看過了]</b>：標記已讀，保留正向興趣繼續推薦
-• <b>[❌ 沒興趣]</b>：標記略過並調降該領域權重
-
-📦 <b>Google Drive 雙拼歸檔</b>
-• 筆記內自動附帶專屬 BibTeX 代碼
-• 雲端資料夾自動維護 <code>references.bib</code> 總庫
-
-👥 <b>學者追蹤</b>
-• <code>/follow 作者名</code>：追蹤大牛學者（+50 權重）
-• <code>/following</code>：查看追蹤名單
-
-💻 <b>大總部同步</b>
-• <code>/bind</code> 或 <code>/web</code>：取得電腦端同步碼`
-      });
-    }
-
-    if (trimmed === "/following") {
-      const list = followedAuthors.map(a => `• <code>${a}</code>`).join("\n");
-      return res.json({
-        type: "text",
-        text: `📋 <b>您關注的學者清單</b>：
-
-${list || "（尚無追蹤學者）"}
-
-<i>輸入 <code>/unfollow 名字</code> 可取消關注</i>`
-      });
-    }
-
-    if (trimmed.startsWith("/follow ")) {
-      const name = trimmed.replace("/follow ", "").trim();
-      if (!followedAuthors.includes(name)) await addAuthor(name);
-      return res.json({
-        type: "text",
-        text: `🌟 <b>成功追蹤學者</b>：<code>${name}</code>
-
-若為該學者著作將自動享有 <b>+50分權重優先推薦</b>！`
-      });
-    }
-
-    if (trimmed.startsWith("新增 ")) {
-      const folderName = trimmed.replace("新增 ", "").trim();
-      if (folderName && !userCategories.includes(folderName)) {
-        await addCategory(folderName);
+    if (isSlash && cmd && cmd !== "search") {
+      if (cmd === "start" || cmd === "welcome") {
+        const name = profile.username || "Researcher";
+        return res.json({ type: "text", text: st(lang, "start", { name }), buttons: startButtons() });
       }
-      return res.json({
-        type: "text",
-        text: `✅ 已成功新增分類資料夾：<b>${folderName}</b>`
-      });
+      if (cmd === "help" || cmd === "h" || cmd === "guide") {
+        return res.json({
+          type: "text",
+          text: st(lang, "help"),
+          buttons: [
+            { label: st(lang, "btn_bind"), action: "bind" },
+            { label: st(lang, "btn_view_pro"), action: "pro" },
+            { label: st(lang, "btn_open_tg"), action: "open_telegram" },
+          ],
+        });
+      }
+      if (cmd === "web") {
+        return res.json({
+          type: "text",
+          text: st(lang, "web_tg", { bot: botHandle }),
+          buttons: [{ label: st(lang, "btn_open_tg"), action: "open_telegram" }],
+        });
+      }
+      if (cmd === "bind") {
+        const code = (await getPendingCode(user_id)) || (await createBindCode(user_id));
+        return res.json({
+          type: "text",
+          text: st(lang, "bind", { code }),
+          buttons: [{ label: st(lang, "btn_open_tg"), action: "open_telegram" }],
+        });
+      }
+      if (cmd === "pro") {
+        const fmtN = (n: number) => isUnlimited(n) ? st(lang, "unlimited") : String(n);
+        const blocks = TIER_ORDER.map((tc) => {
+          const d = TIER_DEFS[tc];
+          return `<b>${tc}</b>\n• search ${fmtN(d.daily_search_limit)}/day · deep ${fmtN(d.daily_deep_limit)}/day\n• chat ${fmtN(d.daily_chat_limit)}/day · follow ${fmtN(d.follow_limit)} · Drive ${fmtN(d.drive_monthly_limit)}/mo`;
+        }).join("\n\n");
+        return res.json({ type: "text", text: st(lang, "pro_head", { tier: profile.tier }) + blocks + st(lang, "pro_foot") });
+      }
+      if (cmd === "lang" || cmd === "language") {
+        const next = parseLangArg(arg);
+        if (next) {
+          await setUserLang(next);
+          return res.json({ type: "text", text: st(next, "lang_ok", { current: LANG_LABEL[next] }), switched_lang: next });
+        }
+        return res.json({
+          type: "text",
+          text: st(lang, "lang_pick", { current: LANG_LABEL[lang] }),
+          buttons: [
+            { label: "English", action: "lang_en" },
+            { label: "日本語", action: "lang_ja" },
+            { label: "繁體中文", action: "lang_zh_hant" },
+            { label: "简体中文", action: "lang_zh_hans" },
+          ],
+        });
+      }
+      if (cmd === "mode") {
+        const allowed = ["smart", "top_tier", "free_only"];
+        if (arg && allowed.includes(arg)) {
+          await setFilterMode(arg);
+          return res.json({ type: "text", text: st(lang, "mode_ok", { mode: arg }) });
+        }
+        return res.json({
+          type: "text",
+          text: st(lang, "mode_pick", { current: profile.filter_mode }),
+          buttons: [
+            { label: st(lang, "mode_smart"), action: "mode:smart" },
+            { label: st(lang, "mode_top"), action: "mode:top_tier" },
+            { label: st(lang, "mode_free"), action: "mode:free_only" },
+          ],
+        });
+      }
+      if (cmd === "following" || cmd === "authors") {
+        const list = followedAuthors.map((a) => `• <code>${a}</code>`).join("\n") || st(lang, "following_empty");
+        return res.json({ type: "text", text: st(lang, "following", { list }) });
+      }
+      if (cmd === "follow" || cmd === "track") {
+        if (!arg) return res.json({ type: "text", text: st(lang, "follow_need") });
+        if (!followedAuthors.includes(arg)) await addAuthor(arg);
+        return res.json({ type: "text", text: st(lang, "follow_ok", { name: arg }) });
+      }
+      if (cmd === "unfollow" || cmd === "untrack") {
+        if (!arg) return res.json({ type: "text", text: st(lang, "follow_need") });
+        if (!followedAuthors.includes(arg)) return res.json({ type: "text", text: st(lang, "unfollow_miss", { name: arg }) });
+        await removeAuthor(arg);
+        return res.json({ type: "text", text: st(lang, "unfollow_ok", { name: arg }) });
+      }
+      if (cmd === "folders" || cmd === "myfolders" || cmd === "categories") {
+        const list = userCategories.map((c) => `• ${c}`).join("\n") || st(lang, "folders_empty");
+        return res.json({ type: "text", text: st(lang, "folders", { list }) });
+      }
+      if (cmd === "review") return res.json({ type: "text", text: st(lang, "review_hint") });
+      if (cmd === "gap") return res.json({ type: "text", text: st(lang, "gap_hint") });
+      if (cmd === "trend") {
+        if (!arg) return res.json({ type: "text", text: st(lang, "trend_need") });
+        return doSearch(arg);
+      }
+      if (cmd === "deep") return res.json({ type: "text", text: st(lang, "help") });
+      return res.json({ type: "text", text: st(lang, "unknown", { cmd: "/" + cmd }) });
     }
 
-    if (trimmed === "我的資料夾" || trimmed === "/folders") {
-      const list = userCategories.map(c => `• ${c}`).join("\n");
-      return res.json({
-        type: "text",
-        text: `📁 <b>您的雲端分類資料夾</b>：
-
-${list || "（尚無分類資料夾）"}`
-      });
+    const lower = trimmed.toLowerCase();
+    const folderListCmds = ["my folders", "我的資料夾", "我的文件夹", "マイフォルダ"];
+    if (folderListCmds.includes(lower) || folderListCmds.includes(trimmed)) {
+      const list = userCategories.map((c) => `• ${c}`).join("\n") || st(lang, "folders_empty");
+      return res.json({ type: "text", text: st(lang, "folders", { list }) });
+    }
+    const addFolder = trimmed.match(/^(?:add folder|新增|添加|追加)\s+(.+)$/i);
+    if (addFolder) {
+      const name = addFolder[1].trim();
+      if (name) await addCategory(name);
+      return res.json({ type: "text", text: st(lang, "folder_add", { name }) });
+    }
+    const renameFolder = trimmed.match(/^(?:rename|改名|更名)\s+(.+?)\s*(?:->|→|-)\s*(.+)$/i);
+    if (renameFolder) {
+      const oldName = renameFolder[1].trim();
+      const newName = renameFolder[2].trim();
+      await renameCategory(oldName, newName);
+      return res.json({ type: "text", text: st(lang, "folder_rename", { old: oldName, new: newName }) });
+    }
+    const delFolder = trimmed.match(/^(?:delete folder|刪除|删除|削除)\s+(.+)$/i);
+    if (delFolder) {
+      const name = delFolder[1].trim();
+      await deleteCategory(name);
+      return res.json({ type: "text", text: st(lang, "folder_del", { name }) });
+    }
+    const followNl = trimmed.match(/^(?:follow|追蹤|追踪|フォロー)\s+(.+)$/i);
+    if (followNl) {
+      const name = followNl[1].trim();
+      if (!followedAuthors.includes(name)) await addAuthor(name);
+      return res.json({ type: "text", text: st(lang, "follow_ok", { name }) });
     }
 
-    // Default search flow
-    let searchQuery = trimmed.replace(/^\/search\s+/, "");
-    const papers = await fetchAcademicPapers(searchQuery, profile.filter_mode);
-
-    if (papers.length === 0) {
-      return res.json({
-        type: "text",
-        text: `😅 找不到與【${searchQuery}】相關的論文，請換個關鍵字試試。`
-      });
-    }
-
-    const topPaper = papers[0];
-    const authorsStr = topPaper.authors.slice(0, 3).join(", ") + (topPaper.authors.length > 3 ? ` 等 ${topPaper.authors.length} 位` : "");
-
-    return res.json({
-      type: "paper_card",
-      paper: topPaper,
-      text: `📄 <b>${topPaper.title}</b>\n\n👥 ${authorsStr} | 📅 ${topPaper.year} | 🗂 ${topPaper.source} ${topPaper.is_open_access ? "🟢 OA" : ""}\n\n🧠 <b>AI 導讀：</b>\n${topPaper.summary.slice(0, 200)}...\n\n🔗 <a href="${topPaper.link}">閱讀完整論文 / PDF</a>`,
-      buttons: [
-        { label: "🔍 深度導讀 (/deep)", action: "deep", data: topPaper.fingerprint },
-        { label: "👁️ 我看過了 (保持興趣)", action: "seen", data: topPaper.id },
-        { label: "❌ 沒興趣 (減少此類)", action: "skip", data: topPaper.id },
-        { label: "☁️ 歸檔到 Google Drive", action: "archive", data: topPaper.id }
-      ]
-    });
+    const searchQuery = trimmed.replace(/^\/search\s+/i, "");
+    return doSearch(searchQuery);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

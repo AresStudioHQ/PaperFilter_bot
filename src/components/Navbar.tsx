@@ -68,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {t('brand_title')}
                 </span>
                 <span className="px-1.5 py-0.2 text-[10px] font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
-                  {t('nav_hq')}
+                  {t('brand_hq_suffix')}
                 </span>
               </div>
               <p className="hidden md:block text-[11px] text-slate-400 font-medium truncate max-w-sm">

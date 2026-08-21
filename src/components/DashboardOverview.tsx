@@ -20,7 +20,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { UserProfile, HistoryRecord, Paper } from '../types';
-import { useI18n, getLocalizedCategory, getLocalizedActivityDetail } from '../i18n';
+import { useI18n, getLocalizedCategory, getLocalizedActivityDetail, localeFromLang } from '../i18n';
 
 interface DashboardOverviewProps {
   user: UserProfile;
@@ -100,10 +100,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex items-center space-x-3">
               <span className="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Telegram Live Sync
+                {t('dash_live_sync')}
               </span>
               <span className="text-xs text-slate-400">
-                Sync Code: <code className="text-indigo-300 font-mono font-bold bg-slate-800/80 px-1.5 py-0.5 rounded">{user.sync_code || 'PF8892'}</code>
+                {t('dash_sync_code')}: <code className="text-indigo-300 font-mono font-bold bg-slate-800/80 px-1.5 py-0.5 rounded">{user.sync_code || '—'}</code>
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
@@ -145,8 +145,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <div className="text-2xl font-bold text-white">{user.total_read_count}</div>
-            <span className="text-xs font-medium text-emerald-400 flex items-center gap-0.5">
-              <TrendingUp className="h-3 w-3" /> +18%
+            <span className="text-xs font-medium text-slate-500 flex items-center gap-0.5">
+              <TrendingUp className="h-3 w-3" /> {t('stat_read_sub')}
             </span>
           </div>
           <p className="mt-2 text-xs text-slate-400">{t('stat_read_sub')}</p>
@@ -161,7 +161,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <div className="text-2xl font-bold text-white">{library.length}</div>
-            <span className="text-xs font-medium text-emerald-400">Drive Synced</span>
+            <span className="text-xs font-medium text-emerald-400">{t('dash_drive_synced')}</span>
           </div>
           <p className="mt-2 text-xs text-slate-400">{t('stat_archived_sub')}</p>
         </div>
@@ -175,7 +175,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <div className="text-2xl font-bold text-white">{user.total_skipped_count}</div>
-            <span className="text-xs font-medium text-slate-400">Noise Filter</span>
+            <span className="text-xs font-medium text-slate-400">{t('dash_noise_filter')}</span>
           </div>
           <p className="mt-2 text-xs text-slate-400">{t('stat_skipped_sub')}</p>
         </div>
@@ -189,7 +189,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <div className="text-2xl font-bold text-white">{user.total_deep_read_count}</div>
-            <span className="text-xs font-medium text-amber-400">4D Insights</span>
+            <span className="text-xs font-medium text-amber-400">{t('dash_4d_insights')}</span>
           </div>
           <p className="mt-2 text-xs text-slate-400">{t('stat_deep_sub')}</p>
         </div>
@@ -227,15 +227,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData.reading_trend.length > 0 ? chartData.reading_trend : [
-                { date: '8/12', searches: 12, archived: 3, deep_reads: 2 },
-                { date: '8/13', searches: 15, archived: 4, deep_reads: 3 },
-                { date: '8/14', searches: 9, archived: 2, deep_reads: 1 },
-                { date: '8/15', searches: 22, archived: 6, deep_reads: 5 },
-                { date: '8/16', searches: 18, archived: 5, deep_reads: 3 },
-                { date: '8/17', searches: 25, archived: 7, deep_reads: 6 },
-                { date: '8/18', searches: 20, archived: 5, deep_reads: 4 },
-              ]}>
+              <AreaChart data={chartData.reading_trend}>
                 <defs>
                   <linearGradient id="colorSearches" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
@@ -251,7 +243,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} domain={[0, (max: number) => Math.max(4, max || 0)]} allowDecimals={false} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.75rem', color: '#fff', fontSize: '12px' }}
                 />
@@ -277,12 +269,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={(chartData.category_distribution.length > 0 ? chartData.category_distribution : [
-                    { name: t('dash_cat_ai'), value: 14 },
-                    { name: t('dash_cat_life'), value: 5 },
-                    { name: t('dash_cat_quantum'), value: 3 },
-                    { name: t('dash_cat_general'), value: 2 },
-                  ]).map(item => ({
+                  data={chartData.category_distribution.map(item => ({
                     ...item,
                     name: getLocalizedCategory(item.name, userLang)
                   }))}
@@ -293,16 +280,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {(chartData.category_distribution.length > 0 ? chartData.category_distribution : [
-                    { name: t('dash_cat_ai'), value: 14 },
-                    { name: t('dash_cat_life'), value: 5 },
-                    { name: t('dash_cat_quantum'), value: 3 },
-                    { name: t('dash_cat_general'), value: 2 },
-                  ]).map((_entry, index) => (
+                  {chartData.category_distribution.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.75rem', color: '#fff', fontSize: '12px' }}
                 />
               </PieChart>
@@ -310,12 +292,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-xs">
-            {(chartData.category_distribution.length > 0 ? chartData.category_distribution : [
-              { name: t('dash_cat_ai'), value: 14 },
-              { name: t('dash_cat_life'), value: 5 },
-              { name: t('dash_cat_quantum'), value: 3 },
-              { name: t('dash_cat_general'), value: 2 },
-            ]).map((item, idx) => {
+            {chartData.category_distribution.length === 0 ? (
+              <div className="col-span-2 text-center text-slate-500 py-2">{t('no_activity')}</div>
+            ) : chartData.category_distribution.map((item, idx) => {
               const localizedName = getLocalizedCategory(item.name, userLang);
               return (
                 <div key={item.name + idx} className="flex items-center gap-1.5 text-slate-300">
@@ -344,7 +323,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </span>
           </div>
           <p className="text-xs text-slate-400">
-            Telegram: <code>/follow AuthorName</code>
+            {t('dash_tg_follow_hint')} <code>/follow AuthorName</code>
           </p>
 
           <form onSubmit={handleAddAuthorSubmit} className="flex gap-2">
@@ -365,6 +344,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </form>
 
           <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+            {followedAuthors.length === 0 && (
+              <p className="text-xs text-slate-500 py-4 text-center">{t('authors_empty')}</p>
+            )}
             {followedAuthors.map((author) => (
               <div
                 key={author}
@@ -384,7 +366,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     className="text-[11px] text-indigo-400 hover:text-indigo-300 px-1.5 py-0.5 rounded hover:bg-indigo-500/10 cursor-pointer"
                     title="Search Author"
                   >
-                    Search
+                    {t('dash_search_author')}
                   </button>
                   <button
                     onClick={() => onRemoveAuthor(author)}
@@ -426,7 +408,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   selectedActionFilter === 'archive' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                📥 Drive
+                {t('filter_drive')}
               </button>
               <button
                 onClick={() => setSelectedActionFilter('deep_read')}
@@ -434,7 +416,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   selectedActionFilter === 'deep_read' ? 'bg-amber-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                🔍 4D Deep
+                {t('filter_deep')}
               </button>
               <button
                 onClick={() => setSelectedActionFilter('seen')}
@@ -442,7 +424,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   selectedActionFilter === 'seen' ? 'bg-blue-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                👁️ Seen
+                {t('filter_seen')}
               </button>
               <button
                 onClick={() => setSelectedActionFilter('skip')}
@@ -450,7 +432,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   selectedActionFilter === 'skip' ? 'bg-rose-600 text-white font-semibold' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                ❌ Skip
+                {t('filter_skip')}
               </button>
             </div>
           </div>
@@ -493,7 +475,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             {getLocalizedCategory(item.category, userLang)}
                           </span>
                         )}
-                        <span>{new Date(item.timestamp).toLocaleString()}</span>
+                        <span>{new Date(item.timestamp).toLocaleString(localeFromLang(userLang))}</span>
                       </div>
                     </div>
                   </div>
