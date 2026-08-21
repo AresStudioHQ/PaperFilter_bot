@@ -1,6 +1,7 @@
-# Render 部署設定（網頁端 Web Service）
-# 注意：本檔僅描述「網頁服務」。Telegram Bot（python bot.py）需另建一個 worker 服務，稍後再加。
-# 所有密鑰類變數使用 sync: false，請在 Render 儀表板中手動填寫，勿寫入此檔。
+# Render：網頁 + Telegram Bot
+# Bot 用 worker + polling（不要設 WEBHOOK_URL；worker 沒有公開 HTTP）。
+# 密鑰請在 Render 儀表板填，勿寫入此檔。
+# starter 要付費；若暫時只開得起一個服務，優先保 bot 活著，網頁可晚一點。
 
 services:
   - type: web
@@ -19,32 +20,35 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-      - key: OPENAI_MODELS
-        sync: false
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_BOT_USERNAME
         sync: false
+      - key: WEB_APP_URL
+        sync: false
 
-  # --- Bot worker（部署網頁後再加）：---
-  # - type: worker
-  #   name: paperfilter-bot
-  #   runtime: python
-  #   plan: starter
-  #   buildCommand: pip install -r requirements.txt
-  #   startCommand: python bot.py
-  #   envVars:
-  #     - key: TELEGRAM_TOKEN
-  #       sync: false
-  #     - key: TURSO_DATABASE_URL
-  #       sync: false
-  #     - key: TURSO_AUTH_TOKEN
-  #       sync: false
-  #     - key: OPENAI_API_KEY
-  #       sync: false
-  #     - key: GOOGLE_CLIENT_ID
-  #       sync: false
-  #     - key: GOOGLE_CLIENT_SECRET
-  #       sync: false
-  #     - key: GOOGLE_REDIRECT_URI
-  #       sync: false
+  - type: worker
+    name: paperfilter-bot
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: WEB_APP_URL
+        sync: false
+      - key: ADMIN_USER_IDS
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
