@@ -205,7 +205,8 @@ def search_semantic_scholar(query: str, max_results=8) -> list[dict]:
                     "authors": authors,
                     "citations": citations,
                     "is_open_access": bool(is_oa or pdf_url),
-                    "is_top_journal": bool(citations >= 20),
+                    "venue_name": "",
+                    "is_top_journal": False,
                 })
     except Exception as e:
         print(f"Semantic Scholar 檢索跳過: {e}", file=sys.stderr)
@@ -252,11 +253,11 @@ def search_crossref(query: str, max_results=6) -> list[dict]:
                 date_parts = item.get("published-print", {}).get("date-parts", []) or item.get("published-online", {}).get("date-parts", [])
                 year = str(date_parts[0][0]) if date_parts and date_parts[0] else str(datetime.now().year)
                 citations = item.get("is-referenced-by-count", 0)
-                source_name = f"頂刊: {container[:20]}" if container else "CrossRef (國際頂刊)"
+                source_name = f"CrossRef · {container[:20]}" if container else "CrossRef (學術庫)"
                 papers.append({
                     "source": source_name,
                     "title": title,
-                    "summary": abstract or f"發表於 {year} 年的頂級學術文獻，標題：{title}",
+                    "summary": abstract or f"發表於 {year} 年的學術文獻，標題：{title}",
                     "link": link,
                     "id": f"doi_{doi.replace('/', '_')}" if doi else f"cr_{title[:15]}",
                     "fingerprint": normalize_title_fingerprint(title),
@@ -264,7 +265,8 @@ def search_crossref(query: str, max_results=6) -> list[dict]:
                     "authors": authors,
                     "citations": citations,
                     "is_open_access": is_oa,
-                    "is_top_journal": True,
+                    "venue_name": container,
+                    "is_top_journal": False,
                 })
     except Exception as e:
         print(f"CrossRef 檢索異常: {e}", file=sys.stderr)
@@ -380,7 +382,8 @@ def search_pubmed(query: str, max_results=6) -> list[dict]:
                 "authors": author_list,
                 "citations": 0,
                 "is_open_access": True,
-                "is_top_journal": True,
+                "venue_name": journal_title,
+                "is_top_journal": False,
             })
     except Exception as e:
         print(f"PubMed 搜尋異常: {e}", file=sys.stderr)
