@@ -51,7 +51,7 @@ MESSAGES = {
             "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n"
             "🔬 <b>只有這裡才有的科研特權</b>：\n"
             "• 5 大學術庫交叉檢索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
-            "• 💡 4 維 AI 深度導讀（動機、方法、發現、限制）\n"
+            "• 💡 AI 深度導讀（動機、方法、發現、限制；依據標題與摘要）\n"
             "• 🔄 Telegram ↔ 網頁大總部雙向同步：手機與電腦同一文獻庫\n"
             "• 👁 看過 / 沒興趣雙軌學習：排序會記住你真正要的論文（多數工具只有收藏或刪除）\n"
             "• ☁️ Google Drive 雙軌歸檔，資料夾自動維護 <code>references.bib</code>\n"
@@ -107,8 +107,8 @@ MESSAGES = {
         "mode_smart": "⚡ 智慧精選 (Smart Balanced)",
         "mode_free": "🟢 僅免費全文 (Open Access)",
         "mode_switched": "✅ 已切換為模式：{mode}",
-        "deep_processing": "🧠 AI 正在研讀全文並萃取 4 維結構化要點，請稍候...",
-        "deep_header": "💡 <b>AI 4 維深度導讀報告</b>",
+        "deep_processing": "🧠 AI 正在依據標題與摘要萃取結構化要點，請稍候...",
+        "deep_header": "💡 <b>AI 深度導讀報告（依據標題與摘要）</b>",
         "bibtex_header": "📋 <b>BibTeX 引用文獻條目</b>",
         "mark_seen": "👁 已標記為已讀並調整個人推薦偏好：{title}",
         "mark_skip": "⏭ 已略過並降低同類權重：{title}",
@@ -127,6 +127,7 @@ MESSAGES = {
         "following_list": "👥 <b>您追蹤的學者名單：</b>\n\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
         "tier_free": "免費版",
+        "tier_pro": "Pro 方案",
         "tier_basic": "Basic 方案",
         "tier_standard": "Standard 方案",
         "tier_premium": "Premium 方案",
@@ -177,12 +178,14 @@ MESSAGES = {
         "chat_empty_library": "📂 您目前文獻庫中沒有論文。請先搜尋並歸檔幾篇論文後再來提問！",
         "chat_loading": "🧠 <b>AI 正在跨 {count} 篇文獻進行深入關聯檢索與分析，請稍候...</b>",
         "chat_header": "💬 <b>跨論文解答報告</b>\n❓ <i>問題：{query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>以上分析僅基於您文獻庫中的論文，不代表全域學術觀點。如需更多功能，升級 Pro 方案可享無限次問答。</i>",
+        "chat_disclaimer": "\n\n---\n📚 <i>以上分析僅基於您文獻庫中的論文，不代表全域學術觀點。升級 Pro 可提高每日問答次數。</i>",
         "reports_empty": "📝 您目前尚無生成的文獻綜述報告。可使用 <code>/review 主題</code> 立即生成！",
         "reports_list_header": "📑 <b>您生成的學術綜述報告清單（共 {count} 份）：</b>\n\n",
         "reports_list_footer": "\n可在網頁端科研大總部查看全文與匯出 Markdown/PDF！",
         "follow_missing_args": "請輸入學者名稱，例如：<code>/follow Yann LeCun</code>",
         "unfollow_missing_args": "請輸入要取消追蹤的學者名稱。",
+        "library_full": "📚 文獻庫已滿（{limit} 篇）。請刪除部分論文，或升級 Pro 以擴大容量。",
+        "follow_limit_reached": "👤 追蹤學者已達上限（{limit} 位）。請取消部分追蹤，或升級 Pro。",
         "drive_connected": "✅ 您的 Google Drive 已成功連結！可以直接歸檔論文與同步 references.bib。",
         "drive_auth_prompt": "請點擊下方按鈕授權 Google Drive 存取：",
         "drive_auth_button": "🔗 授權 Google Drive",
@@ -274,7 +277,7 @@ MESSAGES = {
             "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n"
             "🔬 <b>只有这里才有的科研特权</b>：\n"
             "• 5 大学术库交叉检索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
-            "• 💡 4 维 AI 深度导读（动机、方法、发现、限制）\n"
+            "• 💡 AI 深度导读（动机、方法、发现、限制；依据标题与摘要）\n"
             "• 🔄 Telegram ↔ 网页大总部双向同步：手机与电脑同一文献库\n"
             "• 👁 看过 / 没兴趣双轨学习：排序会记住你真正要的论文（多数工具只有收藏或删除）\n"
             "• ☁️ Google Drive 双轨归档，文件夹自动维护 <code>references.bib</code>\n"
@@ -330,8 +333,8 @@ MESSAGES = {
         "mode_smart": "⚡ 智能精选 (Smart Balanced)",
         "mode_free": "🟢 仅免费全文 (Open Access)",
         "mode_switched": "✅ 已切换为模式：{mode}",
-        "deep_processing": "🧠 AI 正在研读全文并萃取 4 维结构化要点，请稍候...",
-        "deep_header": "💡 <b>AI 4 维深度导读报告</b>",
+        "deep_processing": "🧠 AI 正在依据标题与摘要萃取结构化要点，请稍候...",
+        "deep_header": "💡 <b>AI 深度导读报告（依据标题与摘要）</b>",
         "bibtex_header": "📋 <b>BibTeX 引用文献条目</b>",
         "mark_seen": "👁 已标记为已读并调整个人推荐偏好：{title}",
         "mark_skip": "⏭ 已略过并降低同类权重：{title}",
@@ -350,6 +353,7 @@ MESSAGES = {
         "following_list": "👥 <b>您追踪的学者名单：</b>\n\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
         "tier_free": "免费版",
+        "tier_pro": "Pro 方案",
         "tier_basic": "Basic 方案",
         "tier_standard": "Standard 方案",
         "tier_premium": "Premium 方案",
@@ -400,12 +404,14 @@ MESSAGES = {
         "chat_empty_library": "📂 您目前文献库中没有论文。请先搜索并归档几篇论文后再来提问！",
         "chat_loading": "🧠 <b>AI 正在跨 {count} 篇文献进行深入关联检索与分析，请稍候...</b>",
         "chat_header": "💬 <b>跨论文解答报告</b>\n❓ <i>问题：{query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>以上分析仅基于您文献库中的论文，不代表全域学术观点。如需更多功能，升级 Pro 方案可享无限次问答。</i>",
+        "chat_disclaimer": "\n\n---\n📚 <i>以上分析仅基于您文献库中的论文，不代表全域学术观点。升级 Pro 可提高每日问答次数。</i>",
         "reports_empty": "📝 您目前尚无生成的文献综述报告。可使用 <code>/review 主题</code> 立即生成！",
         "reports_list_header": "📑 <b>您生成的学术综述报告清单（共 {count} 份）：</b>\n\n",
         "reports_list_footer": "\n可在网页端科研大总部查看全文与导出 Markdown/PDF！",
         "follow_missing_args": "请输入学者名称，例如：<code>/follow Yann LeCun</code>",
         "unfollow_missing_args": "请输入要取消追踪的学者名称。",
+        "library_full": "📚 文献库已满（{limit} 篇）。请删除部分论文，或升级 Pro 以扩大容量。",
+        "follow_limit_reached": "👤 追踪学者已达上限（{limit} 位）。请取消部分追踪，或升级 Pro。",
         "drive_connected": "✅ 您的 Google Drive 已成功链接！可以直接归档论文与同步 references.bib。",
         "drive_auth_prompt": "请点击下方按钮授权 Google Drive 访问：",
         "drive_auth_button": "🔗 授权 Google Drive",
@@ -497,7 +503,7 @@ MESSAGES = {
             "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n"
             "🔬 <b>What only PaperFilterBot does</b>:\n"
             "• Cross-search <b>5</b> scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef, OpenAlex)\n"
-            "• 💡 4-dimension AI Deep Reading (Motivation, Method, Finding, Limits)\n"
+            "• 💡 AI Deep Reading (Motivation, Method, Finding, Limits — based on title and abstract)\n"
             "• 🔄 Telegram ↔ Web HQ two-way sync — same library on phone and desktop\n"
             "• 👁 Seen vs Skip dual filter: ranking learns what you actually want (most tools only save or delete)\n"
             "• ☁️ Google Drive dual archive with auto-maintained <code>references.bib</code>\n"
@@ -553,8 +559,8 @@ MESSAGES = {
         "mode_smart": "⚡ Smart Balanced",
         "mode_free": "🟢 Open Access Only",
         "mode_switched": "✅ Filter mode set to: {mode}",
-        "deep_processing": "🧠 AI is analyzing full text for 4-dimension highlights...",
-        "deep_header": "💡 <b>AI Deep Reading Analysis</b>",
+        "deep_processing": "🧠 AI is analyzing the title and abstract for structured highlights...",
+        "deep_header": "💡 <b>AI Deep Reading (title & abstract)</b>",
         "bibtex_header": "📋 <b>BibTeX Entry</b>",
         "mark_seen": "👁 Marked as read & tuned positive bias: {title}",
         "mark_skip": "⏭ Skipped & reduced category weight: {title}",
@@ -573,6 +579,7 @@ MESSAGES = {
         "following_list": "👥 <b>Followed Authors:</b>\n\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
         "tier_free": "Free",
+        "tier_pro": "Pro",
         "tier_basic": "Basic Plan",
         "tier_standard": "Standard Plan",
         "tier_premium": "Premium Plan",
@@ -623,12 +630,14 @@ MESSAGES = {
         "chat_empty_library": "📂 Your library has no papers. Search and archive some papers first!",
         "chat_loading": "🧠 <b>AI is analyzing {count} papers for cross-references...</b>",
         "chat_header": "💬 <b>Cross-Paper Answer Report</b>\n❓ <i>Question: {query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>Analysis based only on your library papers. Upgrade to Pro for unlimited Q&A.</i>",
+        "chat_disclaimer": "\n\n---\n📚 <i>Analysis based only on your library papers. Upgrade to Pro for a higher daily Q&A quota.</i>",
         "reports_empty": "📝 No reports yet. Use <code>/review [Topic]</code> to generate one!",
         "reports_list_header": "📑 <b>Your Literature Reports ({count} total):</b>\n\n",
         "reports_list_footer": "\nView full text & export Markdown/PDF at Web Research HQ!",
         "follow_missing_args": "Enter author name, e.g.: <code>/follow Yann LeCun</code>",
         "unfollow_missing_args": "Enter the author name to unfollow.",
+        "library_full": "📚 Library is full ({limit} papers). Delete some papers or upgrade to Pro.",
+        "follow_limit_reached": "👤 Follow limit reached ({limit}). Unfollow someone or upgrade to Pro.",
         "drive_connected": "✅ Google Drive connected! You can archive papers & sync references.bib.",
         "drive_auth_prompt": "Click the button below to authorize Google Drive access:",
         "drive_auth_button": "🔗 Authorize Google Drive",
@@ -720,7 +729,7 @@ MESSAGES = {
             "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot 研究総本部</b>へようこそ！\n\n"
             "🔬 <b>ここだけの研究特権</b>：\n"
             "• 5大学術DB横断検索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
-            "• 💡 4次元 AI 詳細解説（動機・手法・発見・限界）\n"
+            "• 💡 AI 詳細解説（動機・手法・発見・限界；タイトルと要約に基づく）\n"
             "• 🔄 Telegram ↔ Web HQ 双方向同期：スマホとPCで同じ文献庫\n"
             "• 👁 既読 / 興味なしの二重学習：順位が本当に欲しい論文を覚える（多くのツールは保存か削除だけ）\n"
             "• ☁️ Google Drive 二重保存、フォルダの <code>references.bib</code> を自動更新\n"
@@ -743,7 +752,7 @@ MESSAGES = {
             "📋 <b>/export</b> - BibTeX / RIS / CSVで文献エクスポート\n"
             "⚙️ <b>/mode</b> - 要約モードの切り替え\n"
             "🌐 <b>/lang</b> - 言語設定の変更\n"
-            "📊 <b>/reports</b> - 読書レポートと閲覧履歴\n"
+            "📊 <b>/reports</b> - 文献レビュー履歴\n"
             "☁️ <b>/drive</b> - Google Drive連携確認\n"
             "💻 <b>/web</b> - Web研究総本部のURLを取得\n\n"
             "💡 ヒント：キーワードを入力するだけで論文を検索できます！"
@@ -776,8 +785,8 @@ MESSAGES = {
         "mode_smart": "⚡ スマート推奨 (Smart)",
         "mode_free": "🟢 オープンアクセスのみ",
         "mode_switched": "✅ フィルターモードを {mode} に変更しました",
-        "deep_processing": "🧠 AIが論文全文から4次元重要ポイントを抽出中...",
-        "deep_header": "💡 <b>AI 4次元詳細解説レポート</b>",
+        "deep_processing": "🧠 AI がタイトルと要約に基づいて要点を抽出しています...",
+        "deep_header": "💡 <b>AI 詳細解説レポート（タイトルと要約に基づく）</b>",
         "bibtex_header": "📋 <b>BibTeX 引用エントリ</b>",
         "mark_seen": "👁 閲覧済みに設定し、好みを学習しました: {title}",
         "mark_skip": "⏭ スキップし、関連重みを下げました: {title}",
@@ -796,6 +805,7 @@ MESSAGES = {
         "following_list": "👥 <b>フォロー中著者一覧：</b>\n\n{list}",
         "default_categories": ["Artificial Intelligence", "Bio & Life Sciences", "General Science", "Human Genetics"],
         "tier_free": "無料版",
+        "tier_pro": "Pro プラン",
         "tier_basic": "Basic プラン",
         "tier_standard": "Standard プラン",
         "tier_premium": "Premium プラン",
@@ -846,12 +856,14 @@ MESSAGES = {
         "chat_empty_library": "📂 ライブラリに論文がありません。まず検索して保存してください！",
         "chat_loading": "🧠 <b>AI が {count} 本の論文を横断分析中...</b>",
         "chat_header": "💬 <b>論文横断回答レポート</b>\n❓ <i>質問：{query}</i>\n\n",
-        "chat_disclaimer": "\n\n---\n📚 <i>ライブラリの論文のみに基づく分析です。無制限のQ&Aには Pro にアップグレード。</i>",
+        "chat_disclaimer": "\n\n---\n📚 <i>ライブラリの論文のみに基づく分析です。Pro にアップグレードすると毎日の Q&A 回数を増やせます。</i>",
         "reports_empty": "📝 レポートがまだありません。<code>/review [テーマ]</code> で作成してください！",
         "reports_list_header": "📑 <b>文献レビュー報告書（全 {count} 件）：</b>\n\n",
         "reports_list_footer": "\nWeb研究総本部で全文閲覧・Markdown/PDFエクスポートが可能！",
         "follow_missing_args": "著者名を入力してください。例：<code>/follow Yann LeCun</code>",
         "unfollow_missing_args": "フォロー解除する著者名を入力してください。",
+        "library_full": "📚 ライブラリが上限です（{limit} 本）。論文を削除するか、Pro にアップグレードしてください。",
+        "follow_limit_reached": "👤 フォロー上限です（{limit} 人）。解除するか、Pro にアップグレードしてください。",
         "drive_connected": "✅ Google Drive が接続されました！論文の保存と references.bib の同期が可能です。",
         "drive_auth_prompt": "以下のボタンをクリックして Google Drive を認証してください：",
         "drive_auth_button": "🔗 Google Drive を認証",
@@ -1022,23 +1034,22 @@ def make_main_menu(user_id):
     return markup
 
 def _fmt_quota(user_id, n):
-    if not n or n >= 999999:
+    if n is None or n >= 999999:
         return _t(user_id, "tier_drive_unlimited")
     return str(n)
 
 def _report_quota(user_id, n):
-    if not n or n >= 999999:
+    if n is None or n >= 999999:
         return _t(user_id, "tier_report_unlimited")
+    if n <= 0:
+        return _t(user_id, "tier_report_none")
     return _t(user_id, "tier_report_weekly_n", count=n)
 
 def _build_pro_text(user_id, current_label):
-    """方案比較：無廣告欄；AI Report 為每週 1/3/5/7/無限。"""
-    emojis = {
-        "free": "🆓", "basic": "🔧", "standard": "⭐",
-        "premium": "💎", "ultra": "👑", "lab": "🧪",
-    }
+    """方案比較：Free / Pro。digest 以週計，Free 為 0。"""
+    emojis = {"free": "🆓", "pro": "💎"}
     parts = [_t(user_id, "pro_text_header", tier=current_label)]
-    for tc in ("free", "basic", "standard", "premium", "ultra", "lab"):
+    for tc in ("free", "pro"):
         d = db.TIER_DEFS[tc]
         name = _t(user_id, f"tier_{tc}")
         search_n = _fmt_quota(user_id, d["daily_search_limit"])
@@ -1060,6 +1071,18 @@ def _build_pro_text(user_id, current_label):
         )
     parts.append(_t(user_id, "pro_text_footer"))
     return "\n".join(parts)
+
+def _try_follow_author(user_id, author_name) -> tuple[bool, str]:
+    author_name = (author_name or "").strip()
+    if not author_name:
+        return False, _t(user_id, "follow_missing_args")
+    existing = db.get_followed_authors(user_id)
+    if author_name not in existing:
+        limit = db.get_user_tier(user_id).get("follow_limit", 3)
+        if len(existing) >= limit:
+            return False, _t(user_id, "follow_limit_reached", limit=limit)
+    db.add_followed_author(user_id, author_name)
+    return True, _t(user_id, "follow_success", name=author_name)
 
 def _build_folder_keyboard(user_id: int, paper_id: str, lang: str) -> types.InlineKeyboardMarkup:
     custom_cats = db.get_user_categories(user_id)
@@ -1147,7 +1170,7 @@ def handle_my_command(message):
     cats_str = "、".join(categories) if categories else _t(user_id, "my_default_folders")
     tier_info = db.get_user_tier(user_id)
     tier = tier_info.get("tier", "free")
-    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra"), "lab": _t(user_id, "tier_lab")}
+    tier_names = {"free": _t(user_id, "tier_free"), "pro": _t(user_id, "tier_pro")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
     text = (
         _t(user_id, "my_title")
@@ -1251,7 +1274,7 @@ def handle_pro_command(message, override_user_id=None):
     user_id = override_user_id or message.from_user.id
     tier_info = db.get_user_tier(user_id)
     tier = tier_info.get("tier", "free")
-    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra"), "lab": _t(user_id, "tier_lab")}
+    tier_names = {"free": _t(user_id, "tier_free"), "pro": _t(user_id, "tier_pro")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
     text = _build_pro_text(user_id, tier_badge)
     # 👑 Founding Member 終身徽章
@@ -1315,8 +1338,8 @@ def handle_follow(message):
         bot.reply_to(message, _t(user_id, "follow_missing_args"))
         return
     author_name = parts[1].strip()
-    db.add_followed_author(user_id, author_name)
-    bot.reply_to(message, _t(user_id, "follow_success", name=author_name))
+    _, msg = _try_follow_author(user_id, author_name)
+    bot.reply_to(message, msg, parse_mode="HTML")
 
 @bot.message_handler(commands=['unfollow', 'untrack'])
 def handle_unfollow(message):
@@ -1523,7 +1546,7 @@ def handle_grant(message):
     days = max(1, min(3650, int(parts[2])))
     from datetime import datetime, timedelta
     expires_at = (datetime.utcnow() + timedelta(days=days)).isoformat()
-    db.set_user_tier(target_uid, "lab")
+    db.set_user_tier(target_uid, "pro")
     db.cursor.execute(
         "UPDATE user_tier SET tier_expires_at = ?, expiry_notified = 0 WHERE user_id = ?",
         (expires_at, target_uid)
@@ -1906,8 +1929,8 @@ def handle_text(message):
         if lower.startswith(pfx.lower()):
             author_name = text[len(pfx):].strip()
             if author_name:
-                db.add_followed_author(user_id, author_name)
-                bot.reply_to(message, _t(user_id, "follow_success", name=author_name))
+                _, msg = _try_follow_author(user_id, author_name)
+                bot.reply_to(message, msg, parse_mode="HTML")
                 return
 
     # 6. 取消追蹤學者 (支援 4 國語言前綴)
@@ -2050,6 +2073,10 @@ def handle_callback_query(call):
         except Exception:
             pass
         bot.send_message(call.message.chat.id, _t(user_id, "mark_seen", title=title_display[:100]))
+        try:
+            db.log_activity(user_id, "seen", paper_id=paper_id, paper_title=title_display[:200])
+        except Exception:
+            pass
         return
 
     # 略過
@@ -2070,6 +2097,10 @@ def handle_callback_query(call):
         except Exception:
             pass
         bot.send_message(call.message.chat.id, _t(user_id, "mark_skip", title=title_display[:100]))
+        try:
+            db.log_activity(user_id, "skip", paper_id=paper_id, paper_title=title_display[:200])
+        except Exception:
+            pass
         return
 
     # 選擇資料夾
@@ -2103,7 +2134,6 @@ def handle_callback_query(call):
             paper = _pending_papers.get(paper_id)
         if not paper:
             paper = {"id": paper_id, "title": "Untitled", "summary": "", "link": "", "authors": [], "year": "2024", "category": folder_name}
-            db.add_paper_to_library(user_id, paper)
         bot.answer_callback_query(call.id, _t(user_id, "archive_archiving"))
         bibtex_str = paper.get("bibtex", "") or search_engine.generate_bibtex_str(
             title=paper.get("title", ""),
@@ -2112,10 +2142,13 @@ def handle_callback_query(call):
             link=paper.get("link", ""),
             source=paper.get("source", "")
         )
-        if bibtex_str and not paper.get("bibtex"):
+        if bibtex_str:
             paper["bibtex"] = bibtex_str
-            paper["category"] = folder_name
-            db.add_paper_to_library(user_id, paper)
+        paper["category"] = folder_name
+        if db.add_paper_to_library(user_id, paper) is None:
+            limit = db.get_user_tier(user_id).get("library_limit", 80)
+            bot.send_message(call.message.chat.id, _t(user_id, "library_full", limit=limit), parse_mode="HTML")
+            return
 
         success, result = drive_manager.archive_paper(
             user_id=user_id,

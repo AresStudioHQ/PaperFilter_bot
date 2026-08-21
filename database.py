@@ -107,7 +107,7 @@ class Database:
             )
         ''')
 
-        # 7. 用戶訂閱方案 (free / basic / standard / premium / ultra / lab)
+        # 7. 用戶訂閱方案 (free / pro；舊 basic/standard/premium/ultra/lab 讀取時視為 pro)
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_tier (
                 user_id INTEGER PRIMARY KEY,
@@ -174,6 +174,11 @@ class Database:
                 PRIMARY KEY (user_id, paper_id)
             )
         ''')
+        for col_def in ("user_notes TEXT", "tags TEXT", "is_starred INTEGER DEFAULT 0"):
+            try:
+                self.cursor.execute(f"ALTER TABLE user_paper_library ADD COLUMN {col_def}")
+            except Exception:
+                pass
 
         # 9. 自動生成的文獻綜述
         self.cursor.execute('''
@@ -257,6 +262,19 @@ class Database:
                 user_id INTEGER,
                 date TEXT,
                 PRIMARY KEY (user_id, date)
+            )
+        ''')
+
+        # 16. 網頁/Bot 共用操作歷史
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_activity (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                action TEXT,
+                paper_id TEXT,
+                paper_title TEXT,
+                details TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
         self.conn.commit()
@@ -402,61 +420,33 @@ class Database:
         self.conn.commit()
 
     # --- 6. 用戶訂閱方案與配額管理 ---
-    # === 5 級訂閱方案定義 ===
+    # 與 src/subscriptionTiers.ts 完全一致：商業化只保留 Free / Pro
     TIER_DEFS = {
         "free": {
-            "daily_search_limit": 20, "daily_deep_limit": 5,
-            "daily_litreview_limit": 3, "daily_gap_analysis_limit": 3,
-            "daily_export_limit": 10, "daily_digest_limit": 1,
-            "daily_chat_limit": 3,
-            "drive_monthly_limit": 20,
-            "follow_limit": 3, "category_limit": 5,
+            "daily_search_limit": 15, "daily_deep_limit": 3,
+            "daily_litreview_limit": 1, "daily_gap_analysis_limit": 1,
+            "daily_export_limit": 5, "daily_digest_limit": 0,
+            "daily_chat_limit": 2, "drive_monthly_limit": 10,
+            "follow_limit": 3, "category_limit": 5, "library_limit": 80,
         },
-        "basic": {
-            "daily_search_limit": 50, "daily_deep_limit": 15,
+        "pro": {
+            "daily_search_limit": 80, "daily_deep_limit": 25,
             "daily_litreview_limit": 10, "daily_gap_analysis_limit": 10,
-            "daily_export_limit": 25, "daily_digest_limit": 3,
-            "daily_chat_limit": 10,
-            "drive_monthly_limit": 50,
-            "follow_limit": 10, "category_limit": 20,
-        },
-        "standard": {
-            "daily_search_limit": 150, "daily_deep_limit": 50,
-            "daily_litreview_limit": 25, "daily_gap_analysis_limit": 25,
-            "daily_export_limit": 80, "daily_digest_limit": 5,
-            "daily_chat_limit": 25,
-            "drive_monthly_limit": 100,
-            "follow_limit": 30, "category_limit": 999999,
-        },
-        "premium": {
-            "daily_search_limit": 300, "daily_deep_limit": 150,
-            "daily_litreview_limit": 100, "daily_gap_analysis_limit": 100,
-            "daily_export_limit": 250, "daily_digest_limit": 7,
-            "daily_chat_limit": 100,
-            "drive_monthly_limit": 999999,
-            "follow_limit": 999999, "category_limit": 999999,
-        },
-        "ultra": {
-            "daily_search_limit": 500, "daily_deep_limit": 300,
-            "daily_litreview_limit": 999999, "daily_gap_analysis_limit": 999999,
-            "daily_export_limit": 999999, "daily_digest_limit": 999999,
-            "daily_chat_limit": 999999,
-            "drive_monthly_limit": 999999,
-            "follow_limit": 999999, "category_limit": 999999,
-        },
-        "lab": {
-            "daily_search_limit": 999999, "daily_deep_limit": 999999,
-            "daily_litreview_limit": 999999, "daily_gap_analysis_limit": 999999,
-            "daily_export_limit": 999999, "daily_digest_limit": 999999,
-            "daily_chat_limit": 999999,
-            "drive_monthly_limit": 999999,
-            "follow_limit": 999999, "category_limit": 999999,
+            "daily_export_limit": 80, "daily_digest_limit": 7,
+            "daily_chat_limit": 20, "drive_monthly_limit": 200,
+            "follow_limit": 30, "category_limit": 999999, "library_limit": 2000,
         },
     }
-    TIER_PRICES = {
-        "free": 0, "basic": 150, "standard": 299, "premium": 499, "ultra": 999, "lab": 2999,
-    }
-    TIER_RANK = {"free": 0, "basic": 1, "standard": 2, "premium": 3, "ultra": 4, "lab": 5}
+    TIER_PRICES = {"free": 0, "pro": 299}
+    TIER_RANK = {"free": 0, "pro": 1}
+    LEGACY_PAID = {"basic", "standard", "premium", "ultra", "lab", "pro"}
+
+    def _normalize_tier(self, tier: str) -> str:
+        if not tier or tier == "free":
+            return "free"
+        if tier in self.LEGACY_PAID:
+            return "pro"
+        return "free"
 
     def get_user_tier(self, user_id: int) -> dict:
         self.cursor.execute("SELECT tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit, tier_expires_at, is_founder FROM user_tier WHERE user_id = ?", (user_id,))
@@ -469,11 +459,11 @@ class Database:
             ''', (user_id, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"]))
             self.conn.commit()
             return {"tier": "free", **d}
-        tier = row[0]
+        stored_tier = row[0]
         tier_expires_at = row[7]
         is_founder = bool(row[8])
         # 到期自動降級（Founder 終身不受影響）
-        if tier_expires_at and not is_founder and tier != "free":
+        if tier_expires_at and not is_founder and stored_tier != "free":
             from datetime import datetime
             try:
                 if datetime.utcnow() > datetime.fromisoformat(tier_expires_at):
@@ -481,11 +471,13 @@ class Database:
                     return {"tier": "free", **self.TIER_DEFS["free"]}
             except (ValueError, TypeError):
                 pass
-        # Serve live TIER_DEFS limits for every tier so plan changes apply instantly
+        # 舊方案代碼對應到 Pro，避免舊列缺少 TIER_DEFS key 而崩潰
+        tier = self._normalize_tier(stored_tier)
         d = self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
         return {"tier": tier, "tier_expires_at": tier_expires_at, "is_founder": is_founder, **d}
 
     def set_user_tier(self, user_id: int, tier: str, limits: dict = None):
+        tier = self._normalize_tier(tier)
         d = limits or self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
         self.cursor.execute('''
             INSERT INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit, updated_at)
@@ -528,9 +520,9 @@ class Database:
                 return False, "promo_expired"
         except (ValueError, TypeError):
             return False, "promo_invalid"
-        # 升級為 lab 全功能 + 寫入到期日
+        # 升級為 Pro + 寫入到期日
         expires_at = (datetime.utcnow() + timedelta(days=self.PROMO_ACCESS_DAYS)).isoformat()
-        self.set_user_tier(user_id, "lab")
+        self.set_user_tier(user_id, "pro")
         self.cursor.execute(
             "UPDATE user_tier SET tier_expires_at = ?, expiry_notified = 0 WHERE user_id = ?",
             (expires_at, user_id)
@@ -569,8 +561,9 @@ class Database:
         self.conn.commit()
 
     def set_founder(self, user_id: int) -> bool:
+        self.set_user_tier(user_id, "pro")
         self.cursor.execute(
-            "UPDATE user_tier SET is_founder = 1, tier = CASE WHEN tier = 'free' THEN 'lab' ELSE tier END, tier_expires_at = NULL, expiry_notified = 0 WHERE user_id = ?",
+            "UPDATE user_tier SET is_founder = 1, tier = 'pro', tier_expires_at = NULL, expiry_notified = 0 WHERE user_id = ?",
             (user_id,)
         )
         self.conn.commit()
@@ -586,8 +579,7 @@ class Database:
         from datetime import date
         today = date.today().isoformat()
         tier_info = self.get_user_tier(user_id)
-        tier = tier_info.get("tier", "free")
-        drive_limit = self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])["drive_monthly_limit"]
+        drive_limit = tier_info.get("drive_monthly_limit", self.TIER_DEFS["free"]["drive_monthly_limit"])
         if drive_limit >= 999999:
             return True, ""
         self.cursor.execute("SELECT COUNT(*) FROM drive_archive_log WHERE user_id = ? AND date = ?", (user_id, today))
@@ -606,7 +598,8 @@ class Database:
 
     def check_quota(self, user_id: int, action: str) -> tuple[bool, str]:
         """檢查用戶是否還有配額。回傳 (是否允許, 錯誤訊息)
-        digest 以週計（週一 00:00 重置）：Free 1 / Basic 3 / Standard 5 / Premium 7 / Ultra+Lab 無限。
+        digest 以週計（週一 00:00 重置）：Free 0（不含推播）/ Pro 7。
+        daily_digest_limit 為 0 時走 limit<=0 分支，拒絕並提示升級 Pro。
         """
         from datetime import date, timedelta
         today = date.today()
@@ -619,12 +612,14 @@ class Database:
             "gap_analysis": ("gap_analyses", tier_info["daily_gap_analysis_limit"]),
             "export": ("exports", tier_info["daily_export_limit"]),
             "digest": ("digests", tier_info["daily_digest_limit"]),
-            "chat": ("chats", self.TIER_DEFS.get(tier_info["tier"], self.TIER_DEFS["free"])["daily_chat_limit"]),
+            "chat": ("chats", tier_info.get("daily_chat_limit", self.TIER_DEFS["free"]["daily_chat_limit"])),
         }
         if action not in limit_map:
             return True, ""
         col, limit = limit_map[action]
         if limit <= 0:
+            if action == "digest":
+                return False, "Free 不含每日推播，請升級 Pro"
             return False, f"您的方案 ({tier_info['tier']}) 不支援此功能，請升級訂閱。"
         if limit >= 999999:
             return True, ""
@@ -670,9 +665,21 @@ class Database:
 
     # --- 7. 用戶論文收藏庫 ---
     def add_paper_to_library(self, user_id: int, paper: dict):
+        """Insert or update a paper. Returns paper_id, or None if the library is full (new papers only)."""
         import uuid
         paper_id = paper.get("id") or paper.get("fingerprint") or str(uuid.uuid4())[:16]
         authors_json = json.dumps(paper.get("authors", []), ensure_ascii=False)
+        self.cursor.execute(
+            "SELECT 1 FROM user_paper_library WHERE user_id = ? AND paper_id = ?",
+            (user_id, paper_id),
+        )
+        exists = self.cursor.fetchone()
+        if not exists:
+            library_limit = self.get_user_tier(user_id).get("library_limit", 80)
+            self.cursor.execute("SELECT COUNT(*) FROM user_paper_library WHERE user_id = ?", (user_id,))
+            count = (self.cursor.fetchone() or [0])[0]
+            if count >= library_limit:
+                return None
         self.cursor.execute('''
             INSERT INTO user_paper_library (user_id, paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -685,17 +692,43 @@ class Database:
         return paper_id
 
     def get_user_library(self, user_id: int, category: str = None, limit: int = 100) -> list[dict]:
+        cols = "paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category, user_notes, tags, is_starred"
         if category:
-            self.cursor.execute("SELECT paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category FROM user_paper_library WHERE user_id = ? AND category = ? ORDER BY added_at DESC LIMIT ?", (user_id, category, limit))
+            self.cursor.execute(f"SELECT {cols} FROM user_paper_library WHERE user_id = ? AND category = ? ORDER BY added_at DESC LIMIT ?", (user_id, category, limit))
         else:
-            self.cursor.execute("SELECT paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category FROM user_paper_library WHERE user_id = ? ORDER BY added_at DESC LIMIT ?", (user_id, limit))
+            self.cursor.execute(f"SELECT {cols} FROM user_paper_library WHERE user_id = ? ORDER BY added_at DESC LIMIT ?", (user_id, limit))
         rows = self.cursor.fetchall()
         papers = []
         for r in rows:
+            try:
+                tags = json.loads(r[11]) if r[11] else []
+            except Exception:
+                tags = []
+            if not isinstance(tags, list):
+                tags = []
             papers.append({
-                "id": r[0], "title": r[1], "authors": json.loads(r[2]) if r[2] else [], "year": r[3], "source": r[4], "link": r[5], "summary": r[6], "fingerprint": r[7], "bibtex": r[8], "category": r[9]
+                "id": r[0], "title": r[1], "authors": json.loads(r[2]) if r[2] else [], "year": r[3], "source": r[4], "link": r[5], "summary": r[6], "fingerprint": r[7], "bibtex": r[8], "category": r[9],
+                "notes": r[10] or "", "tags": tags, "starred": int(r[12] or 0),
             })
         return papers
+
+    def log_activity(self, user_id: int, action: str, paper_id: str = "", paper_title: str = "", details: str = ""):
+        self.cursor.execute(
+            "INSERT INTO user_activity (user_id, action, paper_id, paper_title, details) VALUES (?, ?, ?, ?, ?)",
+            (user_id, action, paper_id or "", paper_title or "", details or ""),
+        )
+        self.conn.commit()
+
+    def get_activity(self, user_id: int, limit: int = 50) -> list[dict]:
+        self.cursor.execute(
+            "SELECT id, user_id, action, paper_id, paper_title, details, created_at FROM user_activity WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT ?",
+            (user_id, limit),
+        )
+        rows = self.cursor.fetchall()
+        return [
+            {"id": r[0], "user_id": r[1], "action": r[2], "paper_id": r[3] or "", "paper_title": r[4] or "", "details": r[5] or "", "created_at": r[6]}
+            for r in rows
+        ]
 
     def get_library_stats(self, user_id: int) -> dict:
         self.cursor.execute("SELECT COUNT(*), COUNT(DISTINCT category) FROM user_paper_library WHERE user_id = ?", (user_id,))

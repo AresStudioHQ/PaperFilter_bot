@@ -697,6 +697,7 @@ def generate_ai_summary(text: str, user_id: int = 0) -> str:
 
 
 def generate_deep_analysis(title: str, text: str, fingerprint: str = None, user_id: int = 0) -> str:
+    """Deep analysis from title + abstract only. Never claim to have read the full paper."""
     tier = db.get_user_tier(user_id).get("tier", "free") if user_id else "free"
     
     if fingerprint:
@@ -721,8 +722,9 @@ def generate_deep_analysis(title: str, text: str, fingerprint: str = None, user_
     prompt = f"""Please perform a deep structured analysis of the following academic paper based on the title and abstract below.
 
 Analysis guidelines:
-- Base your analysis on the information provided in the title and abstract. You may supplement with general domain knowledge to explain context, but clearly separate the authors' claims from your own background knowledge.
-- If specific numbers or metrics are mentioned in the abstract, cite them. If the abstract does not provide specific quantitative results, describe the qualitative findings instead of inventing numbers.
+- Base your analysis ONLY on the provided title and abstract. You may supplement with general domain knowledge to explain context, but clearly separate the authors' claims from your own background knowledge.
+- If specific numbers or metrics are mentioned in the abstract, cite them. If the abstract does not provide specific quantitative results, describe the qualitative findings instead.
+- Do not invent numbers, metrics, sample sizes, p-values, accuracies, or benchmark scores that are not present in the title or abstract. Never fabricate citations.
 - This analysis is for quick understanding only; readers should verify details against the original paper.
 
 Title: {title}
@@ -737,20 +739,20 @@ Abstract & Key Content: {text}
 (Break down the proposed system architecture, mathematical models, algorithms, or experimental design)
 
 📊 <b>【Key Findings & Breakthrough Data】</b>
-(Specific quantitative metrics, benchmark improvements, and major experimental conclusions)
+(Specific quantitative metrics, benchmark improvements, and major experimental conclusions — only if stated in the abstract)
 
 ⚠️ <b>【Limitations & Future Directions】</b>
 (Limitations identified by authors or objectively existing, and promising research directions)
 """
     report = _invoke_ai(
         prompt=prompt,
-        system_prompt="You are a senior reviewer at top international academic journals. Provide a thorough, structured analysis based on the provided title and abstract. Use your domain knowledge to explain context and significance, but clearly distinguish between what the paper claims and your general knowledge. Avoid vague statements.",
+        system_prompt="You are a senior reviewer at top international academic journals. Provide a thorough, structured analysis based on the provided title and abstract only. Use your domain knowledge to explain context and significance, but clearly distinguish between what the paper claims and your general knowledge. Do not invent numbers. Avoid vague statements.",
         tier=tier,
         temperature=0.2
     )
 
     if not report:
-        report = "❌ 尚未設定 AI API Key，無法生成深度導讀。"
+        report = "❌ 尚未設定 AI API Key，無法依據標題與摘要生成深度導讀。"
     elif fingerprint:
         db.set_cached_ai(fingerprint, deep_report=report)
 
@@ -787,9 +789,10 @@ def chat_with_user_library(user_id: int, query: str, papers: list) -> str:
     tier = db.get_user_tier(user_id).get("tier", "free")
     lang = _lang_instruction(user_id)
     
-    # 建立多篇論文的結構化上下文
+    # 只使用呼叫端傳入的論文，最多 8 篇以控制成本
+    selected = papers[:8]
     context_blocks = []
-    for i, p in enumerate(papers[:15], 1):
+    for i, p in enumerate(selected, 1):
         auth_str = ", ".join(p.get("authors", [])[:3])
         context_blocks.append(
             f"[文獻 {i}] 《{p.get('title', '')}》\n"
@@ -798,7 +801,7 @@ def chat_with_user_library(user_id: int, query: str, papers: list) -> str:
         )
     papers_context = "\n---\n".join(context_blocks)
     
-    prompt = f"""你是一名世界頂尖的學術研究顧問。用戶正在針對他文獻庫中的 {len(papers)} 篇論文提出具體研究問題。
+    prompt = f"""你是一名世界頂尖的學術研究顧問。用戶正在針對他文獻庫中傳入的 {len(selected)} 篇論文提出具體研究問題。
 
 【用戶提問】：
 {query}
@@ -821,7 +824,7 @@ def chat_with_user_library(user_id: int, query: str, papers: list) -> str:
 【回應格式】：
 - 開頭先用 1-2 句話總結核心發現
 - 接著提供結構化對比（表格或條列式）
-- 結尾標註「📚 以上分析基於您的 {len(papers)} 篇文獻庫」
+- 結尾標註「📚 以上分析基於您傳入的 {len(selected)} 篇文獻」
 """
     answer = _invoke_ai(
         prompt=prompt,
@@ -849,6 +852,8 @@ def generate_literature_review(user_id: int, papers: list) -> str:
     prompt = f"""以下是用戶收藏的 {len(papers)} 篇學術論文，請撰寫一份結構嚴謹、具備發表情境的學術文獻綜述草稿（{lang}）：
 {papers_text}
 
+This is a draft. Verify citations against originals.
+
 請按以下 5 大段落輸出（保留 HTML 標籤 <b>）：
 1. <b>【研究背景與主題概述】</b>（闡述該領域核心意義）
 2. <b>【主流技術路徑與代表性工作】</b>（逐條深入剖析各文獻貢獻）
@@ -856,7 +861,7 @@ def generate_literature_review(user_id: int, papers: list) -> str:
 4. <b>【學界共同共識與最新突破】</b>
 5. <b>【現存研究缺口與未來研究倡議】</b>
 
-請保持頂級期刊綜述風格，引用論文時使用（作者, 年份）格式。"""
+請保持頂級期刊綜述風格，引用論文時使用（作者, 年份）格式。Do not invent papers or numbers that are not in the provided abstracts."""
 
     review = _invoke_ai(
         prompt=prompt,
