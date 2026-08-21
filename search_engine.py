@@ -682,7 +682,14 @@ def generate_deep_analysis(title: str, text: str, fingerprint: str = None, user_
         "ja": "日本語で回答してください",
     }.get(lang, "Please respond in English")
 
-    prompt = f"""Please perform a deep structured analysis of the following academic paper:
+    prompt = f"""Please perform a deep structured analysis of the following academic paper.
+
+CRITICAL INTEGRITY RULES (must follow strictly):
+- Only use information present in the Title and Abstract/Content provided below. Do NOT invent authors, numbers, datasets, metrics, benchmark scores, or conclusions that are not explicitly stated.
+- If the abstract does not mention specific quantitative results, say "未提供具體量化數據" instead of guessing numbers.
+- Clearly distinguish the authors' stated claims from your own general background knowledge.
+- This is an AI-generated analysis for quick understanding only; formal citation must verify against the original paper.
+
 Title: {title}
 Abstract & Key Content: {text}
 
@@ -702,7 +709,7 @@ Abstract & Key Content: {text}
 """
     report = _invoke_ai(
         prompt=prompt,
-        system_prompt="You are a senior reviewer and domain expert at top international academic journals. Provide deep analysis of the paper's mechanisms and data. Avoid vague or generic statements.",
+        system_prompt="You are a senior reviewer at top international academic journals. Provide deep analysis strictly based on the provided title and abstract. NEVER fabricate data, metrics, author names, or results not present in the source text. If the source lacks specifics, state that explicitly. Avoid vague or generic statements.",
         tier=tier,
         temperature=0.2
     )

@@ -1803,7 +1803,8 @@ def handle_callback_query(call):
                 source=paper.get("source", "")
             )
         db.increment_usage(user_id, "deep")
-        report_msg = f"{_t(user_id, 'deep_header')}\n\n{deep_report}"
+        disclaimer = "\n\n<i>⚠️ 此深度導讀由 AI 根據論文摘要生成，僅供快速理解，正式引用請務必核對原文。</i>"
+        report_msg = f"{_t(user_id, 'deep_header')}\n\n{deep_report}{disclaimer}"
         if len(report_msg) > 4000:
             for i in range(0, len(report_msg), 4000):
                 bot.send_message(call.message.chat.id, report_msg[i:i+4000], parse_mode="HTML")
