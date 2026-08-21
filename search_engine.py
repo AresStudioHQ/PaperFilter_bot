@@ -452,7 +452,8 @@ def fetch_paper_multi_source(
     seen_ids: set[str],
     user_bias: tuple = ({}, {}),
     followed_authors: list[str] = None,
-    filter_mode: str = "smart"
+    filter_mode: str = "smart",
+    user_id: int = 0
 ) -> tuple:
     pos_bias, neg_bias = user_bias
     followed_authors = followed_authors or []
@@ -604,7 +605,7 @@ def fetch_paper_multi_source(
     if cached and cached[0]:
         ai_summary = cached[0]
     else:
-        ai_summary = generate_ai_summary(selected["summary"])
+        ai_summary = generate_ai_summary(selected["summary"], user_id=user_id)
         if fp:
             db.set_cached_ai(fp, summary=ai_summary)
 
@@ -650,10 +651,23 @@ def _invoke_ai(prompt: str, system_prompt: str = "你是專業學術論文導讀
     return ""
 
 
-def generate_ai_summary(text: str) -> str:
+def generate_ai_summary(text: str, user_id: int = 0) -> str:
+    lang = "en"
+    if user_id:
+        try:
+            lang = db.get_user_lang(user_id) or "en"
+        except Exception:
+            lang = "en"
+    lang_prompts = {
+        "zh_hant": "請用繁體中文以 2 到 3 句話精準總結這篇論文的核心研究問題與關鍵突破成果。",
+        "zh_hans": "请用简体中文以 2 到 3 句话精准总结这篇论文的核心研究问题与关键突破成果。",
+        "en": "In 2-3 sentences, concisely summarize this paper's core research question and key breakthrough findings. Respond in English.",
+        "ja": "この論文の核心的な研究問題と重要な成果を2〜3文で簡潔にまとめてください。日本語で回答してください。",
+    }
+    system_prompt = f"你是專業學術論文導讀助手。{lang_prompts.get(lang, lang_prompts['en'])}"
     res = _invoke_ai(
         prompt=text[:1800],
-        system_prompt="你是專業學術論文導讀助手。請用繁體中文以 2 到 3 句話精準總結這篇論文的核心研究問題與關鍵突破成果。",
+        system_prompt=system_prompt,
         tier="free",
         temperature=0.3
     )
@@ -682,13 +696,12 @@ def generate_deep_analysis(title: str, text: str, fingerprint: str = None, user_
         "ja": "日本語で回答してください",
     }.get(lang, "Please respond in English")
 
-    prompt = f"""Please perform a deep structured analysis of the following academic paper.
+    prompt = f"""Please perform a deep structured analysis of the following academic paper based on the title and abstract below.
 
-CRITICAL INTEGRITY RULES (must follow strictly):
-- Only use information present in the Title and Abstract/Content provided below. Do NOT invent authors, numbers, datasets, metrics, benchmark scores, or conclusions that are not explicitly stated.
-- If the abstract does not mention specific quantitative results, say "未提供具體量化數據" instead of guessing numbers.
-- Clearly distinguish the authors' stated claims from your own general background knowledge.
-- This is an AI-generated analysis for quick understanding only; formal citation must verify against the original paper.
+Analysis guidelines:
+- Base your analysis on the information provided in the title and abstract. You may supplement with general domain knowledge to explain context, but clearly separate the authors' claims from your own background knowledge.
+- If specific numbers or metrics are mentioned in the abstract, cite them. If the abstract does not provide specific quantitative results, describe the qualitative findings instead of inventing numbers.
+- This analysis is for quick understanding only; readers should verify details against the original paper.
 
 Title: {title}
 Abstract & Key Content: {text}
@@ -709,7 +722,7 @@ Abstract & Key Content: {text}
 """
     report = _invoke_ai(
         prompt=prompt,
-        system_prompt="You are a senior reviewer at top international academic journals. Provide deep analysis strictly based on the provided title and abstract. NEVER fabricate data, metrics, author names, or results not present in the source text. If the source lacks specifics, state that explicitly. Avoid vague or generic statements.",
+        system_prompt="You are a senior reviewer at top international academic journals. Provide a thorough, structured analysis based on the provided title and abstract. Use your domain knowledge to explain context and significance, but clearly distinguish between what the paper claims and your general knowledge. Avoid vague statements.",
         tier=tier,
         temperature=0.2
     )
