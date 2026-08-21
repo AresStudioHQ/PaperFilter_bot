@@ -3,6 +3,7 @@ import sys
 import io
 import re
 import json
+import urllib.parse
 from datetime import datetime, timezone
 import requests
 from google.oauth2.credentials import Credentials
@@ -15,6 +16,8 @@ SCOPES = [
     'openid',
     'https://www.googleapis.com/auth/userinfo.email',
 ]
+
+REQUIRED_SCOPES = {'https://www.googleapis.com/auth/drive.file'}
 
 DELETED_SUFFIX = "（已移除）"
 
@@ -72,19 +75,24 @@ class DriveOAuthManager:
         redirect_uri = client_info.get("redirect_uri")
         if not client_id:
             return None
-        scope_str = "%20".join(SCOPES)
-        return (
+        scope_str = urllib.parse.quote(" ".join(SCOPES))
+        encoded_redirect = urllib.parse.quote(redirect_uri, safe="")
+        url = (
             f"https://accounts.google.com/o/oauth2/v2/auth?"
             f"client_id={client_id}&"
-            f"redirect_uri={redirect_uri}&"
+            f"redirect_uri={encoded_redirect}&"
             f"response_type=code&"
             f"scope={scope_str}&"
             f"access_type=offline&"
+            f"include_granted_scopes=true&"
             f"prompt=consent&"
             f"state={user_id}"
         )
+        print(f"🔗 OAuth URL scopes: {[s for s in SCOPES]}", file=sys.stderr)
+        print(f"🔗 OAuth URL: {url[:200]}...", file=sys.stderr)
+        return url
 
-    def exchange_code(self, user_id: int, code: str) -> bool:
+    def exchange_code(self, user_id: int, code: str) -> tuple[bool, str]:
         client_info = self.get_client_info()
         data = {
             "code": code,
@@ -97,20 +105,34 @@ class DriveOAuthManager:
             res = requests.post("https://oauth2.googleapis.com/token", data=data, timeout=10)
             token_data = res.json()
             if "error" in token_data:
-                print(f"❌ Google Token 交換失敗: {token_data.get('error_description')}", file=sys.stderr)
-                return False
+                err = token_data.get("error_description") or token_data.get("error", "unknown")
+                print(f"❌ Google Token 交換失敗: {err}", file=sys.stderr)
+                return False, err
+            granted_scopes = set(token_data.get("scope", "").split())
+            print(f"✅ 用戶 {user_id} Token 交換成功", file=sys.stderr)
+            print(f"   授權的 scopes: {granted_scopes}", file=sys.stderr)
+            missing = REQUIRED_SCOPES - granted_scopes
+            if missing:
+                print(f"   ⚠️ 缺少必要 scope: {missing}", file=sys.stderr)
+                db.save_token(user_id, json.dumps(token_data))
+                return False, f"缺少必要授權: {', '.join(missing)}。請在 Google Cloud Console 的 OAuth 同意畫面中確認 drive.file scope 已發布。"
             db.save_token(user_id, json.dumps(token_data))
-            print(f"✅ 用戶 {user_id} 成功存入 Google Drive Token！", file=sys.stderr)
-            return True
+            print(f"   ✅ 用戶 {user_id} 成功存入 Google Drive Token（含 drive.file）", file=sys.stderr)
+            return True, "success"
         except Exception as e:
             print(f"❌ 換取 Token 例外: {e}", file=sys.stderr)
-            return False
+            return False, str(e)
 
     def get_user_service(self, user_id: int):
         token_json = db.get_token(user_id)
         if not token_json:
             return None
         token_info = json.loads(token_json)
+        granted = set(token_info.get("scope", "").split())
+        if "https://www.googleapis.com/auth/drive.file" not in granted:
+            print(f"⚠️ 用戶 {user_id} token 缺少 drive.file scope，清除 token", file=sys.stderr)
+            db.remove_token(user_id)
+            return None
         client_info = self.get_client_info()
         creds = Credentials(
             token=token_info.get("access_token"),

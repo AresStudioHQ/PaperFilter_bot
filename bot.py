@@ -1967,6 +1967,7 @@ def oauth2callback():
     code = request.args.get("code")
     state = request.args.get("state")
     error = request.args.get("error")
+    granted_scope = request.args.get("scope", "")
     if error:
         return f"<h3>授權失敗：{error}</h3>", 400
     if not code or not state:
@@ -1975,7 +1976,8 @@ def oauth2callback():
         user_id = int(state)
     except ValueError:
         return "<h3>無效的 state 參數</h3>", 400
-    success = drive_manager.exchange_code(user_id, code)
+    print(f"🔗 OAuth callback — granted scope: {granted_scope}", file=sys.stderr)
+    success, detail = drive_manager.exchange_code(user_id, code)
     if success:
         try:
             bot.send_message(user_id, _t(user_id, "drive_auth_success"))
@@ -1983,7 +1985,19 @@ def oauth2callback():
             pass
         return "<h3>✅ Google Drive 授權成功！請回到 Telegram 繼續使用。</h3>"
     else:
-        return "<h3>❌ 授權失敗，請重試。</h3>", 500
+        has_drive = "drive.file" in granted_scope
+        if not has_drive:
+            msg = (
+                "⚠️ Google 未授予 drive.file 權限。\n\n"
+                "<b>請在 Google Cloud Console 做以下檢查：</b>\n"
+                "1. 進入 APIs & Services → OAuth consent screen → Data Access\n"
+                "2. 確認已加入 Google Drive API (drive.file) scope\n"
+                "3. 點擊「PUBLISH」讓 scope 狀態變成 In production\n"
+                "4. 如果是 Testing 模式，需將你的 email 加入 Test users\n\n"
+                "設定好後請打 /drive revoke 再重新授權。"
+            )
+            return f"<h3>{msg}</h3>", 500
+        return f"<h3>❌ 授權失敗：{detail}</h3>", 500
 
 @app.route("/")
 def index():
