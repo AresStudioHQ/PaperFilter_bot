@@ -107,6 +107,9 @@ export const DeepModal: React.FC<DeepModalProps> = ({
                 <div className="whitespace-pre-line text-slate-300 font-sans leading-relaxed text-sm bg-slate-900/90 p-4 rounded-lg border border-slate-800/80">
                   {defaultReport}
                 </div>
+                <p className="text-xs text-slate-500 italic">
+                  {t('deep_abstract_disclaimer')}
+                </p>
                 <p className="text-xs text-slate-500 italic flex items-center gap-1">
                   {t('deep_modal_disclaimer')}
                 </p>

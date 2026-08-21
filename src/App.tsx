@@ -3,10 +3,8 @@ import { Navbar } from './components/Navbar';
 import { DashboardOverview } from './components/DashboardOverview';
 import { LibraryManagement } from './components/LibraryManagement';
 import { SearchSection } from './components/SearchSection';
-import { CitationGraph } from './components/CitationGraph';
 import { ProFeaturesHub } from './components/ProFeaturesHub';
 import { TrendsSection } from './components/TrendsSection';
-import { BotSimulator } from './components/BotSimulator';
 import { DeepModal } from './components/DeepModal';
 import { TelegramBindingModal } from './components/TelegramBindingModal';
 import { Paper, UserProfile, FilterMode, HistoryRecord } from './types';
@@ -295,18 +293,18 @@ export default function App() {
     setActiveTab('pro');
   };
 
-  const handleUpgradePro = async (tier: string = 'premium') => {
-    try {
-      const res = await fetch('/api/auth/upgrade-tier', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier })
-      });
-      const data = await res.json();
-      if (data.success && data.user) setUser(data.user);
-    } catch (err) {
-      console.error(err);
+  const handleRedeemCode = async (code: string) => {
+    const res = await fetch('/api/auth/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+    const data = await res.json();
+    if (data.success && data.user) {
+      setUser(data.user);
+      return;
     }
+    throw new Error(data.error || t('pro_redeem_fail'));
   };
 
   // ---------- 登入閘門 ----------
@@ -396,21 +394,12 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'graph' && (
-          <CitationGraph
-            library={library}
-            userLang={user.user_lang}
-            onSelectPaperForDeep={handleOpenDeep}
-            onAddToMatrix={(p) => { handleAddToLibrary(p); setActiveTab('pro'); }}
-          />
-        )}
-
         {activeTab === 'pro' && (
           <ProFeaturesHub
             library={library}
             user={user}
             userLang={user.user_lang}
-            onUpgradePro={handleUpgradePro}
+            onRedeemCode={handleRedeemCode}
             onSelectPaperForDeep={handleOpenDeep}
             model={selectedModel}
           />
@@ -418,18 +407,6 @@ export default function App() {
 
         {activeTab === 'trends' && (
           <TrendsSection userLang={user.user_lang} model={selectedModel} />
-        )}
-
-        {activeTab === 'simulator' && (
-          <BotSimulator
-            userLang={user.user_lang}
-            botUsername={botUsername}
-            onLanguageChange={handleLanguageChange}
-            onOpenDeep={handleOpenDeep}
-            onAddToLibrary={handleAddToLibrary}
-            onOpenSyncModal={() => setIsSyncModalOpen(true)}
-            onOpenProModal={() => setActiveTab('pro')}
-          />
         )}
 
       </main>
@@ -498,7 +475,7 @@ export default function App() {
       <footer className="border-t border-slate-800/80 bg-slate-900/50 py-5 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>{t('footer_hq')}</p>
-          <p className="font-mono text-indigo-400">v3.0 Pro Enterprise Edition</p>
+          <p className="font-mono text-indigo-400">PaperFilterBot · Free / Pro</p>
         </div>
       </footer>
     </div>

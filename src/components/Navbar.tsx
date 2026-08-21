@@ -4,13 +4,10 @@ import {
   Library, 
   Search, 
   TrendingUp, 
-  Bot, 
   LayoutDashboard, 
   Crown, 
   Link as LinkIcon,
-  CheckCircle2,
-  SlidersHorizontal,
-  Network
+  CheckCircle2
 } from 'lucide-react';
 import { UserProfile, FilterMode } from '../types';
 import { useI18n } from '../i18n';
@@ -228,18 +225,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('graph')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
-              activeTab === 'graph'
-                ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50 shadow-inner font-semibold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-            }`}
-          >
-            <Network className="h-4 w-4 text-indigo-400 shrink-0" />
-            <span>{t('nav_graph')}</span>
-          </button>
-
-          <button
             onClick={() => setActiveTab('pro')}
             className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 text-amber-300 ${
               activeTab === 'pro'
@@ -261,18 +246,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <TrendingUp className="h-4 w-4 shrink-0" />
             <span>{t('nav_trends')}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('simulator')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 text-sky-300 ${
-              activeTab === 'simulator'
-                ? 'bg-sky-500/25 text-sky-200 border border-sky-500/50 shadow-inner font-semibold'
-                : 'hover:text-sky-200 hover:bg-sky-500/10'
-            }`}
-          >
-            <Bot className="h-4 w-4 text-sky-400 shrink-0" />
-            <span>{t('nav_simulator')}</span>
           </button>
         </div>
 
