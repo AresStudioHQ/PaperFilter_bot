@@ -28,6 +28,9 @@ except ImportError:
         def mark_folder_deleted(self, *args): pass
     drive_manager = DummyDriveManager()
 
+# 暫存搜尋結果論文資料（供歸檔時使用）
+_pending_papers = {}
+
 # 追蹤用戶首次使用功能
 _user_first_use = set()
 # 追蹤用戶對話模式（{user_id: True}）
@@ -1536,6 +1539,11 @@ def _send_paper_card(chat_id, user_id, title, ai_summary, link, paper_id, alread
     else:
         markup.add(types.InlineKeyboardButton(_t(user_id, "btn_doi"), url=link))
     bot.send_message(chat_id, text, reply_markup=markup, disable_web_page_preview=True)
+    _pending_papers[paper_id[:40]] = {
+        "title": title, "summary": raw_summary, "link": link,
+        "authors": authors, "year": year, "source": source,
+        "fingerprint": fingerprint, "id": paper_id,
+    }
 
 def _do_search(message, user_id: int, query: str):
     lang = _get_lang(user_id, message.from_user.language_code)
@@ -1755,7 +1763,9 @@ def handle_callback_query(call):
             papers = db.get_user_library(user_id)
             paper = next((p for p in papers if p.get("fingerprint") == fingerprint), None)
             if not paper:
-                paper = {"title": _t(user_id, "read_paper"), "summary": "", "authors": [], "year": "2024", "link": "", "source": "Academic"}
+                paper = next((v for v in _pending_papers.values() if v.get("fingerprint") == fingerprint), None)
+            if not paper:
+                paper = {"title": "Untitled", "summary": "", "authors": [], "year": "2024", "link": "", "source": "Academic"}
             deep_report = search_engine.generate_deep_analysis(
                 title=paper.get("title", ""),
                 text=paper.get("summary", ""),
@@ -1848,7 +1858,9 @@ def handle_callback_query(call):
         papers = db.get_user_library(user_id)
         paper = next((p for p in papers if str(p.get("id", ""))[:40] == paper_id or str(p.get("fingerprint", ""))[:40] == paper_id), None)
         if not paper:
-            paper = {"id": paper_id, "title": _t(user_id, "read_paper"), "summary": "", "link": "", "authors": [], "year": "2024", "category": folder_name}
+            paper = _pending_papers.get(paper_id)
+        if not paper:
+            paper = {"id": paper_id, "title": "Untitled", "summary": "", "link": "", "authors": [], "year": "2024", "category": folder_name}
             db.add_paper_to_library(user_id, paper)
         bot.answer_callback_query(call.id, _t(user_id, "archive_archiving"))
         bibtex_str = paper.get("bibtex", "") or search_engine.generate_bibtex_str(
