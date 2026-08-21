@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 import json
 import threading
@@ -128,6 +128,7 @@ MESSAGES = {
         "tier_standard": "Standard 方案",
         "tier_premium": "Premium 方案",
         "tier_ultra": "Ultra 方案",
+        "tier_lab": "實驗室方案",
         "tier_price": "{price}/月",
         "tier_search_daily": "{count} 次搜尋/日",
         "tier_deep_daily": "{count} 次深度導讀/日",
@@ -249,31 +250,34 @@ MESSAGES = {
             "• 搜尋：20 次/日\n"
             "• 深度導讀：5 次/日\n"
             "• /review + /gap + /chat：各 3 次/日\n"
-            "• Drive：20 篇/月\n"
+            "• Drive：20 篇/日\n"
             "• 廣告：有\n\n"
             "🔧 <b>Basic</b>\n"
-            "• 搜尋：80 次/日\n"
+            "• 搜尋：50 次/日\n"
             "• 深度導讀：15 次/日\n"
-            "• /review + /gap + /chat：各 8 次/日\n"
-            "• Drive：80 篇/月\n"
+            "• /review + /gap + /chat：各 10 次/日\n"
+            "• Drive：50 篇/日\n"
             "• 無廣告\n\n"
             "⭐ <b>Standard</b>\n"
-            "• 搜尋：250 次/日\n"
+            "• 搜尋：150 次/日\n"
             "• 深度導讀：50 次/日\n"
             "• /review + /gap + /chat：各 25 次/日\n"
-            "• Drive：300 篇/月\n"
+            "• Drive：100 篇/日\n"
             "• 每月 AI 分析報告\n\n"
             "💎 <b>Premium</b>\n"
-            "• 搜尋：800 次/日\n"
+            "• 搜尋：300 次/日\n"
             "• 深度導讀：150 次/日\n"
-            "• /review + /gap + /chat：各 80 次/日\n"
+            "• /review + /gap + /chat：各 100 次/日\n"
             "• Drive：無限\n"
             "• 每週 AI 分析報告\n\n"
             "👑 <b>Ultra</b>\n"
-            "• 搜尋：無限\n"
-            "• 深度導讀：400 次/日\n"
+            "• 搜尋：500 次/日\n"
+            "• 深度導讀：300 次/日\n"
             "• 所有功能無限\n"
             "• 每日 AI 分析報告\n\n"
+            "🧪 <b>實驗室方案（團隊）</b>\n"
+            "• 全部功能無限制\n"
+            "• 適合研究團隊\n\n"
             "💡 可在科研大總部一鍵升級！"
         ),
     },
@@ -359,6 +363,7 @@ MESSAGES = {
         "tier_standard": "Standard 方案",
         "tier_premium": "Premium 方案",
         "tier_ultra": "Ultra 方案",
+        "tier_lab": "实验室方案",
         "tier_price": "{price}/月",
         "tier_search_daily": "{count} 次搜索/日",
         "tier_deep_daily": "{count} 次深度导读/日",
@@ -480,31 +485,34 @@ MESSAGES = {
             "• 搜索：20 次/日\n"
             "• 深度导读：5 次/日\n"
             "• /review + /gap + /chat：各 3 次/日\n"
-            "• Drive：20 篇/月\n"
+            "• Drive：20 篇/日\n"
             "• 广告：有\n\n"
             "🔧 <b>Basic</b>\n"
-            "• 搜索：80 次/日\n"
+            "• 搜索：50 次/日\n"
             "• 深度导读：15 次/日\n"
-            "• /review + /gap + /chat：各 8 次/日\n"
-            "• Drive：80 篇/月\n"
+            "• /review + /gap + /chat：各 10 次/日\n"
+            "• Drive：50 篇/日\n"
             "• 无广告\n\n"
             "⭐ <b>Standard</b>\n"
-            "• 搜索：250 次/日\n"
+            "• 搜索：150 次/日\n"
             "• 深度导读：50 次/日\n"
             "• /review + /gap + /chat：各 25 次/日\n"
-            "• Drive：300 篇/月\n"
+            "• Drive：100 篇/日\n"
             "• 每月 AI 分析报告\n\n"
             "💎 <b>Premium</b>\n"
-            "• 搜索：800 次/日\n"
+            "• 搜索：300 次/日\n"
             "• 深度导读：150 次/日\n"
-            "• /review + /gap + /chat：各 80 次/日\n"
+            "• /review + /gap + /chat：各 100 次/日\n"
             "• Drive：无限\n"
             "• 每周 AI 分析报告\n\n"
             "👑 <b>Ultra</b>\n"
-            "• 搜索：无限\n"
-            "• 深度导读：400 次/日\n"
+            "• 搜索：500 次/日\n"
+            "• 深度导读：300 次/日\n"
             "• 所有功能无限\n"
             "• 每日 AI 分析报告\n\n"
+            "🧪 <b>实验室方案（团队）</b>\n"
+            "• 全部功能无限制\n"
+            "• 适合研究团队\n\n"
             "💡 可在科研大总部一键升级！"
         ),
     },
@@ -590,6 +598,7 @@ MESSAGES = {
         "tier_standard": "Standard Plan",
         "tier_premium": "Premium Plan",
         "tier_ultra": "Ultra Plan",
+        "tier_lab": "Lab Plan",
         "tier_price": "{price}/mo",
         "tier_search_daily": "{count} searches/day",
         "tier_deep_daily": "{count} deep reads/day",
@@ -711,31 +720,34 @@ MESSAGES = {
             "• Search: 20/day\n"
             "• Deep Reading: 5/day\n"
             "• /review + /gap + /chat: 3/day each\n"
-            "• Drive: 20 papers/mo\n"
+            "• Drive: 20 papers/day\n"
             "• Ads: Yes\n\n"
             "🔧 <b>Basic</b>\n"
-            "• Search: 80/day\n"
+            "• Search: 50/day\n"
             "• Deep Reading: 15/day\n"
-            "• /review + /gap + /chat: 8/day each\n"
-            "• Drive: 80 papers/mo\n"
+            "• /review + /gap + /chat: 10/day each\n"
+            "• Drive: 50 papers/day\n"
             "• Ad-Free\n\n"
             "⭐ <b>Standard</b>\n"
-            "• Search: 250/day\n"
+            "• Search: 150/day\n"
             "• Deep Reading: 50/day\n"
             "• /review + /gap + /chat: 25/day each\n"
-            "• Drive: 300 papers/mo\n"
+            "• Drive: 100 papers/day\n"
             "• Monthly AI Report\n\n"
             "💎 <b>Premium</b>\n"
-            "• Search: 800/day\n"
+            "• Search: 300/day\n"
             "• Deep Reading: 150/day\n"
-            "• /review + /gap + /chat: 80/day each\n"
+            "• /review + /gap + /chat: 100/day each\n"
             "• Drive: Unlimited\n"
             "• Weekly AI Report\n\n"
             "👑 <b>Ultra</b>\n"
-            "• Search: Unlimited\n"
-            "• Deep Reading: 400/day\n"
+            "• Search: 500/day\n"
+            "• Deep Reading: 300/day\n"
             "• All features unlimited\n"
             "• Daily AI Report\n\n"
+            "🧪 <b>Lab Plan (Team)</b>\n"
+            "• Everything unlimited\n"
+            "• For research groups\n\n"
             "💡 Upgrade now at Web Research HQ!"
         ),
     },
@@ -821,6 +833,7 @@ MESSAGES = {
         "tier_standard": "Standard プラン",
         "tier_premium": "Premium プラン",
         "tier_ultra": "Ultra プラン",
+        "tier_lab": "Lab プラン",
         "tier_price": "月額 {price}",
         "tier_search_daily": "{count} 回/日 検索",
         "tier_deep_daily": "{count} 回/日 詳細解説",
@@ -942,31 +955,34 @@ MESSAGES = {
             "• 検索：20 回/日\n"
             "• 詳細解説：5 回/日\n"
             "• /review + /gap + /chat：各 3 回/日\n"
-            "• Drive：20 本/月\n"
+            "• Drive：20 本/日\n"
             "• 広告：あり\n\n"
             "🔧 <b>Basic</b>\n"
-            "• 検索：80 回/日\n"
+            "• 検索：50 回/日\n"
             "• 詳細解説：15 回/日\n"
-            "• /review + /gap + /chat：各 8 回/日\n"
-            "• Drive：80 本/月\n"
+            "• /review + /gap + /chat：各 10 回/日\n"
+            "• Drive：50 本/日\n"
             "• 広告なし\n\n"
             "⭐ <b>Standard</b>\n"
-            "• 検索：250 回/日\n"
+            "• 検索：150 回/日\n"
             "• 詳細解説：50 回/日\n"
             "• /review + /gap + /chat：各 25 回/日\n"
-            "• Drive：300 本/月\n"
+            "• Drive：100 本/日\n"
             "• 月次 AI レポート\n\n"
             "💎 <b>Premium</b>\n"
-            "• 検索：800 回/日\n"
+            "• 検索：300 回/日\n"
             "• 詳細解説：150 回/日\n"
-            "• /review + /gap + /chat：各 80 回/日\n"
+            "• /review + /gap + /chat：各 100 回/日\n"
             "• Drive：無制限\n"
             "• 週次 AI レポート\n\n"
             "👑 <b>Ultra</b>\n"
-            "• 検索：無限\n"
-            "• 詳細解説：400 回/日\n"
+            "• 検索：500 回/日\n"
+            "• 詳細解説：300 回/日\n"
             "• 全機能無制限\n"
             "• 日次 AI レポート\n\n"
+            "🧪 <b>Lab プラン（チーム）</b>\n"
+            "• 全機能無制限\n"
+            "• 研究グループ向け\n\n"
             "💡 Web研究総本部で今すぐアップグレード！"
         ),
     }
@@ -1110,7 +1126,7 @@ def handle_my_command(message):
     cats_str = "、".join(categories) if categories else _t(user_id, "my_default_folders")
     tier_info = db.get_user_tier(user_id)
     tier = tier_info.get("tier", "free")
-    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra")}
+    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra"), "lab": _t(user_id, "tier_lab")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
     text = (
         _t(user_id, "my_title")
@@ -1207,7 +1223,7 @@ def handle_pro_command(message, override_user_id=None):
     user_id = override_user_id or message.from_user.id
     tier_info = db.get_user_tier(user_id)
     tier = tier_info.get("tier", "free")
-    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra")}
+    tier_names = {"free": _t(user_id, "tier_free"), "basic": _t(user_id, "tier_basic"), "standard": _t(user_id, "tier_standard"), "premium": _t(user_id, "tier_premium"), "ultra": _t(user_id, "tier_ultra"), "lab": _t(user_id, "tier_lab")}
     tier_badge = tier_names.get(tier, _t(user_id, "tier_free"))
     text = _t(user_id, "pro_text", tier=tier_badge)
     bot.reply_to(message, text, parse_mode="HTML")

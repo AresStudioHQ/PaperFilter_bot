@@ -107,11 +107,11 @@ class Database:
             )
         ''')
 
-        # 7. 用戶訂閱方案 (free / basic / standard / premium / ultra)
+        # 7. 用戶訂閱方案 (free / basic / standard / premium / ultra / lab)
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_tier (
                 user_id INTEGER PRIMARY KEY,
-                tier TEXT DEFAULT 'ultra',
+                tier TEXT DEFAULT 'free',
                 daily_search_limit INTEGER DEFAULT 500,
                 daily_deep_limit INTEGER DEFAULT 50,
                 daily_litreview_limit INTEGER DEFAULT 20,
@@ -379,54 +379,62 @@ class Database:
             "follow_limit": 3, "category_limit": 5,
         },
         "basic": {
-            "daily_search_limit": 80, "daily_deep_limit": 15,
-            "daily_litreview_limit": 8, "daily_gap_analysis_limit": 8,
-            "daily_export_limit": 40, "daily_digest_limit": 5,
-            "daily_chat_limit": 8,
-            "drive_monthly_limit": 80,
+            "daily_search_limit": 50, "daily_deep_limit": 15,
+            "daily_litreview_limit": 10, "daily_gap_analysis_limit": 10,
+            "daily_export_limit": 25, "daily_digest_limit": 5,
+            "daily_chat_limit": 10,
+            "drive_monthly_limit": 50,
             "follow_limit": 10, "category_limit": 20,
         },
         "standard": {
-            "daily_search_limit": 250, "daily_deep_limit": 50,
+            "daily_search_limit": 150, "daily_deep_limit": 50,
             "daily_litreview_limit": 25, "daily_gap_analysis_limit": 25,
-            "daily_export_limit": 120, "daily_digest_limit": 10,
+            "daily_export_limit": 80, "daily_digest_limit": 10,
             "daily_chat_limit": 25,
-            "drive_monthly_limit": 300,
+            "drive_monthly_limit": 100,
             "follow_limit": 30, "category_limit": 999999,
         },
         "premium": {
-            "daily_search_limit": 800, "daily_deep_limit": 150,
-            "daily_litreview_limit": 80, "daily_gap_analysis_limit": 80,
-            "daily_export_limit": 350, "daily_digest_limit": 20,
-            "daily_chat_limit": 80,
+            "daily_search_limit": 300, "daily_deep_limit": 150,
+            "daily_litreview_limit": 100, "daily_gap_analysis_limit": 100,
+            "daily_export_limit": 250, "daily_digest_limit": 20,
+            "daily_chat_limit": 100,
             "drive_monthly_limit": 999999,
             "follow_limit": 999999, "category_limit": 999999,
         },
         "ultra": {
-            "daily_search_limit": 999999, "daily_deep_limit": 400,
+            "daily_search_limit": 500, "daily_deep_limit": 300,
             "daily_litreview_limit": 999999, "daily_gap_analysis_limit": 999999,
             "daily_export_limit": 999999, "daily_digest_limit": 50,
             "daily_chat_limit": 999999,
             "drive_monthly_limit": 999999,
             "follow_limit": 999999, "category_limit": 999999,
         },
+        "lab": {
+            "daily_search_limit": 999999, "daily_deep_limit": 999999,
+            "daily_litreview_limit": 999999, "daily_gap_analysis_limit": 999999,
+            "daily_export_limit": 999999, "daily_digest_limit": 999999,
+            "daily_chat_limit": 999999,
+            "drive_monthly_limit": 999999,
+            "follow_limit": 999999, "category_limit": 999999,
+        },
     }
     TIER_PRICES = {
-        "free": 0, "basic": 150, "standard": 299, "premium": 499, "ultra": 999,
+        "free": 0, "basic": 150, "standard": 299, "premium": 499, "ultra": 999, "lab": 2999,
     }
-    TIER_RANK = {"free": 0, "basic": 1, "standard": 2, "premium": 3, "ultra": 4}
+    TIER_RANK = {"free": 0, "basic": 1, "standard": 2, "premium": 3, "ultra": 4, "lab": 5}
 
     def get_user_tier(self, user_id: int) -> dict:
         self.cursor.execute("SELECT tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit FROM user_tier WHERE user_id = ?", (user_id,))
         row = self.cursor.fetchone()
         if not row:
-            d = self.TIER_DEFS["ultra"]
+            d = self.TIER_DEFS["free"]
             self.cursor.execute('''
                 INSERT INTO user_tier (user_id, tier, daily_search_limit, daily_deep_limit, daily_litreview_limit, daily_gap_analysis_limit, daily_export_limit, daily_digest_limit)
-                VALUES (?, 'ultra', ?, ?, ?, ?, ?, ?)
+                VALUES (?, 'free', ?, ?, ?, ?, ?, ?)
             ''', (user_id, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"]))
             self.conn.commit()
-            return {"tier": "ultra", **d}
+            return {"tier": "free", **d}
         tier = row[0]
         # Serve live TIER_DEFS limits for every tier so plan changes apply instantly
         d = self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
@@ -454,7 +462,7 @@ class Database:
         row = self.cursor.fetchone()
         used = row[0] if row else 0
         if used >= drive_limit:
-            return False, f"本月 Drive 歸檔額度已用盡 ({used}/{drive_limit})，下個月自動同步或升級方案。"
+            return False, f"今日 Drive 歸檔額度已用盡 ({used}/{drive_limit})，明日 00:00 重置或升級方案。"
         return True, ""
 
     def log_drive_archive(self, user_id: int):
