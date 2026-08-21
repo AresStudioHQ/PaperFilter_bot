@@ -1193,6 +1193,18 @@ def handle_help(message, override_user_id=None):
     user_id = override_user_id or message.from_user.id
     help_text = _t(user_id, "help")
 
+    # 管理員專屬：附加 Beta 測試碼管理指令（一般用戶與測試員看不到）
+    if _is_admin(user_id):
+        help_text += (
+            "\n\n🔧 <b>── Admin / Beta Tools (hidden for others) ──</b>\n"
+            "• <code>/gencode [note]</code> — 產生測試碼（72h 兌換期限）\n"
+            "• <code>/codes</code> — 測試碼名冊（誰兌換了、ID 是多少）\n"
+            "• <code>/redeem PF-XXXXXX</code> — 兌換測試碼（7 天全功能）\n"
+            "• <code>/grant &lt;user_id&gt; &lt;days&gt;</code> — 依貢獻授予 N 天全功能\n"
+            "• <code>/founder &lt;user_id&gt;</code> — 授予 👑 終身 Founding Member\n"
+            "\n💡 測試員的 user_id 在 /codes 兌換紀錄裡直接看得到。"
+        )
+
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
         types.InlineKeyboardButton(_t(user_id, "help_bind_button"), callback_data="cmd_bind"),
@@ -1571,6 +1583,33 @@ def handle_codes(message):
                 pass
         lines.append(line)
     bot.reply_to(message, "\n".join(lines))
+
+@bot.message_handler(commands=['grant'])
+def handle_grant(message):
+    """管理員手動授予全功能 N 天：/grant <user_id> <days>"""
+    user_id = message.from_user.id
+    if not _is_admin(user_id):
+        bot.reply_to(message, _t(user_id, "promo_admin_only"))
+        return
+    parts = message.text.split()
+    if len(parts) < 3 or not parts[1].lstrip('@').isdigit() or not parts[2].isdigit():
+        bot.reply_to(message, "Usage: /grant <user_id> <days>  (e.g. /grant 123456789 30)")
+        return
+    target_uid = int(parts[1].lstrip('@'))
+    days = max(1, min(3650, int(parts[2])))
+    from datetime import datetime, timedelta
+    expires_at = (datetime.utcnow() + timedelta(days=days)).isoformat()
+    db.set_user_tier(target_uid, "lab")
+    db.cursor.execute(
+        "UPDATE user_tier SET tier_expires_at = ?, expiry_notified = 0 WHERE user_id = ?",
+        (expires_at, target_uid)
+    )
+    db.conn.commit()
+    bot.reply_to(message, f"✅ Granted <code>{target_uid}</code> full access for <b>{days} days</b> (until {expires_at[:10]}).")
+    try:
+        bot.send_message(target_uid, f"🎁 Thank you for your contribution! Your full access has been extended by <b>{days} days</b> (until {expires_at[:10]}).")
+    except Exception:
+        pass
 
 @bot.message_handler(commands=['founder'])
 def handle_founder(message):
@@ -2201,6 +2240,7 @@ def handle_callback_query(call):
     message.text.startswith('/categories'), message.text.startswith('/cats'),
     message.text.startswith('/gencode'), message.text.startswith('/codes'),
     message.text.startswith('/founder'), message.text.startswith('/redeem'),
+    message.text.startswith('/grant'),
 ]))
 def handle_unknown_command(message):
     user_id = message.from_user.id
