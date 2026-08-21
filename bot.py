@@ -1104,6 +1104,12 @@ def _build_folder_keyboard(user_id: int, paper_id: str, lang: str) -> types.Inli
 def handle_start(message):
     user_id = message.from_user.id
     name = message.from_user.first_name or "Researcher"
+    # 第一次接觸時，依 Telegram 語系自動存入偏好（僅在尚未設定時），讓網頁端也跟隨語言
+    try:
+        if not db.get_user_lang(user_id) and message.from_user.language_code:
+            db.set_user_lang(user_id, _get_lang(user_id, message.from_user.language_code))
+    except Exception:
+        pass
     welcome_text = _t(user_id, "welcome", name=name)
 
     markup = types.InlineKeyboardMarkup(row_width=2)
