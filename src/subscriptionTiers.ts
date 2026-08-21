@@ -1,8 +1,7 @@
-// 訂閱等級單一資料源：數值與 bot 端 database.py 的 TIER_DEFS / TIER_PRICES / TIER_RANK 完全一致。
-// 前端 Pro 專區與 Navbar 都從這裡讀，避免前後端額度不同步。
-// daily_digest_limit = 每週 AI Report 次數（週一重置）。Ultra / Lab = 無限制。
+// 訂閱等級單一資料源：與 bot 端 database.py 的 TIER_DEFS / TIER_PRICES / TIER_RANK 完全一致。
+// 商業化只保留 Free / Pro。舊的 basic/standard/premium/ultra/lab 讀取時一律視為 Pro。
 
-export type TierCode = 'free' | 'basic' | 'standard' | 'premium' | 'ultra' | 'lab';
+export type TierCode = 'free' | 'pro';
 
 export const UNLIMITED = 999999;
 
@@ -10,54 +9,63 @@ export function isUnlimited(n: number): boolean {
   return !n || n >= UNLIMITED;
 }
 
-// 是否為付費方案（free 以外皆算，含 lab）
+/** 舊方案代碼對應到 Pro（資料庫可能仍存 premium / lab 等） */
+export const LEGACY_PAID_TIERS = new Set([
+  'basic', 'standard', 'premium', 'ultra', 'lab', 'pro',
+]);
+
+export function normalizeTier(tier: string | null | undefined): TierCode {
+  if (!tier || tier === 'free') return 'free';
+  if (LEGACY_PAID_TIERS.has(tier)) return 'pro';
+  return 'free';
+}
+
 export function hasPaidTier(tier: string): boolean {
-  return (TIER_RANK[tier as TierCode] ?? 0) > 0;
+  return normalizeTier(tier) === 'pro';
 }
 
 export const TIER_DEFS: Record<TierCode, Record<string, number>> = {
   free: {
-    daily_search_limit: 20, daily_deep_limit: 5, daily_litreview_limit: 3, daily_gap_analysis_limit: 3,
-    daily_export_limit: 10, daily_digest_limit: 1, daily_chat_limit: 3, drive_monthly_limit: 20, follow_limit: 3, category_limit: 5,
+    daily_search_limit: 15,
+    daily_deep_limit: 3,
+    daily_litreview_limit: 1,
+    daily_gap_analysis_limit: 1,
+    daily_export_limit: 5,
+    daily_digest_limit: 0,
+    daily_chat_limit: 2,
+    drive_monthly_limit: 10,
+    follow_limit: 3,
+    category_limit: 5,
+    library_limit: 80,
   },
-  basic: {
-    daily_search_limit: 50, daily_deep_limit: 15, daily_litreview_limit: 10, daily_gap_analysis_limit: 10,
-    daily_export_limit: 25, daily_digest_limit: 3, daily_chat_limit: 10, drive_monthly_limit: 50, follow_limit: 10, category_limit: 20,
-  },
-  standard: {
-    daily_search_limit: 150, daily_deep_limit: 50, daily_litreview_limit: 25, daily_gap_analysis_limit: 25,
-    daily_export_limit: 80, daily_digest_limit: 5, daily_chat_limit: 25, drive_monthly_limit: 100, follow_limit: 30, category_limit: UNLIMITED,
-  },
-  premium: {
-    daily_search_limit: 300, daily_deep_limit: 150, daily_litreview_limit: 100, daily_gap_analysis_limit: 100,
-    daily_export_limit: 250, daily_digest_limit: 7, daily_chat_limit: 100, drive_monthly_limit: UNLIMITED, follow_limit: UNLIMITED, category_limit: UNLIMITED,
-  },
-  ultra: {
-    daily_search_limit: 500, daily_deep_limit: 300, daily_litreview_limit: UNLIMITED, daily_gap_analysis_limit: UNLIMITED,
-    daily_export_limit: UNLIMITED, daily_digest_limit: UNLIMITED, daily_chat_limit: UNLIMITED, drive_monthly_limit: UNLIMITED, follow_limit: UNLIMITED, category_limit: UNLIMITED,
-  },
-  lab: {
-    daily_search_limit: UNLIMITED, daily_deep_limit: UNLIMITED, daily_litreview_limit: UNLIMITED, daily_gap_analysis_limit: UNLIMITED,
-    daily_export_limit: UNLIMITED, daily_digest_limit: UNLIMITED, daily_chat_limit: UNLIMITED, drive_monthly_limit: UNLIMITED, follow_limit: UNLIMITED, category_limit: UNLIMITED,
+  pro: {
+    daily_search_limit: 80,
+    daily_deep_limit: 25,
+    daily_litreview_limit: 10,
+    daily_gap_analysis_limit: 10,
+    daily_export_limit: 80,
+    daily_digest_limit: 7,
+    daily_chat_limit: 20,
+    drive_monthly_limit: 200,
+    follow_limit: 30,
+    category_limit: UNLIMITED,
+    library_limit: 2000,
   },
 };
 
 export const TIER_PRICES: Record<TierCode, number> = {
-  free: 0, basic: 150, standard: 299, premium: 499, ultra: 999, lab: 2999,
+  free: 0,
+  pro: 299,
 };
 
 export const TIER_RANK: Record<TierCode, number> = {
-  free: 0, basic: 1, standard: 2, premium: 3, ultra: 4, lab: 5,
+  free: 0,
+  pro: 1,
 };
 
-export const TIER_ORDER: TierCode[] = ['free', 'basic', 'standard', 'premium', 'ultra', 'lab'];
+export const TIER_ORDER: TierCode[] = ['free', 'pro'];
 
-// 各等級的賣點（用於對比表下方簡述），key 對應 i18n 的 pro_tier_*_pitch
 export const TIER_PITCH_KEY: Record<TierCode, string> = {
   free: 'pro_tier_free_pitch',
-  basic: 'pro_tier_basic_pitch',
-  standard: 'pro_tier_standard_pitch',
-  premium: 'pro_tier_premium_pitch',
-  ultra: 'pro_tier_ultra_pitch',
-  lab: 'pro_tier_lab_pitch',
+  pro: 'pro_tier_pro_pitch',
 };
