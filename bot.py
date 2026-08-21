@@ -246,6 +246,32 @@ MESSAGES = {
         "help_bind_button": "🔗 綁定網頁端",
         "help_pro_button": "👑 查看 Pro 特權",
         "unknown_command": "❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。",
+        "help_beta_extra": (
+            "\n🧪 <b>封閉測試</b>\n"
+            "• <code>/digest CRISPR, LLM</code> — 設定主題並立刻過濾今日新論文\n"
+            "• <code>/digest</code> — 再跑一次　• <code>/digest off</code> — 關閉\n"
+            "• <code>/feedback 你的意見</code> — 直接打給開發者\n"
+            "• <code>/waitlist</code> — 正式版開放訂閱時通知你"
+        ),
+        "beta_mission": (
+            "🧪 <b>7 天測試任務</b>（請盡量做完，這決定正式版要不要收費）\n"
+            "1. 傳自己領域的關鍵字搜 5 次，把沒興趣的按 👎\n"
+            "2. 收藏至少 3 篇，到網頁看是否同一庫\n"
+            "3. <code>/digest 你的主題</code> 看今日過濾準不準\n"
+            "4. 用 <code>/feedback</code> 罵得越具體越好\n"
+            "5. 若 7 天後還想留著 → <code>/waitlist</code>"
+        ),
+        "digest_usage": "用法：<code>/digest CRISPR, graph neural network</code>\n關掉：<code>/digest off</code>",
+        "digest_off": "已關閉每日過濾。再設定主題即可重新打開。",
+        "digest_on": "✅ 已記住主題：<b>{topics}</b>\n正在拉取你還沒看過的論文（依據標題與摘要，不含全文）…",
+        "digest_header": "📬 <b>今日過濾</b> · {topics}\n沒興趣請按 👎，系統會越來越準。",
+        "digest_empty": "這批主題暫時沒有你沒看過的新論文。明天再試，或換關鍵字。",
+        "digest_need_pro": "每日過濾是 Pro 功能。測試請 /redeem 測試碼，或先用關鍵字搜尋。",
+        "feedback_usage": "用法：<code>/feedback 搜尋太偏 CS、我要的是植物病理</code>",
+        "feedback_ok": "✅ 收到。正式版會優先改測試者反覆提到的問題。",
+        "waitlist_ok": "✅ 已列入正式版候補。金流開放時會從 Telegram 通知你。",
+        "waitlist_already": "你已在候補名單裡。",
+        "trial_expiring": "⏰ 測試 Pro 將於 <b>{expires}</b> 到期（不到 24 小時）。\n若這週少不了它：<code>/waitlist</code>\n有話要罵：<code>/feedback ...</code>",
         "paper_et_al": "等 {count} 位",
         "paper_seen_badge": "👁 [已看過]",
         "paper_ai_summary": "🧠 <b>AI 導讀：</b>\n{text}",
@@ -269,7 +295,6 @@ MESSAGES = {
         "codes_empty": "目前沒有任何測試碼。用 /gencode 產生第一組。",
         "founder_granted": "👑 已將 <code>{uid}</code> 設為 Founding Member（終身全功能）！",
         "founder_fail": "找不到該使用者（需先與 Bot 有過互動）。",
-        "trial_expiring": "⏰ 你的全功能測試將於 <b>{expires}</b> 到期（剩餘不到 24 小時）。\n📝 別忘了填寫回饋表單，你的建議會直接影響定價與功能方向！",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · 終身榮譽全功能\n",
     },
     "zh_hans": {
@@ -472,6 +497,32 @@ MESSAGES = {
         "help_bind_button": "🔗 绑定网页端",
         "help_pro_button": "👑 查看 Pro 特权",
         "unknown_command": "❌ 没有此指令：{cmd}\n请输入 /help 查看所有可用指令。",
+        "help_beta_extra": (
+            "\n🧪 <b>封闭测试</b>\n"
+            "• <code>/digest CRISPR, LLM</code> — 设定主题并立刻过滤今日新论文\n"
+            "• <code>/digest</code> — 再跑一次　• <code>/digest off</code> — 关闭\n"
+            "• <code>/feedback 你的意见</code>\n"
+            "• <code>/waitlist</code> — 正式版开放订阅时通知你"
+        ),
+        "beta_mission": (
+            "🧪 <b>7 天测试任务</b>\n"
+            "1. 用自己领域的关键词搜 5 次，没兴趣按 👎\n"
+            "2. 收藏至少 3 篇，到网页确认同一库\n"
+            "3. <code>/digest 你的主题</code>\n"
+            "4. <code>/feedback</code> 写具体问题\n"
+            "5. 还想留着 → <code>/waitlist</code>"
+        ),
+        "digest_usage": "用法：<code>/digest CRISPR, graph neural network</code>\n关闭：<code>/digest off</code>",
+        "digest_off": "已关闭每日过滤。",
+        "digest_on": "✅ 已记住主题：<b>{topics}</b>\n正在拉取你还没看过的论文…",
+        "digest_header": "📬 <b>今日过滤</b> · {topics}\n没兴趣请按 👎。",
+        "digest_empty": "这批主题暂时没有你没看过的新论文。",
+        "digest_need_pro": "每日过滤是 Pro 功能。测试请 /redeem，或先用关键词搜索。",
+        "feedback_usage": "用法：<code>/feedback 搜索太偏 CS</code>",
+        "feedback_ok": "✅ 收到。",
+        "waitlist_ok": "✅ 已列入正式版候补。",
+        "waitlist_already": "你已在候补名单里。",
+        "trial_expiring": "⏰ 测试 Pro 将于 <b>{expires}</b> 到期。想留着请 /waitlist。",
         "paper_et_al": "等 {count} 位",
         "paper_seen_badge": "👁 [已看过]",
         "paper_ai_summary": "🧠 <b>AI 导读：</b>\n{text}",
@@ -495,7 +546,6 @@ MESSAGES = {
         "codes_empty": "目前没有任何测试码。用 /gencode 产生第一组。",
         "founder_granted": "👑 已将 <code>{uid}</code> 设为 Founding Member（终身全功能）！",
         "founder_fail": "找不到该用户（需先与 Bot 有过互动）。",
-        "trial_expiring": "⏰ 你的全功能测试将于 <b>{expires}</b> 到期（剩余不到 24 小时）。\n📝 别忘了填写回馈表单，你的建议会直接影响定价与功能方向！",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · 终身荣誉全功能\n",
     },
     "en": {
@@ -698,6 +748,32 @@ MESSAGES = {
         "help_bind_button": "🔗 Bind to Web",
         "help_pro_button": "👑 View Pro Features",
         "unknown_command": "❌ Unknown command: {cmd}\nType /help to see all commands.",
+        "help_beta_extra": (
+            "\n🧪 <b>Closed beta</b>\n"
+            "• <code>/digest CRISPR, LLM</code> — set topics and filter today's new papers\n"
+            "• <code>/digest</code> run again · <code>/digest off</code>\n"
+            "• <code>/feedback your notes</code>\n"
+            "• <code>/waitlist</code> — ping me when paid Pro launches"
+        ),
+        "beta_mission": (
+            "<b>7-day beta mission</b>\n"
+            "1. Search your field 5 times; 👎 what you don't want\n"
+            "2. Save ≥3 papers; confirm they show up on the web\n"
+            "3. <code>/digest your topics</code>\n"
+            "4. <code>/feedback</code> with specifics\n"
+            "5. Still need it after 7 days → <code>/waitlist</code>"
+        ),
+        "digest_usage": "Usage: <code>/digest CRISPR, graph neural network</code>\nOff: <code>/digest off</code>",
+        "digest_off": "Daily filter off.",
+        "digest_on": "✅ Topics saved: <b>{topics}</b>\nFetching papers you haven't seen…",
+        "digest_header": "📬 <b>Today's filter</b> · {topics}\n👎 anything off-topic.",
+        "digest_empty": "No unseen papers for these topics right now.",
+        "digest_need_pro": "Daily filter is Pro. Redeem a test code or search by keyword.",
+        "feedback_usage": "Usage: <code>/feedback search is too CS-heavy</code>",
+        "feedback_ok": "✅ Logged. Repeated tester complaints get fixed first.",
+        "waitlist_ok": "✅ You're on the launch list. We'll message you when paid Pro opens.",
+        "waitlist_already": "You're already on the list.",
+        "trial_expiring": "⏰ Trial Pro ends <b>{expires}</b> (under 24h).\nWant to keep it? <code>/waitlist</code>\nNotes: <code>/feedback ...</code>",
         "paper_et_al": "et al. ({count} authors)",
         "paper_seen_badge": "👁 [Seen]",
         "paper_ai_summary": "🧠 <b>AI Summary:</b>\n{text}",
@@ -721,7 +797,6 @@ MESSAGES = {
         "codes_empty": "No test codes yet. Use /gencode to create the first one.",
         "founder_granted": "👑 <code>{uid}</code> is now a Founding Member (lifetime full access)!",
         "founder_fail": "User not found (they need to interact with the bot first).",
-        "trial_expiring": "⏰ Your full-access trial ends at <b>{expires}</b> (less than 24h left).\n📝 Don't forget to fill out the feedback form — your input directly shapes pricing and features!",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · Lifetime full access\n",
     },
     "ja": {
@@ -924,6 +999,32 @@ MESSAGES = {
         "help_bind_button": "🔗 Web連携",
         "help_pro_button": "👑 Pro機能を見る",
         "unknown_command": "❌ 未知のコマンド：{cmd}\n/help で利用可能なコマンド一覧を確認できます。",
+        "help_beta_extra": (
+            "\n🧪 <b>クローズドベータ</b>\n"
+            "• <code>/digest CRISPR, LLM</code> — テーマを保存し、未読論文を今すぐフィルタ\n"
+            "• <code>/digest</code> 再実行 · <code>/digest off</code>\n"
+            "• <code>/feedback 意見</code>\n"
+            "• <code>/waitlist</code> — 有料正式版の開始を通知"
+        ),
+        "beta_mission": (
+            "<b>7日間のテスト</b>\n"
+            "1. 自分の分野で5回検索し、不要なら 👎\n"
+            "2. 3本以上保存し、Webで同じ庫か確認\n"
+            "3. <code>/digest テーマ</code>\n"
+            "4. <code>/feedback</code>\n"
+            "5. まだ必要なら <code>/waitlist</code>"
+        ),
+        "digest_usage": "使い方：<code>/digest CRISPR, graph neural network</code>\n停止：<code>/digest off</code>",
+        "digest_off": "デイリーフィルタをオフにしました。",
+        "digest_on": "✅ テーマ：<b>{topics}</b>\n未読論文を取得中…",
+        "digest_header": "📬 <b>今日のフィルタ</b> · {topics}",
+        "digest_empty": "このテーマの未読論文は今はありません。",
+        "digest_need_pro": "デイリーフィルタは Pro です。/redeem するかキーワード検索を。",
+        "feedback_usage": "使い方：<code>/feedback 検索がCSに偏っている</code>",
+        "feedback_ok": "✅ 受け取りました。",
+        "waitlist_ok": "✅ 正式版ウェイトリストに登録しました。",
+        "waitlist_already": "すでに登録済みです。",
+        "trial_expiring": "⏰ 試用 Pro は <b>{expires}</b> に終了します。残したい場合は /waitlist。",
         "paper_et_al": "他 {count} 名",
         "paper_seen_badge": "👁 [閲覧済み]",
         "paper_ai_summary": "🧠 <b>AI 解説：</b>\n{text}",
@@ -947,7 +1048,6 @@ MESSAGES = {
         "codes_empty": "まだテストコードがありません。/gencode で最初の 1 枚を作成してください。",
         "founder_granted": "👑 <code>{uid}</code> を Founding Member（永久フルアクセス）に設定しました！",
         "founder_fail": "ユーザーが見つかりません（先に Bot とやり取りが必要です）。",
-        "trial_expiring": "⏰ フルアクセストライアルは <b>{expires}</b> に終了します（残り 24 時間未満）。\n📝 フィードバックフォームの記入をお忘れなく——あなたの意見が価格と機能の方向性を直接決めます！",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · 永久フルアクセス\n",
     }
 }
@@ -1138,7 +1238,7 @@ def handle_start(message):
 @bot.message_handler(commands=['help', 'h', 'guide'])
 def handle_help(message, override_user_id=None):
     user_id = override_user_id or message.from_user.id
-    help_text = _t(user_id, "help")
+    help_text = _t(user_id, "help") + _t(user_id, "help_beta_extra")
 
     # 管理員專屬：附加 Beta 測試碼管理指令（一般用戶與測試員看不到）
     if _is_admin(user_id):
@@ -1588,9 +1688,151 @@ def handle_redeem(message):
     ok, result = db.redeem_promo_code(parts[1], user_id)
     if ok:
         expires_display = result[:10] if isinstance(result, str) else str(result)
-        bot.reply_to(message, _t(user_id, "promo_redeem_ok", expires=expires_display))
+        bot.reply_to(message, _t(user_id, "promo_redeem_ok", expires=expires_display), parse_mode="HTML")
+        bot.send_message(user_id, _t(user_id, "beta_mission"), parse_mode="HTML")
     else:
         bot.reply_to(message, _t(result))
+
+def _parse_digest_topics(raw: str) -> list[str]:
+    parts = [p.strip() for p in re.split(r"[,，;；]+", raw or "") if p.strip()]
+    if len(parts) == 1 and " " in parts[0] and "," not in raw:
+        # "/digest graph neural nets" as one topic is OK; keep as one
+        return [parts[0][:80]]
+    return [p[:80] for p in parts[:5]]
+
+
+def _run_digest_for_user(user_id: int, chat_id: int, announce: bool = True) -> bool:
+    """Send up to 5 unseen papers across the user's digest topics. Returns True if sent."""
+    from datetime import date
+    allowed, err_msg = db.check_quota(user_id, "digest")
+    if not allowed:
+        if announce:
+            bot.send_message(chat_id, f"⚠️ {err_msg}")
+        return False
+    settings = db.get_digest_settings(user_id)
+    topics = settings.get("topics") or []
+    if not topics:
+        if announce:
+            bot.send_message(chat_id, _t(user_id, "digest_usage"), parse_mode="HTML")
+        return False
+    seen_ids = db.get_seen_papers(user_id)
+    bias = db.get_user_bias(user_id)
+    user_bias = (bias.get("positive", {}), bias.get("negative", {}))
+    followed = db.get_followed_authors(user_id)
+    filter_mode = db.get_filter_mode(user_id)
+    per = max(1, 5 // max(len(topics), 1))
+    bundled = []
+    used_fp = set()
+    for topic in topics[:3]:
+        papers = search_engine.list_top_papers(
+            user_input=topic,
+            seen_ids=seen_ids.union(used_fp),
+            user_bias=user_bias,
+            followed_authors=followed,
+            filter_mode=filter_mode,
+            limit=per,
+            unseen_only=True,
+        )
+        for p in papers:
+            fp = p.get("fingerprint") or p.get("id")
+            if fp in used_fp:
+                continue
+            used_fp.add(fp)
+            bundled.append(p)
+            if len(bundled) >= 5:
+                break
+        if len(bundled) >= 5:
+            break
+    if not bundled:
+        if announce:
+            bot.send_message(chat_id, _t(user_id, "digest_empty"))
+        return False
+    topic_label = " · ".join(topics[:3])
+    bot.send_message(chat_id, _t(user_id, "digest_header", topics=topic_label), parse_mode="HTML")
+    lang = _get_lang(user_id)
+    for p in bundled:
+        snippet = (p.get("summary") or "")[:280]
+        _send_paper_card(
+            chat_id=chat_id,
+            user_id=user_id,
+            title=p.get("title") or "",
+            ai_summary=snippet,
+            link=p.get("link") or "",
+            paper_id=str(p.get("id") or p.get("fingerprint") or "p"),
+            already_seen=False,
+            authors=p.get("authors") or [],
+            raw_summary=p.get("summary") or "",
+            year=p.get("year") or "",
+            source=p.get("source") or "",
+            is_open_access=bool(p.get("is_open_access")),
+            fingerprint=p.get("fingerprint") or "",
+            lang=lang,
+            venue_name=p.get("venue_name") or "",
+            tier=p.get("tier"),
+            is_preprint=bool(p.get("is_preprint")),
+            citations=p.get("citations") or 0,
+        )
+    db.increment_usage(user_id, "digest")
+    db.mark_digest_sent(user_id, date.today().isoformat())
+    db.log_activity(user_id, "digest", paper_title=topic_label, details=f"{len(bundled)} papers")
+    return True
+
+
+def _maybe_lazy_digest(message):
+    """If Pro user has digest on and hasn't received one today, send when they next talk."""
+    try:
+        from datetime import date
+        user_id = message.from_user.id
+        tier = db.get_user_tier(user_id).get("tier", "free")
+        if tier == "free":
+            return
+        settings = db.get_digest_settings(user_id)
+        if not settings.get("is_active") or not settings.get("topics"):
+            return
+        today = date.today().isoformat()
+        if settings.get("last_digest_on") == today:
+            return
+        _run_digest_for_user(user_id, message.chat.id, announce=False)
+    except Exception as e:
+        print(f"lazy digest skip: {e}", file=sys.stderr)
+
+
+@bot.message_handler(commands=['digest'])
+def handle_digest(message):
+    user_id = message.from_user.id
+    parts = message.text.split(maxsplit=1)
+    arg = parts[1].strip() if len(parts) > 1 else ""
+    if arg.lower() in ("off", "stop", "關閉", "关闭", "オフ"):
+        db.set_digest_settings(user_id, is_active=0)
+        bot.reply_to(message, _t(user_id, "digest_off"))
+        return
+    if arg:
+        topics = _parse_digest_topics(arg)
+        db.set_digest_settings(user_id, topics=topics, is_active=1, frequency="daily", max_papers=5)
+        bot.reply_to(message, _t(user_id, "digest_on", topics=" · ".join(topics)), parse_mode="HTML")
+    _run_digest_for_user(user_id, message.chat.id, announce=True)
+
+
+@bot.message_handler(commands=['feedback'])
+def handle_feedback(message):
+    user_id = message.from_user.id
+    parts = message.text.split(maxsplit=1)
+    body = parts[1].strip() if len(parts) > 1 else ""
+    if not body:
+        bot.reply_to(message, _t(user_id, "feedback_usage"), parse_mode="HTML")
+        return
+    db.add_feedback(user_id, body)
+    bot.reply_to(message, _t(user_id, "feedback_ok"))
+
+
+@bot.message_handler(commands=['waitlist'])
+def handle_waitlist(message):
+    user_id = message.from_user.id
+    if db.is_on_waitlist(user_id):
+        bot.reply_to(message, _t(user_id, "waitlist_already"))
+        return
+    db.join_waitlist(user_id)
+    bot.reply_to(message, _t(user_id, "waitlist_ok"))
 
 def _check_trial_reminder(message):
     """到期前 24 小時自動提醒填回饋表單（每次互動時惰性檢查）"""
@@ -1862,6 +2104,7 @@ def handle_text(message):
 
     # Beta 試用到期前提醒（惰性檢查，不打擾正常流程）
     _check_trial_reminder(message)
+    _maybe_lazy_digest(message)
 
     # 對話模式優先 - 非指令訊息自動進入跨文獻問答
     if _chat_mode_users.get(user_id) and not text.startswith('/'):
@@ -2203,7 +2446,8 @@ def handle_callback_query(call):
     message.text.startswith('/categories'), message.text.startswith('/cats'),
     message.text.startswith('/gencode'), message.text.startswith('/codes'),
     message.text.startswith('/founder'), message.text.startswith('/redeem'),
-    message.text.startswith('/grant'),
+    message.text.startswith('/grant'), message.text.startswith('/digest'),
+    message.text.startswith('/feedback'), message.text.startswith('/waitlist'),
 ]))
 def handle_unknown_command(message):
     user_id = message.from_user.id

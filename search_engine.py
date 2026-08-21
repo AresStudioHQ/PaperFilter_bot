@@ -447,20 +447,18 @@ def search_arxiv_candidates(words: list[str], max_results=6) -> list[dict]:
 
 
 # ===================== 5. 跨庫智慧去重 + 動態模式評分選拔 =====================
-def fetch_paper_multi_source(
+def _search_and_rank(
     user_input: str,
     seen_ids: set[str],
     user_bias: tuple = ({}, {}),
     followed_authors: list[str] = None,
     filter_mode: str = "smart",
-    user_id: int = 0,
-    generate_summary: bool = True
-) -> tuple:
+) -> tuple[list[dict], list[dict]]:
     pos_bias, neg_bias = user_bias
     followed_authors = followed_authors or []
     words = parse_words(user_input)
     if not words:
-        return None, None, None, None, False, [], "", "2024", "Academic", False, ""
+        return [], []
 
     # 並行搜尋 5 個資料源（提速）
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -491,7 +489,7 @@ def fetch_paper_multi_source(
     raw_list = s2_list + cr_list + pubmed_list + arxiv_list + oa_list
 
     if not raw_list:
-        return None, None, None, None, False, [], "", "2024", "Academic", False, ""
+        return [], []
 
     unique_candidates = []
     seen_fingerprints_in_batch = set()
@@ -594,11 +592,49 @@ def fetch_paper_multi_source(
         if c["id"] not in seen_ids and (c.get("fingerprint") not in seen_ids)
     ]
 
-    if unseen_candidates:
-        selected = unseen_candidates[0]
+    return all_candidates, unseen_candidates
+
+
+def list_top_papers(
+    user_input: str,
+    seen_ids: set[str],
+    user_bias: tuple = ({}, {}),
+    followed_authors: list[str] = None,
+    filter_mode: str = "smart",
+    limit: int = 5,
+    unseen_only: bool = True,
+) -> list[dict]:
+    """Digest / batch: ranked papers without burning an AI summary per hit."""
+    all_c, unseen = _search_and_rank(
+        user_input, seen_ids, user_bias, followed_authors, filter_mode
+    )
+    pool = unseen if unseen_only else all_c
+    if not pool:
+        return []
+    return pool[: max(1, min(limit, 8))]
+
+
+def fetch_paper_multi_source(
+    user_input: str,
+    seen_ids: set[str],
+    user_bias: tuple = ({}, {}),
+    followed_authors: list[str] = None,
+    filter_mode: str = "smart",
+    user_id: int = 0,
+    generate_summary: bool = True
+) -> tuple:
+    all_c, unseen = _search_and_rank(
+        user_input, seen_ids, user_bias, followed_authors, filter_mode
+    )
+    empty = (None, None, None, None, False, [], "", "2024", "Academic", False, "", "", None, False, 0)
+    if not all_c:
+        return empty
+
+    if unseen:
+        selected = unseen[0]
         already_seen = False
     else:
-        selected = all_candidates[0]
+        selected = all_c[0]
         already_seen = True
 
     fp = selected.get("fingerprint", "")

@@ -70,6 +70,7 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
   const [redeemCode, setRedeemCode] = useState('');
   const [redeemBusy, setRedeemBusy] = useState(false);
   const [redeemFeedback, setRedeemFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+  const [waitlistMsg, setWaitlistMsg] = useState<string | null>(null);
 
   const handleSendChat = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -560,6 +561,24 @@ ${matrixData.map((r) => `| **${r.title}** (${r.authors}, ${r.year}) | ${r.pain_p
               </p>
             )}
           </form>
+          <div className="max-w-3xl mx-auto text-center space-y-2">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                  const data = await res.json();
+                  setWaitlistMsg(data.already ? t('waitlist_already') : t('waitlist_ok'));
+                } catch {
+                  setWaitlistMsg(t('pro_redeem_fail'));
+                }
+              }}
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-200 border border-amber-500/40 rounded-xl text-xs font-bold cursor-pointer"
+            >
+              {t('waitlist_btn')}
+            </button>
+            {waitlistMsg && <p className="text-xs text-emerald-400 font-semibold">{waitlistMsg}</p>}
+          </div>
         </div>
       )}
     </div>

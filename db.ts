@@ -229,6 +229,17 @@ export async function initTables(): Promise<void> {
     redeemed_at TIMESTAMP,
     status TEXT DEFAULT 'unused'
   )`);
+  await q(`CREATE TABLE IF NOT EXISTS launch_waitlist (
+    user_id INTEGER PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    note TEXT DEFAULT ''
+  )`);
+  await q(`CREATE TABLE IF NOT EXISTS beta_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    body TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
 
   // 欄位遷移（舊資料庫補上可信度 / 筆記 / 配額欄位）
   await q(`ALTER TABLE user_paper_library ADD COLUMN venue_name TEXT`).catch(() => {});
@@ -791,4 +802,15 @@ export async function migrateWebToTelegram(webUid: number, tgUid: number): Promi
     [tgUid, webUid, tgUid]
   );
   await q(`DELETE FROM user_tier WHERE user_id=?`, [webUid]);
+}
+
+export async function joinWaitlist(note = ""): Promise<{ already: boolean }> {
+  const uid = currentUserId();
+  const existing = await q(`SELECT user_id FROM launch_waitlist WHERE user_id = ?`, [uid]);
+  if (existing.rows[0]) return { already: true };
+  await q(
+    `INSERT INTO launch_waitlist (user_id, note) VALUES (?, ?)`,
+    [uid, String(note || "").slice(0, 500)]
+  );
+  return { already: false };
 }

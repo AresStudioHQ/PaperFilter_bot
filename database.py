@@ -239,6 +239,26 @@ class Database:
                 is_active INTEGER DEFAULT 0
             )
         ''')
+        try:
+            self.cursor.execute("ALTER TABLE digest_settings ADD COLUMN last_digest_on TEXT")
+        except Exception:
+            pass
+
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS launch_waitlist (
+                user_id INTEGER PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                note TEXT DEFAULT ''
+            )
+        ''')
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS beta_feedback (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                body TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
 
         # 14. 使用量追蹤 (配額控制)
         self.cursor.execute('''
@@ -912,11 +932,63 @@ class Database:
 
     # --- 12. 摘要設定 ---
     def get_digest_settings(self, user_id: int) -> dict:
-        self.cursor.execute("SELECT frequency, push_time, topics_json, max_papers, include_deep, is_active FROM digest_settings WHERE user_id = ?", (user_id,))
+        try:
+            self.cursor.execute(
+                "SELECT frequency, push_time, topics_json, max_papers, include_deep, is_active, last_digest_on FROM digest_settings WHERE user_id = ?",
+                (user_id,),
+            )
+        except Exception:
+            self.cursor.execute(
+                "SELECT frequency, push_time, topics_json, max_papers, include_deep, is_active FROM digest_settings WHERE user_id = ?",
+                (user_id,),
+            )
         row = self.cursor.fetchone()
         if not row:
-            return {"frequency": "weekly", "push_time": "08:00", "topics": [], "max_papers": 10, "include_deep": 0, "is_active": 0}
-        return {"frequency": row[0], "push_time": row[1], "topics": json.loads(row[2]) if row[2] else [], "max_papers": row[3], "include_deep": row[4], "is_active": row[5]}
+            return {
+                "frequency": "daily", "push_time": "08:00", "topics": [], "max_papers": 5,
+                "include_deep": 0, "is_active": 0, "last_digest_on": None,
+            }
+        last_on = row[6] if len(row) > 6 else None
+        return {
+            "frequency": row[0], "push_time": row[1],
+            "topics": json.loads(row[2]) if row[2] else [],
+            "max_papers": row[3], "include_deep": row[4], "is_active": row[5],
+            "last_digest_on": last_on,
+        }
+
+    def mark_digest_sent(self, user_id: int, day: str):
+        try:
+            self.cursor.execute(
+                "UPDATE digest_settings SET last_digest_on = ? WHERE user_id = ?",
+                (day, user_id),
+            )
+            self.conn.commit()
+        except Exception:
+            pass
+
+    def join_waitlist(self, user_id: int, note: str = "") -> bool:
+        self.cursor.execute(
+            "INSERT INTO launch_waitlist (user_id, note) VALUES (?, ?) "
+            "ON CONFLICT(user_id) DO UPDATE SET note = excluded.note",
+            (user_id, (note or "")[:500]),
+        )
+        self.conn.commit()
+        return True
+
+    def is_on_waitlist(self, user_id: int) -> bool:
+        self.cursor.execute("SELECT 1 FROM launch_waitlist WHERE user_id = ?", (user_id,))
+        return self.cursor.fetchone() is not None
+
+    def add_feedback(self, user_id: int, body: str) -> bool:
+        text = (body or "").strip()
+        if not text:
+            return False
+        self.cursor.execute(
+            "INSERT INTO beta_feedback (user_id, body) VALUES (?, ?)",
+            (user_id, text[:4000]),
+        )
+        self.conn.commit()
+        return True
 
     def set_digest_settings(self, user_id: int, frequency: str = None, push_time: str = None, topics: list = None, max_papers: int = None, include_deep: int = None, is_active: int = None):
         current = self.get_digest_settings(user_id)

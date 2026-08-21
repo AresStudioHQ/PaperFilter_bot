@@ -33,6 +33,7 @@ import {
   listActivity,
   getActivityStats,
   redeemPromoCode,
+  joinWaitlist,
   type PaperItem,
   type QuotaAction,
 } from "./db";
@@ -642,8 +643,14 @@ app.post("/api/auth/redeem", async (req, res) => {
   }
 });
 
-app.post("/api/lab-inquiry", async (_req, res) => {
-  res.status(410).json({ success: false, error: "Gone" });
+app.post("/api/waitlist", async (req, res) => {
+  try {
+    const note = String((req.body || {}).note || "");
+    const result = await joinWaitlist(note);
+    res.json({ success: true, already: result.already });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 app.post("/api/auth/update-mode", async (req, res) => {
