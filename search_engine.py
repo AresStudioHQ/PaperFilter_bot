@@ -39,7 +39,7 @@ Entrez.email = os.getenv("ENTREZ_EMAIL", "paperfilter-bot@example.com")
 ARXIV_API = "https://export.arxiv.org/api/query"
 USER_AGENT = "PaperFilterBot/3.0 (academic-paper-filter; mailto:paperfilter-bot@example.com)"
 ARXIV_ID_RE = re.compile(r"(\d{4}\.\d{4,5})(?:v\d+)?", re.IGNORECASE)
-REQUEST_TIMEOUT = 10
+REQUEST_TIMEOUT = 6
 
 KEYWORD_ALIASES: dict[str, list[str]] = {
     "psycology": ["psychology", "psychological", "psychologist"],
@@ -453,7 +453,8 @@ def fetch_paper_multi_source(
     user_bias: tuple = ({}, {}),
     followed_authors: list[str] = None,
     filter_mode: str = "smart",
-    user_id: int = 0
+    user_id: int = 0,
+    generate_summary: bool = True
 ) -> tuple:
     pos_bias, neg_bias = user_bias
     followed_authors = followed_authors or []
@@ -471,7 +472,7 @@ def fetch_paper_multi_source(
             executor.submit(search_openalex, user_input, 8): "oa",
         }
         s2_list, cr_list, pubmed_list, arxiv_list, oa_list = [], [], [], [], []
-        for future in concurrent.futures.as_completed(futures, timeout=12):
+        for future in concurrent.futures.as_completed(futures, timeout=8):
             src = futures[future]
             try:
                 result = future.result()
@@ -602,12 +603,14 @@ def fetch_paper_multi_source(
 
     fp = selected.get("fingerprint", "")
     cached = db.get_cached_ai(fp) if fp else None
-    if cached and cached[0]:
+    if generate_summary and cached and cached[0]:
         ai_summary = cached[0]
-    else:
+    elif generate_summary:
         ai_summary = generate_ai_summary(selected["summary"], user_id=user_id)
         if fp:
             db.set_cached_ai(fp, summary=ai_summary)
+    else:
+        ai_summary = ""
 
     return (
         selected["title"],
@@ -629,6 +632,25 @@ def fetch_paper_multi_source(
 
 
 # ===================== AI 摘要、深度導讀與分級調度 =====================
+def _user_lang(user_id: int) -> str:
+    if user_id:
+        try:
+            return db.get_user_lang(user_id) or "en"
+        except Exception:
+            pass
+    return "en"
+
+
+def _lang_instruction(user_id: int) -> str:
+    lang = _user_lang(user_id)
+    return {
+        "zh_hant": "請以繁體中文",
+        "zh_hans": "請以簡體中文",
+        "en": "Please respond in English",
+        "ja": "日本語で回答してください",
+    }.get(lang, "Please respond in English")
+
+
 def _invoke_ai(prompt: str, system_prompt: str = "你是專業學術論文導讀專家。", tier: str = "free", temperature: float = 0.3) -> str:
     """統一使用 GPT-4o-mini 進行 AI 呼叫（低成本、高速度）"""
     openai_key = os.getenv("OPENAI_API_KEY")
@@ -763,6 +785,7 @@ def chat_with_user_library(user_id: int, query: str, papers: list) -> str:
         return "❌ 您的文獻庫中尚無論文。請先搜尋並點擊【☁️ 歸檔到雲端】收藏論文後再來提問！"
     
     tier = db.get_user_tier(user_id).get("tier", "free")
+    lang = _lang_instruction(user_id)
     
     # 建立多篇論文的結構化上下文
     context_blocks = []
@@ -784,7 +807,7 @@ def chat_with_user_library(user_id: int, query: str, papers: list) -> str:
 {papers_context}
 
 【回答要求】：
-1. 必須以繁體中文客觀、嚴謹、具備深度學術洞察力回答。
+1. 必須以 {lang} 客觀、嚴謹、具備深度學術洞察力回答。
 2. 進行跨論文的橫向結構化對比（例如：方法論異同、實驗數據優劣、各自面臨的挑戰）。
 3. 每提到具體數據或結論，必須在句尾精確標註引用出處，例如：[文獻 1] 或 (作者, 年份)。
 4. 若文獻中未提及該資訊，請誠實說明並給出合理的研究方向推論。
@@ -817,12 +840,13 @@ def generate_literature_review(user_id: int, papers: list) -> str:
         return "❌ 沒有論文可供生成文獻綜述。"
     
     tier = db.get_user_tier(user_id).get("tier", "free")
+    lang = _lang_instruction(user_id)
     papers_text = ""
     for i, p in enumerate(papers[:20], 1):
         authors_str = ", ".join(p.get("authors", [])[:3]) if p.get("authors") else "Unknown"
         papers_text += f"{i}. 《{p.get('title', '')}》\n   作者: {authors_str} ({p.get('year', '')})\n   摘要: {str(p.get('summary', ''))[:200]}\n\n"
 
-    prompt = f"""以下是用戶收藏的 {len(papers)} 篇學術論文，請撰寫一份結構嚴謹、具備發表情境的學術文獻綜述草稿（繁體中文）：
+    prompt = f"""以下是用戶收藏的 {len(papers)} 篇學術論文，請撰寫一份結構嚴謹、具備發表情境的學術文獻綜述草稿（{lang}）：
 {papers_text}
 
 請按以下 5 大段落輸出（保留 HTML 標籤 <b>）：
@@ -856,11 +880,12 @@ def analyze_research_gaps(user_id: int, papers: list) -> str:
         return "❌ 沒有論文可供分析研究缺口。"
     
     tier = db.get_user_tier(user_id).get("tier", "free")
+    lang = _lang_instruction(user_id)
     papers_text = ""
     for i, p in enumerate(papers[:15], 1):
         papers_text += f"{i}. 《{p.get('title', '')}》 ({p.get('year', '')})\n   摘要: {str(p.get('summary', ''))[:200]}\n\n"
 
-    prompt = f"""以下是 {len(papers)} 篇學術論文，請深度分析這些研究中尚未解決的關鍵研究缺口（繁體中文）：
+    prompt = f"""以下是 {len(papers)} 篇學術論文，請深度分析這些研究中尚未解決的關鍵研究缺口（{lang}）：
 {papers_text}
 
 請輸出：
@@ -887,6 +912,7 @@ def analyze_research_trends(user_id: int, topic: str, years: int = 5) -> dict:
         return cached
 
     tier = db.get_user_tier(user_id).get("tier", "free") if user_id else "free"
+    lang = _lang_instruction(user_id)
 
     try:
         recent_papers = search_semantic_scholar(topic, max_results=10)
@@ -914,7 +940,7 @@ def analyze_research_trends(user_id: int, topic: str, years: int = 5) -> dict:
         prompt = f"""以下是關於「{topic}」的近期學術論文：
 {papers_summary}
 
-請用繁體中文深度分析這個領域的研究趨勢：
+請用 {lang} 深度分析這個領域的研究趨勢：
 1. 主流研究方向與演進
 2. 近年爆發的新興方法/技術
 3. 預測未來 2-3 年的關鍵突破點

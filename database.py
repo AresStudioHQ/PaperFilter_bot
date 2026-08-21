@@ -371,12 +371,12 @@ class Database:
     # === 5 級訂閱方案定義 ===
     TIER_DEFS = {
         "free": {
-            "daily_search_limit": 10, "daily_deep_limit": 1,
-            "daily_litreview_limit": 0, "daily_gap_analysis_limit": 0,
-            "daily_export_limit": 3, "daily_digest_limit": 0,
-            "daily_chat_limit": 0,
-            "drive_monthly_limit": 5,
-            "follow_limit": 0, "category_limit": 3,
+            "daily_search_limit": 50, "daily_deep_limit": 10,
+            "daily_litreview_limit": 5, "daily_gap_analysis_limit": 5,
+            "daily_export_limit": 20, "daily_digest_limit": 3,
+            "daily_chat_limit": 10,
+            "drive_monthly_limit": 30,
+            "follow_limit": 5, "category_limit": 10,
         },
         "basic": {
             "daily_search_limit": 30, "daily_deep_limit": 5,
@@ -427,7 +427,12 @@ class Database:
             ''', (user_id, d["daily_search_limit"], d["daily_deep_limit"], d["daily_litreview_limit"], d["daily_gap_analysis_limit"], d["daily_export_limit"], d["daily_digest_limit"]))
             self.conn.commit()
             return {"tier": "ultra", **d}
-        return {"tier": row[0], "daily_search_limit": row[1], "daily_deep_limit": row[2], "daily_litreview_limit": row[3], "daily_gap_analysis_limit": row[4], "daily_export_limit": row[5], "daily_digest_limit": row[6]}
+        tier = row[0]
+        # Beta: free tier always reads live TIER_DEFS so limit adjustments apply instantly
+        if tier == "free":
+            d = self.TIER_DEFS["free"]
+            return {"tier": "free", **d}
+        return {"tier": tier, "daily_search_limit": row[1], "daily_deep_limit": row[2], "daily_litreview_limit": row[3], "daily_gap_analysis_limit": row[4], "daily_export_limit": row[5], "daily_digest_limit": row[6]}
 
     def set_user_tier(self, user_id: int, tier: str, limits: dict = None):
         d = limits or self.TIER_DEFS.get(tier, self.TIER_DEFS["free"])
