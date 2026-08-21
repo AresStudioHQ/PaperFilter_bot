@@ -1,13 +1,45 @@
-# Render：網頁 + Telegram Bot
-# Bot 用 worker + polling（不要設 WEBHOOK_URL；worker 沒有公開 HTTP）。
-# 密鑰請在 Render 儀表板填，勿寫入此檔。
-# starter 要付費；若暫時只開得起一個服務，優先保 bot 活著，網頁可晚一點。
+# 免費測試：Bot 必須是 web + webhook，不能是 worker。
+# Worker / polling 在睡著時沒人去跟 Telegram 要訊息，使用者會以為 bot 死了。
+# Web + webhook：Telegram 打你的網址 → Render 睡醒（常 30–60 秒）→ 再回訊息。
+# 若帳號只允一個免費 web，先開 paperfilter-bot，網頁可晚點。
 
 services:
   - type: web
+    name: paperfilter-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    healthCheckPath: /health
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: WEBHOOK_URL
+        sync: false
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: WEB_APP_URL
+        sync: false
+      - key: ADMIN_USER_IDS
+        sync: false
+      - key: PORT
+        value: "10000"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+
+  # 第二個服務常要付費。有額度再開。
+  - type: web
     name: paperfilter-web
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: npm install && npm run build
     startCommand: node dist/server.cjs
     healthCheckPath: /api/auth/config
@@ -25,30 +57,4 @@ services:
       - key: TELEGRAM_BOT_USERNAME
         sync: false
       - key: WEB_APP_URL
-        sync: false
-
-  - type: worker
-    name: paperfilter-bot
-    runtime: python
-    plan: starter
-    buildCommand: pip install -r requirements.txt
-    startCommand: python bot.py
-    envVars:
-      - key: TELEGRAM_TOKEN
-        sync: false
-      - key: TURSO_DATABASE_URL
-        sync: false
-      - key: TURSO_AUTH_TOKEN
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: WEB_APP_URL
-        sync: false
-      - key: ADMIN_USER_IDS
-        sync: false
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-      - key: GOOGLE_REDIRECT_URI
         sync: false
