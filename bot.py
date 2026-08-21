@@ -1920,6 +1920,12 @@ def handle_text(message):
     if _chat_mode_users.get(user_id) and not text.startswith('/'):
         return _process_chat_query(message, text)
 
+    # 未知指令防護：以 / 開頭但無對應功能時，回覆指令不存在（不誤觸發論文搜尋）
+    if text.startswith('/'):
+        cmd = text.split()[0].split('@')[0]
+        bot.reply_to(message, _t(user_id, "unknown_command", cmd=cmd))
+        return
+
     # 1. 查詢資料夾清單 (支援 4 國語言)
     folder_triggers = [
         "我的資料夾", "我的文件夹", "資料夾", "文件夹",
