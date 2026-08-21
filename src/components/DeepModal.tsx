@@ -59,6 +59,15 @@ export const DeepModal: React.FC<DeepModalProps> = ({
               <span className="text-xs text-slate-300 font-mono flex items-center gap-1 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
                 📅 {paper.year} · {paper.source}
               </span>
+              {paper.credibility_emoji && (
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-md border flex items-center gap-1 ${
+                  paper.is_preprint
+                    ? 'bg-red-500/10 text-red-300 border-red-500/20'
+                    : (paper.tier ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' : 'bg-slate-500/10 text-slate-300 border-slate-500/20')
+                }`} title={paper.credibility_label}>
+                  {paper.credibility_emoji} {paper.credibility_label}
+                </span>
+              )}
             </div>
             <h2 className="text-lg font-bold text-white leading-snug line-clamp-2">{paper.title}</h2>
             <p className="text-xs text-slate-400">👥 {paper.authors.slice(0, 5).join(', ')}{paper.authors.length > 5 ? ' et al.' : ''}</p>
@@ -98,6 +107,9 @@ export const DeepModal: React.FC<DeepModalProps> = ({
                 <div className="whitespace-pre-line text-slate-300 font-sans leading-relaxed text-sm bg-slate-900/90 p-4 rounded-lg border border-slate-800/80">
                   {defaultReport}
                 </div>
+                <p className="text-xs text-slate-500 italic flex items-center gap-1">
+                  ⚠️ 此深度導讀由 AI 根據論文摘要生成，僅供快速理解，正式引用請務必核對原文。
+                </p>
               </div>
 
               {/* BibTeX Box */}

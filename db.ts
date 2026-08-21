@@ -52,6 +52,11 @@ export interface PaperItem {
   citations: number;
   is_open_access: boolean;
   is_top_journal: boolean;
+  venue_name?: string;
+  tier?: string | null;
+  is_preprint?: boolean;
+  credibility_label?: string;
+  credibility_emoji?: string;
   score?: number;
   bibtex?: string;
   category?: string;
@@ -110,8 +115,20 @@ export async function initTables(): Promise<void> {
     bibtex TEXT,
     category TEXT,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    venue_name TEXT,
+    tier TEXT,
+    is_preprint INTEGER DEFAULT 0,
+    credibility_emoji TEXT,
+    credibility_label TEXT,
     PRIMARY KEY (user_id, paper_id)
   )`);
+
+  // 欄位遷移（舊資料庫補上可信度欄位）
+  await q(`ALTER TABLE user_paper_library ADD COLUMN venue_name TEXT`).catch(() => {});
+  await q(`ALTER TABLE user_paper_library ADD COLUMN tier TEXT`).catch(() => {});
+  await q(`ALTER TABLE user_paper_library ADD COLUMN is_preprint INTEGER DEFAULT 0`).catch(() => {});
+  await q(`ALTER TABLE user_paper_library ADD COLUMN credibility_emoji TEXT`).catch(() => {});
+  await q(`ALTER TABLE user_paper_library ADD COLUMN credibility_label TEXT`).catch(() => {});
 
   // 初始化使用者基本資料
   await q(`INSERT OR IGNORE INTO users (user_id) VALUES (?)`, [SEED_USER_ID]);
@@ -197,6 +214,11 @@ function rowToPaper(row: any): PaperItem {
     citations: 0,
     is_open_access: false,
     is_top_journal: false,
+    venue_name: row.venue_name || "",
+    tier: row.tier || null,
+    is_preprint: Boolean(row.is_preprint),
+    credibility_emoji: row.credibility_emoji || "",
+    credibility_label: row.credibility_label || "",
     bibtex: row.bibtex || "",
     category: row.category || "人工智慧",
     user_notes: "",
@@ -208,7 +230,7 @@ function rowToPaper(row: any): PaperItem {
 
 export async function getLibrary(): Promise<PaperItem[]> {
   const r = await q(
-    `SELECT paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category, added_at
+    `SELECT paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category, added_at, venue_name, tier, is_preprint, credibility_emoji, credibility_label
      FROM user_paper_library WHERE user_id = ? ORDER BY added_at DESC`,
     [currentUserId()]
   );
@@ -219,13 +241,15 @@ export async function addPaper(paper: PaperItem): Promise<void> {
   const paper_id = paper.id || paper.fingerprint || `p_${Date.now()}`;
   const authors = JSON.stringify(paper.authors || []);
   await q(
-    `INSERT INTO user_paper_library (user_id, paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO user_paper_library (user_id, paper_id, title, authors, year, source, link, abstract, fingerprint, bibtex, category, venue_name, tier, is_preprint, credibility_emoji, credibility_label)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(user_id, paper_id) DO UPDATE SET
-       title = ?, authors = ?, year = ?, source = ?, link = ?, abstract = ?, fingerprint = ?, bibtex = ?, category = ?`,
+       title = ?, authors = ?, year = ?, source = ?, link = ?, abstract = ?, fingerprint = ?, bibtex = ?, category = ?, venue_name = ?, tier = ?, is_preprint = ?, credibility_emoji = ?, credibility_label = ?`,
     [
       currentUserId(), paper_id, paper.title, authors, paper.year, paper.source, paper.link, paper.summary, paper.fingerprint, paper.bibtex, paper.category || "人工智慧",
+      paper.venue_name || "", paper.tier || null, paper.is_preprint ? 1 : 0, paper.credibility_emoji || "", paper.credibility_label || "",
       paper.title, authors, paper.year, paper.source, paper.link, paper.summary, paper.fingerprint, paper.bibtex, paper.category || "人工智慧",
+      paper.venue_name || "", paper.tier || null, paper.is_preprint ? 1 : 0, paper.credibility_emoji || "", paper.credibility_label || "",
     ]
   );
 }

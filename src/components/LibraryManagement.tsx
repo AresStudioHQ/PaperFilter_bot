@@ -410,6 +410,15 @@ export const LibraryManagement: React.FC<LibraryManagementProps> = ({
                                 Citations: {paper.citations}
                               </span>
                             )}
+                            {paper.credibility_emoji && (
+                              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
+                                paper.is_preprint
+                                  ? 'text-red-300 bg-red-500/10 border-red-500/20'
+                                  : (paper.tier ? 'text-amber-300 bg-amber-500/10 border-amber-500/20' : 'text-slate-300 bg-slate-500/10 border-slate-500/20')
+                              }`} title={paper.credibility_label}>
+                                {paper.credibility_emoji} {paper.credibility_label}
+                              </span>
+                            )}
                           </div>
 
                           <h3 className="text-base font-bold text-white hover:text-indigo-300 transition-colors leading-snug">

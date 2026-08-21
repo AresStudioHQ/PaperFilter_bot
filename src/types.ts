@@ -15,6 +15,11 @@ export interface Paper {
   score?: number;
   is_open_access: boolean;
   is_top_journal: boolean;
+  venue_name?: string;
+  tier?: string | null;
+  is_preprint?: boolean;
+  credibility_label?: string;
+  credibility_emoji?: string;
   bibtex?: string;
   user_notes?: string;
   tags?: string[];

@@ -166,17 +166,21 @@ export const SearchSection: React.FC<SearchSectionProps> = ({
               {/* Header row */}
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1.5 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {paper.is_top_journal && (
-                      <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 text-xs font-semibold border border-amber-500/20 flex items-center gap-1">
-                        <Award className="w-3 h-3 text-amber-400" /> Top-Tier
-                      </span>
-                    )}
-                    {paper.is_open_access && (
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20 flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3" /> OA
-                      </span>
-                    )}
+                   <div className="flex flex-wrap items-center gap-2">
+                     {paper.credibility_emoji && (
+                       <span className={`px-2 py-0.5 rounded-md text-xs font-semibold border flex items-center gap-1 ${
+                         paper.is_preprint
+                           ? 'bg-red-500/10 text-red-300 border-red-500/20'
+                           : (paper.tier ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' : 'bg-slate-500/10 text-slate-300 border-slate-500/20')
+                       }`} title={paper.credibility_label}>
+                         <Award className="w-3 h-3" /> {paper.credibility_emoji} {paper.credibility_label}
+                       </span>
+                     )}
+                     {paper.is_open_access && (
+                       <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20 flex items-center gap-1">
+                         <CheckCircle className="w-3 h-3" /> OA
+                       </span>
+                     )}
                     <span className="text-xs font-mono text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/30">
                       {paper.source}
                     </span>
