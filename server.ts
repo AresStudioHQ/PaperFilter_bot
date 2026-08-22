@@ -1240,65 +1240,6 @@ app.post("/api/export", async (req, res) => {
   }
 });
 
-// 12. Trend Analysis
-app.post("/api/trend", async (req, res) => {
-  try {
-    if (!(await enforceQuota(res, "search"))) return;
-    const { topic = "machine learning" } = req.body;
-    const papers = await fetchAcademicPapers(topic, "smart");
-
-    const yearCounts: Record<string, number> = {};
-    for (const p of papers) {
-      const y = p.year || "2024";
-      yearCounts[y] = (yearCounts[y] || 0) + 1;
-    }
-
-    const gemini = getGeminiClient();
-    let aiAnalysis = "";
-
-    if (gemini) {
-      try {
-        const response = await gemini.models.generateContent({
-          model: req.body?.model,
-          contents: `以下是關於「${topic}」的近期學術論文：
-${papers.slice(0, 10).map(p => `- ${p.title} (${p.year})`).join("\n")}
-
-請用繁體中文分析這個領域的研究趨勢，包含：
-1. 主流研究方向
-2. 新興技術/方法
-3. 研究熱度變化
-4. 預測未來 2-3 年的發展方向
-
-請精簡有力，控制在 300 字以內。`
-        });
-        aiAnalysis = response.text || "";
-      } catch (e: any) {
-        if (e?.code === "MODEL_TIER") return res.status(403).json({ success: false, error: e.message });
-        if (e?.code === "NO_KEY") return res.status(502).json({ success: false, error: "🚫 AI 服務尚未設定 API Key，請聯絡管理員。" });
-        console.warn("OpenAI trend error:", e);
-      }
-    }
-
-    if (!aiAnalysis) {
-      return res.status(502).json({ success: false, error: "🚫 AI 服務暫時無法使用，可能是 API 額度用盡或服務異常。請稍後再試。" });
-    }
-
-    await incrementUsage("search");
-    await logActivity({ action: "search", paper_title: `趨勢：${topic}` });
-
-    res.json({
-      success: true,
-      topic,
-      total_papers_found: papers.length,
-      year_distribution: yearCounts,
-      recent_publications: papers.slice(0, 5).map(p => p.title),
-      ai_analysis: aiAnalysis
-    });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message || "趨勢分析失敗" });
-  }
-});
-
 app.post("/api/simulate-bot", async (_req, res) => {
   res.status(410).json({ success: false, error: "Gone" });
 });

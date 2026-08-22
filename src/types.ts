@@ -64,14 +64,6 @@ export interface BotMessage {
   timestamp: string;
 }
 
-export interface TrendData {
-  topic: string;
-  total_papers_found: number;
-  year_distribution: Record<string, number>;
-  recent_publications: string[];
-  ai_analysis: string;
-}
-
 export interface LibraryChatMessage {
   id: string;
   role: 'user' | 'assistant';

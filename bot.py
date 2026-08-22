@@ -70,7 +70,6 @@ MESSAGES = {
             "➖ <b>/unfollow [學者]</b> - 取消追蹤學者\n"
             "📑 <b>/review [主題]</b> - AI 一鍵生成多篇論文文獻綜述\n"
             "🔍 <b>/gap</b> - 自動分析目前收藏文獻的研究盲點與缺口\n"
-            "📈 <b>/trend [領域]</b> - 分析領域近年發表年份與 AI 趨勢\n"
             "📋 <b>/export</b> - 匯出收藏文獻為 BibTeX / RIS / CSV\n"
             "⚙️ <b>/mode</b> - 切換論文過濾模式（頂刊 / 智慧 / OA 免費）\n"
             "🌐 <b>/lang</b> - 切換多國語言\n"
@@ -321,7 +320,6 @@ MESSAGES = {
             "➖ <b>/unfollow [学者]</b> - 取消追踪学者\n"
             "📑 <b>/review [主题]</b> - AI 一键生成多篇论文文献综述\n"
             "🔍 <b>/gap</b> - 自动分析目前收藏文献的研究盲点与缺口\n"
-            "📈 <b>/trend [领域]</b> - 分析领域近年发表年份与 AI 趋势\n"
             "📋 <b>/export</b> - 导出收藏文献为 BibTeX / RIS / CSV\n"
             "⚙️ <b>/mode</b> - 切换论文过滤模式（顶刊 / 智能 / OA 免费）\n"
             "🌐 <b>/lang</b> - 切换多国语言\n"
@@ -572,7 +570,6 @@ MESSAGES = {
             "➖ <b>/unfollow [Author]</b> - Untrack researcher\n"
             "📑 <b>/review [Topic]</b> - AI Literature Synthesis Review Draft\n"
             "🔍 <b>/gap</b> - Discover research gaps across your library\n"
-            "📈 <b>/trend [Field]</b> - Publication year trends & AI analysis\n"
             "📋 <b>/export</b> - Export library to BibTeX / RIS / CSV\n"
             "⚙️ <b>/mode</b> - Toggle filter criteria (Top-Tier / Smart / OA Only)\n"
             "🌐 <b>/lang</b> - Switch interface language\n"
@@ -823,7 +820,6 @@ MESSAGES = {
             "➖ <b>/unfollow [著者名]</b> - 追跡解除\n"
             "📑 <b>/review [テーマ]</b> - AI文献レビュー草案を作成\n"
             "🔍 <b>/gap</b> - 収集済み文献から研究ギャップを自動抽出\n"
-            "📈 <b>/trend [分野]</b> - 分野別トレンド＆年別推移分析\n"
             "📋 <b>/export</b> - BibTeX / RIS / CSVで文献エクスポート\n"
             "⚙️ <b>/mode</b> - 要約モードの切り替え\n"
             "🌐 <b>/lang</b> - 言語設定の変更\n"
@@ -1553,21 +1549,6 @@ def handle_gap(message):
             bot.send_message(message.chat.id, gaps[i:i+4000])
     else:
         bot.send_message(message.chat.id, gaps)
-
-@bot.message_handler(commands=['trend'])
-def handle_trend(message):
-    user_id = message.from_user.id
-    parts = message.text.strip().split(maxsplit=1)
-    topic = parts[1].strip() if len(parts) > 1 else "machine learning"
-    bot.reply_to(message, _t(user_id, "trend_loading", topic=topic))
-    trends = search_engine.analyze_research_trends(user_id, topic)
-    year_dist = trends.get("year_distribution", {})
-    year_str = " ".join(_t(user_id, "trend_year_format", year=y, count=c) for y, c in sorted(year_dist.items(), reverse=True)[:5])
-    ai_analysis = trends.get("ai_analysis", "")
-    result = _t(user_id, "trend_result_header", topic=topic, count=trends.get('total_papers_found', 0), year_str=year_str)
-    if ai_analysis:
-        result += _t(user_id, "trend_ai_analysis", analysis=ai_analysis)
-    bot.send_message(message.chat.id, result, parse_mode="HTML")
 
 @bot.message_handler(commands=['export'])
 def handle_export(message, override_user_id=None):
@@ -2438,7 +2419,7 @@ def handle_callback_query(call):
     message.text.startswith('/bind'), message.text.startswith('/pro'),
     message.text.startswith('/following'), message.text.startswith('/follow '),
     message.text.startswith('/unfollow '), message.text.startswith('/review'),
-    message.text.startswith('/gap'), message.text.startswith('/trend'),
+    message.text.startswith('/gap'),
     message.text.startswith('/export'), message.text.startswith('/mode'),
     message.text.startswith('/lang'), message.text.startswith('/reports'),
     message.text.startswith('/drive'), message.text.startswith('/web'),

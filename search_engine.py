@@ -945,64 +945,6 @@ def analyze_research_gaps(user_id: int, papers: list) -> str:
     return gaps if gaps else "❌ 缺口分析生成失敗。"
 
 
-def analyze_research_trends(user_id: int, topic: str, years: int = 5) -> dict:
-    """分析最近的研究趨勢"""
-    cache_key = f"trend_{topic}_{years}"
-    cached = db.get_trend_cache(cache_key)
-    if cached:
-        return cached
-
-    tier = db.get_user_tier(user_id).get("tier", "free") if user_id else "free"
-    lang = _lang_instruction(user_id)
-
-    try:
-        recent_papers = search_semantic_scholar(topic, max_results=10)
-        recent_papers += search_arxiv_candidates(parse_words(topic), max_results=8)
-    except Exception:
-        recent_papers = []
-
-    papers_summary = ""
-    year_counter: dict[str, int] = {}
-    for p in recent_papers[:15]:
-        y = str(p.get("year", ""))
-        if y:
-            year_counter[y] = year_counter.get(y, 0) + 1
-        papers_summary += f"- {p.get('title', '')} ({y})\n"
-
-    trends: dict = {
-        "topic": topic,
-        "total_papers_found": len(recent_papers),
-        "year_distribution": year_counter,
-        "recent_publications": [p.get("title", "") for p in recent_papers[:5]],
-        "ai_analysis": ""
-    }
-
-    if recent_papers:
-        prompt = f"""以下是關於「{topic}」的近期學術論文：
-{papers_summary}
-
-請用 {lang} 深度分析這個領域的研究趨勢：
-1. 主流研究方向與演進
-2. 近年爆發的新興方法/技術
-3. 預測未來 2-3 年的關鍵突破點
-
-請精簡扼要，條列式呈現。"""
-        ai_res = _invoke_ai(
-            prompt=prompt,
-            system_prompt="你是國際學術趨勢分析專家。",
-            tier=tier,
-            temperature=0.3
-        )
-        trends["ai_analysis"] = ai_res or f"近期共找到 {len(recent_papers)} 篇相關論文，發表年份分佈：{year_counter}"
-
-    try:
-        db.set_trend_cache(cache_key, topic, trends)
-    except Exception:
-        pass
-
-    return trends
-
-
 def export_papers(papers: list, format_type: str) -> str:
     """匯出論文清單（支援 RIS / BibTeX / CSV）"""
     if not papers:

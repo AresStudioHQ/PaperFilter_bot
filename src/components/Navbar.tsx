@@ -3,7 +3,6 @@ import {
   Sparkles, 
   Library, 
   Search, 
-  TrendingUp, 
   LayoutDashboard, 
   Crown, 
   Link as LinkIcon,
@@ -236,17 +235,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>{t('nav_pro')}</span>
           </button>
 
-          <button
-            onClick={() => setActiveTab('trends')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
-              activeTab === 'trends'
-                ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50 shadow-inner font-semibold'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-            }`}
-          >
-            <TrendingUp className="h-4 w-4 shrink-0" />
-            <span>{t('nav_trends')}</span>
-          </button>
         </div>
 
       </div>

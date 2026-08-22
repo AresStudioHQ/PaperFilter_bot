@@ -4,7 +4,6 @@ import { DashboardOverview } from './components/DashboardOverview';
 import { LibraryManagement } from './components/LibraryManagement';
 import { SearchSection } from './components/SearchSection';
 import { ProFeaturesHub } from './components/ProFeaturesHub';
-import { TrendsSection } from './components/TrendsSection';
 import { DeepModal } from './components/DeepModal';
 import { TelegramBindingModal } from './components/TelegramBindingModal';
 import { Paper, UserProfile, FilterMode, HistoryRecord } from './types';
@@ -403,10 +402,6 @@ export default function App() {
             onSelectPaperForDeep={handleOpenDeep}
             model={selectedModel}
           />
-        )}
-
-        {activeTab === 'trends' && (
-          <TrendsSection userLang={user.user_lang} model={selectedModel} />
         )}
 
       </main>
