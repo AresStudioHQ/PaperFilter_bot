@@ -61,27 +61,21 @@ MESSAGES = {
             "若久沒回覆，等一分鐘再傳一次 <code>hi</code>。直接打關鍵字即可搜尋。"
         ),
         "help": (
-            "📖 <b>PaperFilterBot 全指令導覽</b>\n\n"
-            "🔍 <b>論文檢索</b>：直接在聊天室發送關鍵字（例如：LLM Agent）\n"
-            "💬 <b>/chat</b> - 切換跨文獻問答模式（進入後直接輸入問題）\n"
-            "📚 <b>/my</b> - 查看我的文獻庫、分類資料夾與 Drive 狀態\n"
-            "🔗 <b>/bind</b> - 取得 6 位數同步代碼，綁定網頁科研大總部\n"
-            "💎 <b>/pro</b> - 查看方案比較與升級資訊\n"
-            "📂 <b>/following</b> - 管理追蹤學者與關鍵字\n"
-            "➕ <b>/follow [學者]</b> - 追蹤頂級學者最新著作\n"
-            "➖ <b>/unfollow [學者]</b> - 取消追蹤學者\n"
-            "📑 <b>/review [主題]</b> - AI 一鍵生成多篇論文文獻綜述\n"
-            "🔍 <b>/gap</b> - 自動分析目前收藏文獻的研究盲點與缺口\n"
-            "📋 <b>/export</b> - 匯出收藏文獻為 BibTeX / RIS / CSV\n"
-            "⚙️ <b>/mode</b> - 切換論文過濾模式（頂刊 / 智慧 / OA 免費）\n"
-            "🌐 <b>/lang</b> - 切換多國語言\n"
-            "📊 <b>/reports</b> - 產生個人文獻綜述歷史報告\n"
-            "☁️ <b>/drive</b> - 連結或檢查 Google Drive 雲端同步狀態\n"
-            "💻 <b>/web</b> - 取得網頁端科研大總部網址\n\n"
-            "💡 提示：直接輸入關鍵字即可搜尋論文！"
+            "📖 <b>PaperFilterBot</b>\n\n"
+            "直接打關鍵字搜尋（arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex）。\n"
+            "深度導讀只根據標題和摘要，沒有讀 PDF。沒有早上自動推播。\n\n"
+            "• <code>/digest CRISPR, LLM</code> — 立刻過濾今日新論文\n"
+            "• <code>/feedback 你的意見</code> — 打給開發者\n"
+            "• <code>/my</code> — 文獻庫　• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> — 針對已看過的文獻提問（有額度）\n"
+            "• <code>/follow 學者名</code> — 之後搜尋提高該名字權重（不會自動抓動態）\n"
+            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
+            "• <code>/bind</code> 或 <code>/web</code> — 可選網頁版（同一 Telegram 帳才同步）\n"
+            "• <code>/redeem PF-XXXXXX</code> — 兌換測試碼\n\n"
+            "若沒反應，等 30–60 秒再傳 <code>hi</code>。"
         ),
         "btn_search": "🔍 檢索論文",
-        "btn_web": "💻 開啟科研大總部",
+        "btn_web": "💻 開啟網頁版",
         "btn_bind": "🔗 綁定同步碼",
         "btn_pro": "💎 Pro 專區",
         "btn_lang": "🌐 切換語言",
@@ -94,7 +88,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 熱門：Transformer",
         "btn_hot_crispr": "🧬 熱門：CRISPR",
         "btn_bind_web": "🔗 綁定網頁端",
-        "btn_open_web": "🌐 開啟研究大總部",
+        "btn_open_web": "🌐 開啟網頁版",
         "btn_view_pro": "👑 查看 Pro 特權",
         "btn_full_help": "📖 完整指令幫助",
         "read_paper": "查看原始文獻",
@@ -248,11 +242,7 @@ MESSAGES = {
         "help_pro_button": "👑 查看 Pro 特權",
         "unknown_command": "❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。",
         "help_beta_extra": (
-            "\n🧪 <b>封閉測試</b>\n"
-            "• <code>/digest CRISPR, LLM</code> — 設定主題並立刻過濾今日新論文\n"
-            "• <code>/digest</code> — 再跑一次　• <code>/digest off</code> — 關閉\n"
-            "• <code>/feedback 你的意見</code> — 直接打給開發者\n"
-            "• <code>/waitlist</code> — 正式版開放訂閱時通知你"
+            "\n• <code>/digest off</code> — 關掉主題　• <code>/waitlist</code> — 之後若收費想被通知"
         ),
         "beta_mission": (
             "🧪 <b>7 天測試任務</b>（請盡量做完，這決定正式版要不要收費）\n"
@@ -314,27 +304,21 @@ MESSAGES = {
             "若久没回复，等一分钟再发一次 <code>hi</code>。直接打关键词即可搜索。"
         ),
         "help": (
-            "📖 <b>PaperFilterBot 全指令导览</b>\n\n"
-            "🔍 <b>论文检索</b>：直接在聊天室发送关键词（例如：LLM Agent）\n"
-            "💬 <b>/chat</b> - 切换跨文献问答模式（进入后直接输入问题）\n"
-            "📚 <b>/my</b> - 查看我的文献库、分类文件夹与 Drive 状态\n"
-            "🔗 <b>/bind</b> - 获取 6 位数同步代码，绑定网页科研大总部\n"
-            "💎 <b>/pro</b> - 查看方案比较与升级信息\n"
-            "📂 <b>/following</b> - 管理追踪学者与关键词\n"
-            "➕ <b>/follow [学者]</b> - 追踪顶级学者最新著作\n"
-            "➖ <b>/unfollow [学者]</b> - 取消追踪学者\n"
-            "📑 <b>/review [主题]</b> - AI 一键生成多篇论文文献综述\n"
-            "🔍 <b>/gap</b> - 自动分析目前收藏文献的研究盲点与缺口\n"
-            "📋 <b>/export</b> - 导出收藏文献为 BibTeX / RIS / CSV\n"
-            "⚙️ <b>/mode</b> - 切换论文过滤模式（顶刊 / 智能 / OA 免费）\n"
-            "🌐 <b>/lang</b> - 切换多国语言\n"
-            "📊 <b>/reports</b> - 生成个人文献综述历史报告\n"
-            "☁️ <b>/drive</b> - 链接或检查 Google Drive 云端同步状态\n"
-            "💻 <b>/web</b> - 获取网页端科研大总部网址\n\n"
-            "💡 提示：直接输入关键词即可搜寻论文！"
+            "📖 <b>PaperFilterBot</b>\n\n"
+            "直接打关键词搜索（arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex）。\n"
+            "深度导读只根据标题和摘要，没有读 PDF。没有早上自动推送。\n\n"
+            "• <code>/digest CRISPR, LLM</code> — 立刻过滤今日新论文\n"
+            "• <code>/feedback 你的意见</code> — 打给开发者\n"
+            "• <code>/my</code> — 文献库　• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> — 针对已看过的文献提问（有额度）\n"
+            "• <code>/follow 学者名</code> — 之后搜索提高该名字权重（不会自动抓动态）\n"
+            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
+            "• <code>/bind</code> 或 <code>/web</code> — 可选网页版（同一 Telegram 帐才同步）\n"
+            "• <code>/redeem PF-XXXXXX</code> — 兑换测试码\n\n"
+            "若没反应，等 30–60 秒再传 <code>hi</code>。"
         ),
         "btn_search": "🔍 检索论文",
-        "btn_web": "💻 开启科研大总部",
+        "btn_web": "💻 开启网页版",
         "btn_bind": "🔗 绑定同步码",
         "btn_pro": "💎 Pro 专区",
         "btn_lang": "🌐 切换语言",
@@ -347,7 +331,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 热门：Transformer",
         "btn_hot_crispr": "🧬 热门：CRISPR",
         "btn_bind_web": "🔗 绑定网页端",
-        "btn_open_web": "🌐 打开研究总部",
+        "btn_open_web": "🌐 打开网页版",
         "btn_view_pro": "👑 查看 Pro 特权",
         "btn_full_help": "📖 完整指令帮助",
         "read_paper": "查看原始文献",
@@ -501,11 +485,7 @@ MESSAGES = {
         "help_pro_button": "👑 查看 Pro 特权",
         "unknown_command": "❌ 没有此指令：{cmd}\n请输入 /help 查看所有可用指令。",
         "help_beta_extra": (
-            "\n🧪 <b>封闭测试</b>\n"
-            "• <code>/digest CRISPR, LLM</code> — 设定主题并立刻过滤今日新论文\n"
-            "• <code>/digest</code> — 再跑一次　• <code>/digest off</code> — 关闭\n"
-            "• <code>/feedback 你的意见</code>\n"
-            "• <code>/waitlist</code> — 正式版开放订阅时通知你"
+            "\n• <code>/digest off</code> — 关掉主题　• <code>/waitlist</code> — 之后若收费想被通知"
         ),
         "beta_mission": (
             "🧪 <b>7 天测试任务</b>\n"
@@ -567,27 +547,21 @@ MESSAGES = {
             "If nothing comes back, wait a minute and send <code>hi</code> again. Or just type keywords to search."
         ),
         "help": (
-            "📖 <b>PaperFilterBot Command Suite</b>\n\n"
-            "🔍 <b>Search</b>: Send keywords directly (e.g. LLM Agent)\n"
-            "💬 <b>/chat</b> - Toggle cross-paper Q&A mode (type questions directly)\n"
-            "📚 <b>/my</b> - View your library, custom folders & Drive sync\n"
-            "🔗 <b>/bind</b> - Generate 6-digit sync code for Web HQ\n"
-            "💎 <b>/pro</b> - View plan comparison & upgrade info\n"
-            "📂 <b>/following</b> - Manage followed authors & topics\n"
-            "➕ <b>/follow [Author]</b> - Track researcher publications\n"
-            "➖ <b>/unfollow [Author]</b> - Untrack researcher\n"
-            "📑 <b>/review [Topic]</b> - AI Literature Synthesis Review Draft\n"
-            "🔍 <b>/gap</b> - Discover research gaps across your library\n"
-            "📋 <b>/export</b> - Export library to BibTeX / RIS / CSV\n"
-            "⚙️ <b>/mode</b> - Toggle filter criteria (Top-Tier / Smart / OA Only)\n"
-            "🌐 <b>/lang</b> - Switch interface language\n"
-            "📊 <b>/reports</b> - View synthesis report history\n"
-            "☁️ <b>/drive</b> - Check Google Drive sync link\n"
-            "💻 <b>/web</b> - Open Web Research HQ\n\n"
-            "💡 Tip: Just type keywords to search papers!"
+            "📖 <b>PaperFilterBot</b>\n\n"
+            "Type keywords to search (arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex).\n"
+            "Deep read is title + abstract only — no PDFs. No morning auto-push.\n\n"
+            "• <code>/digest CRISPR, LLM</code> — filter today's new papers now\n"
+            "• <code>/feedback your notes</code> — sent to the developer\n"
+            "• <code>/my</code> — library　• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> — ask about papers you've already seen (quota)\n"
+            "• <code>/follow Name</code> — boosts that name in later search (no author feed)\n"
+            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
+            "• <code>/bind</code> or <code>/web</code> — optional website (same Telegram account to sync)\n"
+            "• <code>/redeem PF-XXXXXX</code> — redeem a test code\n\n"
+            "If nothing comes back, wait 30–60s and send <code>hi</code>."
         ),
         "btn_search": "🔍 Search Papers",
-        "btn_web": "💻 Web Research HQ",
+        "btn_web": "💻 Open website",
         "btn_bind": "🔗 Sync to Web",
         "btn_pro": "💎 Pro Suite",
         "btn_lang": "🌐 Language",
@@ -600,7 +574,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 Hot: Transformer",
         "btn_hot_crispr": "🧬 Hot: CRISPR",
         "btn_bind_web": "🔗 Bind to Web HQ",
-        "btn_open_web": "🌐 Open Web HQ",
+        "btn_open_web": "🌐 Open website",
         "btn_view_pro": "👑 View Pro Features",
         "btn_full_help": "📖 Full Command Guide",
         "read_paper": "Read Full Paper",
@@ -754,11 +728,7 @@ MESSAGES = {
         "help_pro_button": "👑 View Pro Features",
         "unknown_command": "❌ Unknown command: {cmd}\nType /help to see all commands.",
         "help_beta_extra": (
-            "\n🧪 <b>Closed beta</b>\n"
-            "• <code>/digest CRISPR, LLM</code> — set topics and filter today's new papers\n"
-            "• <code>/digest</code> run again · <code>/digest off</code>\n"
-            "• <code>/feedback your notes</code>\n"
-            "• <code>/waitlist</code> — ping me when paid Pro launches"
+            "\n• <code>/digest off</code> — clear topics　• <code>/waitlist</code> — ping if paid Pro ever launches"
         ),
         "beta_mission": (
             "<b>7-day beta mission</b>\n"
@@ -820,27 +790,21 @@ MESSAGES = {
             "返事がないときは1分待って <code>hi</code> を再送。キーワードを送れば検索できます。"
         ),
         "help": (
-            "📖 <b>PaperFilterBot コマンド一覧</b>\n\n"
-            "🔍 <b>論文検索</b>：キーワードを直接送信（例：LLM Agent）\n"
-            "💬 <b>/chat</b> - 論文横断Q&Aモード切替（直接質問入力）\n"
-            "📚 <b>/my</b> - 文献ライブラリ・フォルダ・Drive連携状態を確認\n"
-            "🔗 <b>/bind</b> - Web総本部連携用の6桁コードを発行\n"
-            "💎 <b>/pro</b> - プラン比較とアップグレード情報\n"
-            "📂 <b>/following</b> - フォロー中のキーワードとフォルダ管理\n"
-            "➕ <b>/follow [著者名]</b> - 研究者の最新論文を追跡\n"
-            "➖ <b>/unfollow [著者名]</b> - 追跡解除\n"
-            "📑 <b>/review [テーマ]</b> - AI文献レビュー草案を作成\n"
-            "🔍 <b>/gap</b> - 収集済み文献から研究ギャップを自動抽出\n"
-            "📋 <b>/export</b> - BibTeX / RIS / CSVで文献エクスポート\n"
-            "⚙️ <b>/mode</b> - 要約モードの切り替え\n"
-            "🌐 <b>/lang</b> - 言語設定の変更\n"
-            "📊 <b>/reports</b> - 文献レビュー履歴\n"
-            "☁️ <b>/drive</b> - Google Drive連携確認\n"
-            "💻 <b>/web</b> - Web研究総本部のURLを取得\n\n"
-            "💡 ヒント：キーワードを入力するだけで論文を検索できます！"
+            "📖 <b>PaperFilterBot</b>\n\n"
+            "キーワードを送ると検索します（arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex）。\n"
+            "詳細解説はタイトルと要約のみ。PDFは読みません。朝の自動配信はありません。\n\n"
+            "• <code>/digest CRISPR, LLM</code> — 今日の新着を今すぐフィルタ\n"
+            "• <code>/feedback 意見</code> — 開発者に送る\n"
+            "• <code>/my</code> — ライブラリ　• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> — 既読論文への質問（回数制限あり）\n"
+            "• <code>/follow 著者名</code> — 検索でその名前を優遇（フィード自動取得なし）\n"
+            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
+            "• <code>/bind</code> または <code>/web</code> — 任意のWeb版（同じTelegramアカウントで同期）\n"
+            "• <code>/redeem PF-XXXXXX</code> — テストコード引き換え\n\n"
+            "反応がないときは 30–60 秒待って <code>hi</code> を送ってください。"
         ),
         "btn_search": "🔍 論文検索",
-        "btn_web": "💻 Web総本部を開く",
+        "btn_web": "💻 Web版を開く",
         "btn_bind": "🔗 連携コード発行",
         "btn_pro": "💎 Pro機能",
         "btn_lang": "🌐 言語変更",
@@ -853,7 +817,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 人気：Transformer",
         "btn_hot_crispr": "🧬 人気：CRISPR",
         "btn_bind_web": "🔗 Web本部と連携",
-        "btn_open_web": "🌐 Web 研究総本部を開く",
+        "btn_open_web": "🌐 Web版を開く",
         "btn_view_pro": "👑 Pro機能を見る",
         "btn_full_help": "📖 コマンド一覧",
         "read_paper": "原著論文を読む",
@@ -1007,11 +971,7 @@ MESSAGES = {
         "help_pro_button": "👑 Pro機能を見る",
         "unknown_command": "❌ 未知のコマンド：{cmd}\n/help で利用可能なコマンド一覧を確認できます。",
         "help_beta_extra": (
-            "\n🧪 <b>クローズドベータ</b>\n"
-            "• <code>/digest CRISPR, LLM</code> — テーマを保存し、未読論文を今すぐフィルタ\n"
-            "• <code>/digest</code> 再実行 · <code>/digest off</code>\n"
-            "• <code>/feedback 意見</code>\n"
-            "• <code>/waitlist</code> — 有料正式版の開始を通知"
+            "\n• <code>/digest off</code> — テーマ解除　• <code>/waitlist</code> — 有料化時に通知"
         ),
         "beta_mission": (
             "<b>7日間のテスト</b>\n"
@@ -1682,7 +1642,7 @@ def handle_redeem(message):
         bot.reply_to(message, _t(user_id, "promo_redeem_ok", expires=expires_display), parse_mode="HTML")
         bot.send_message(user_id, _t(user_id, "beta_mission"), parse_mode="HTML")
     else:
-        bot.reply_to(message, _t(result))
+        bot.reply_to(message, _t(user_id, result))
 
 def _parse_digest_topics(raw: str) -> list[str]:
     parts = [p.strip() for p in re.split(r"[,，;；]+", raw or "") if p.strip()]
