@@ -70,12 +70,13 @@ MESSAGES = {
             "• <code>/chat</code> — 針對已看過的文獻提問（有額度）\n"
             "• <code>/follow 學者名</code> — 之後搜尋提高該名字權重（不會自動抓動態）\n"
             "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
-            "• <code>/bind</code> 或 <code>/web</code> — 可選網頁版（同一 Telegram 帳才同步）\n"
+            "• <code>/bind</code> 或 <code>/web</code> — 網頁科研大總部（同一 Telegram 帳才同步）\n"
+            "• <code>/drive</code> — 可連 Google Drive（授權失敗就當沒這功能）\n"
             "• <code>/redeem PF-XXXXXX</code> — 兌換測試碼\n\n"
             "若沒反應，等 30–60 秒再傳 <code>hi</code>。"
         ),
         "btn_search": "🔍 檢索論文",
-        "btn_web": "💻 開啟網頁版",
+        "btn_web": "💻 開啟科研大總部",
         "btn_bind": "🔗 綁定同步碼",
         "btn_pro": "💎 Pro 專區",
         "btn_lang": "🌐 切換語言",
@@ -88,7 +89,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 熱門：Transformer",
         "btn_hot_crispr": "🧬 熱門：CRISPR",
         "btn_bind_web": "🔗 綁定網頁端",
-        "btn_open_web": "🌐 開啟網頁版",
+        "btn_open_web": "🌐 開啟科研大總部",
         "btn_view_pro": "👑 查看 Pro 特權",
         "btn_full_help": "📖 完整指令幫助",
         "read_paper": "查看原始文獻",
@@ -313,12 +314,13 @@ MESSAGES = {
             "• <code>/chat</code> — 针对已看过的文献提问（有额度）\n"
             "• <code>/follow 学者名</code> — 之后搜索提高该名字权重（不会自动抓动态）\n"
             "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
-            "• <code>/bind</code> 或 <code>/web</code> — 可选网页版（同一 Telegram 帐才同步）\n"
+            "• <code>/bind</code> 或 <code>/web</code> — 网页科研大总部（同一 Telegram 帐才同步）\n"
+            "• <code>/drive</code> — 可连 Google Drive（授权失败就当没这功能）\n"
             "• <code>/redeem PF-XXXXXX</code> — 兑换测试码\n\n"
             "若没反应，等 30–60 秒再传 <code>hi</code>。"
         ),
         "btn_search": "🔍 检索论文",
-        "btn_web": "💻 开启网页版",
+        "btn_web": "💻 开启科研大总部",
         "btn_bind": "🔗 绑定同步码",
         "btn_pro": "💎 Pro 专区",
         "btn_lang": "🌐 切换语言",
@@ -331,7 +333,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 热门：Transformer",
         "btn_hot_crispr": "🧬 热门：CRISPR",
         "btn_bind_web": "🔗 绑定网页端",
-        "btn_open_web": "🌐 打开网页版",
+        "btn_open_web": "🌐 打开科研大总部",
         "btn_view_pro": "👑 查看 Pro 特权",
         "btn_full_help": "📖 完整指令帮助",
         "read_paper": "查看原始文献",
@@ -556,12 +558,13 @@ MESSAGES = {
             "• <code>/chat</code> — ask about papers you've already seen (quota)\n"
             "• <code>/follow Name</code> — boosts that name in later search (no author feed)\n"
             "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
-            "• <code>/bind</code> or <code>/web</code> — optional website (same Telegram account to sync)\n"
+            "• <code>/bind</code> or <code>/web</code> — optional web HQ (same Telegram account to sync)\n"
+            "• <code>/drive</code> — Google Drive (skip it if OAuth fails)\n"
             "• <code>/redeem PF-XXXXXX</code> — redeem a test code\n\n"
             "If nothing comes back, wait 30–60s and send <code>hi</code>."
         ),
         "btn_search": "🔍 Search Papers",
-        "btn_web": "💻 Open website",
+        "btn_web": "💻 Open Web HQ",
         "btn_bind": "🔗 Sync to Web",
         "btn_pro": "💎 Pro Suite",
         "btn_lang": "🌐 Language",
@@ -574,7 +577,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 Hot: Transformer",
         "btn_hot_crispr": "🧬 Hot: CRISPR",
         "btn_bind_web": "🔗 Bind to Web HQ",
-        "btn_open_web": "🌐 Open website",
+        "btn_open_web": "🌐 Open Web HQ",
         "btn_view_pro": "👑 View Pro Features",
         "btn_full_help": "📖 Full Command Guide",
         "read_paper": "Read Full Paper",
@@ -799,12 +802,13 @@ MESSAGES = {
             "• <code>/chat</code> — 既読論文への質問（回数制限あり）\n"
             "• <code>/follow 著者名</code> — 検索でその名前を優遇（フィード自動取得なし）\n"
             "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
-            "• <code>/bind</code> または <code>/web</code> — 任意のWeb版（同じTelegramアカウントで同期）\n"
+            "• <code>/bind</code> または <code>/web</code> — Web総本部（同じTelegramアカウントで同期）\n"
+            "• <code>/drive</code> — Google Drive（認証に失敗したら使わなくてよい）\n"
             "• <code>/redeem PF-XXXXXX</code> — テストコード引き換え\n\n"
             "反応がないときは 30–60 秒待って <code>hi</code> を送ってください。"
         ),
         "btn_search": "🔍 論文検索",
-        "btn_web": "💻 Web版を開く",
+        "btn_web": "💻 Web総本部を開く",
         "btn_bind": "🔗 連携コード発行",
         "btn_pro": "💎 Pro機能",
         "btn_lang": "🌐 言語変更",
@@ -817,7 +821,7 @@ MESSAGES = {
         "btn_hot_transformer": "🔍 人気：Transformer",
         "btn_hot_crispr": "🧬 人気：CRISPR",
         "btn_bind_web": "🔗 Web本部と連携",
-        "btn_open_web": "🌐 Web版を開く",
+        "btn_open_web": "🌐 Web総本部を開く",
         "btn_view_pro": "👑 Pro機能を見る",
         "btn_full_help": "📖 コマンド一覧",
         "read_paper": "原著論文を読む",
