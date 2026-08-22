@@ -990,6 +990,18 @@ class Database:
         self.conn.commit()
         return True
 
+    def list_feedback(self, limit: int = 20) -> list:
+        cap = max(1, min(int(limit or 20), 50))
+        self.cursor.execute(
+            "SELECT id, user_id, body, created_at FROM beta_feedback ORDER BY created_at DESC LIMIT ?",
+            (cap,),
+        )
+        rows = self.cursor.fetchall()
+        return [
+            {"id": r[0], "user_id": r[1], "body": r[2] or "", "created_at": r[3]}
+            for r in rows
+        ]
+
     def set_digest_settings(self, user_id: int, frequency: str = None, push_time: str = None, topics: list = None, max_papers: int = None, include_deep: int = None, is_active: int = None):
         current = self.get_digest_settings(user_id)
         freq = frequency or current["frequency"]

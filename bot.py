@@ -1,6 +1,7 @@
 ﻿import os
 import sys
 import json
+import html
 import threading
 import time
 import re
@@ -293,6 +294,8 @@ MESSAGES = {
         "promo_expired": "⏰ 這組測試碼已過期（72 小時兌換期限），請聯絡發碼人重新生成。",
         "codes_header": "🎫 測試碼總覽（{used} 已用 / {unused} 未用 / {expired} 過期）：\n\n",
         "codes_empty": "目前沒有任何測試碼。用 /gencode 產生第一組。",
+        "feedbacks_empty": "目前還沒有回饋。",
+        "feedbacks_header": "📬 最新回饋（{n} 則，新到舊）：",
         "founder_granted": "👑 已將 <code>{uid}</code> 設為 Founding Member（終身全功能）！",
         "founder_fail": "找不到該使用者（需先與 Bot 有過互動）。",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · 終身榮譽全功能\n",
@@ -544,6 +547,8 @@ MESSAGES = {
         "promo_expired": "⏰ 这组测试码已过期（72 小时兑换期限），请联系发码人重新生成。",
         "codes_header": "🎫 测试码总览（{used} 已用 / {unused} 未用 / {expired} 过期）：\n\n",
         "codes_empty": "目前没有任何测试码。用 /gencode 产生第一组。",
+        "feedbacks_empty": "目前还没有反馈。",
+        "feedbacks_header": "📬 最新反馈（{n} 则，新到旧）：",
         "founder_granted": "👑 已将 <code>{uid}</code> 设为 Founding Member（终身全功能）！",
         "founder_fail": "找不到该用户（需先与 Bot 有过互动）。",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · 终身荣誉全功能\n",
@@ -795,6 +800,8 @@ MESSAGES = {
         "promo_expired": "⏰ This code has expired (72-hour redemption window). Please ask for a new one.",
         "codes_header": "🎫 Test codes ({used} used / {unused} unused / {expired} expired):\n\n",
         "codes_empty": "No test codes yet. Use /gencode to create the first one.",
+        "feedbacks_empty": "No feedback yet.",
+        "feedbacks_header": "📬 Latest feedback ({n}, newest first):",
         "founder_granted": "👑 <code>{uid}</code> is now a Founding Member (lifetime full access)!",
         "founder_fail": "User not found (they need to interact with the bot first).",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · Lifetime full access\n",
@@ -1046,6 +1053,8 @@ MESSAGES = {
         "promo_expired": "⏰ このコードは期限切れです（72 時間の引き換え期限）。新しいコードを発行者にお問い合わせください。",
         "codes_header": "🎫 テストコード一覧（{used} 使用済 / {unused} 未使用 / {expired} 期限切れ）：\n\n",
         "codes_empty": "まだテストコードがありません。/gencode で最初の 1 枚を作成してください。",
+        "feedbacks_empty": "まだフィードバックはありません。",
+        "feedbacks_header": "📬 最新のフィードバック（{n} 件、新しい順）：",
         "founder_granted": "👑 <code>{uid}</code> を Founding Member（永久フルアクセス）に設定しました！",
         "founder_fail": "ユーザーが見つかりません（先に Bot とやり取りが必要です）。",
         "founder_badge_line": "\n👑 <b>Founding Member</b> · 永久フルアクセス\n",
@@ -1218,10 +1227,6 @@ def handle_start(message):
 
     markup = types.InlineKeyboardMarkup(row_width=2)
     markup.add(
-        types.InlineKeyboardButton(_t(user_id, "btn_hot_transformer"), callback_data="search_kw|Transformer"),
-        types.InlineKeyboardButton(_t(user_id, "btn_hot_crispr"), callback_data="search_kw|CRISPR"),
-    )
-    markup.add(
         types.InlineKeyboardButton(_t(user_id, "btn_bind_web"), callback_data="cmd_bind"),
         types.InlineKeyboardButton(_t(user_id, "btn_view_pro"), callback_data="cmd_pro")
     )
@@ -1246,6 +1251,7 @@ def handle_help(message, override_user_id=None):
             "\n\n🔧 <b>── Admin / Beta Tools (hidden for others) ──</b>\n"
             "• <code>/gencode [note]</code> — 產生測試碼（72h 兌換期限）\n"
             "• <code>/codes</code> — 測試碼名冊（誰兌換了、ID 是多少）\n"
+            "• <code>/feedbacks</code> — 查看使用者回饋（<code>/inbox</code> 相同）\n"
             "• <code>/redeem PF-XXXXXX</code> — 兌換測試碼（7 天全功能）\n"
             "• <code>/grant &lt;user_id&gt; &lt;days&gt;</code> — 依貢獻授予 N 天全功能\n"
             "• <code>/founder &lt;user_id&gt;</code> — 授予 👑 終身 Founding Member\n"
@@ -1808,6 +1814,28 @@ def handle_feedback(message):
         return
     db.add_feedback(user_id, body)
     bot.reply_to(message, _t(user_id, "feedback_ok"))
+
+
+@bot.message_handler(commands=['feedbacks', 'inbox'])
+def handle_feedbacks(message):
+    user_id = message.from_user.id
+    if not _is_admin(user_id):
+        bot.reply_to(message, _t(user_id, "promo_admin_only"))
+        return
+    rows = db.list_feedback(limit=15)
+    if not rows:
+        bot.reply_to(message, _t(user_id, "feedbacks_empty"))
+        return
+    lines = [_t(user_id, "feedbacks_header", n=len(rows))]
+    for row in rows:
+        raw_ts = str(row.get("created_at") or "")
+        date_str = raw_ts.replace("T", " ")[:16] if raw_ts else "-"
+        uid = row.get("user_id")
+        body = (row.get("body") or "").replace("\n", " ").strip()
+        if len(body) > 200:
+            body = body[:197] + "..."
+        lines.append(f"{html.escape(date_str)}  <code>{uid}</code>\n{html.escape(body)}")
+    bot.reply_to(message, "\n\n".join(lines), parse_mode="HTML")
 
 
 @bot.message_handler(commands=['waitlist'])
@@ -2432,6 +2460,7 @@ def handle_callback_query(call):
     message.text.startswith('/gencode'), message.text.startswith('/codes'),
     message.text.startswith('/founder'), message.text.startswith('/redeem'),
     message.text.startswith('/grant'), message.text.startswith('/digest'),
+    message.text.startswith('/feedbacks'), message.text.startswith('/inbox'),
     message.text.startswith('/feedback'), message.text.startswith('/waitlist'),
 ]))
 def handle_unknown_command(message):
