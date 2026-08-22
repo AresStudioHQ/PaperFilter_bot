@@ -48,15 +48,16 @@ _chat_mode_users = {}
 MESSAGES = {
     "zh_hant": {
         "welcome": (
-            "👋 嗨 <b>{name}</b>，歡迎使用 <b>PaperFilterBot 科研大總部</b>！\n\n"
-            "🔬 <b>只有這裡才有的科研特權</b>：\n"
-            "• 5 大學術庫交叉檢索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
-            "• 💡 AI 深度導讀（動機、方法、發現、限制；依據標題與摘要）\n"
-            "• 🔄 Telegram ↔ 網頁大總部雙向同步：手機與電腦同一文獻庫\n"
-            "• 👁 看過 / 沒興趣雙軌學習：排序會記住你真正要的論文（多數工具只有收藏或刪除）\n"
-            "• ☁️ Google Drive 雙軌歸檔，資料夾自動維護 <code>references.bib</code>\n"
-            "• 👤 追蹤學者：其新作在每次搜尋中權重 +50\n\n"
-            "👇 請選擇下方快捷功能，或直接在聊天室發送<b>論文關鍵字</b>進行檢索："
+            "👋 嗨 <b>{name}</b>，這是 <b>PaperFilterBot</b>。\n\n"
+            "文獻每天多到篩不完時，在這裡打自己領域的關鍵字（例如 <code>CRISPR</code>）。"
+            "會從 arXiv、PubMed、Semantic Scholar、CrossRef、OpenAlex 撈一批，依相關與新舊排序。\n\n"
+            "卡片上可以：\n"
+            "• 👎 沒興趣 — 之後較少再推同類\n"
+            "• 看過／收藏進自己的庫\n"
+            "• 短導讀與深度導讀 — <b>只根據標題和摘要</b>，沒有讀 PDF\n\n"
+            "這是測試版。排序會偏、導讀可能講錯。"
+            "請用 <code>/feedback</code> 寫具體問題（例如太偏 CS、太舊）。指令一覽：<code>/help</code>\n\n"
+            "若久沒回覆，等一分鐘再傳一次 <code>hi</code>。直接打關鍵字即可搜尋。"
         ),
         "help": (
             "📖 <b>PaperFilterBot 全指令導覽</b>\n\n"
@@ -298,15 +299,16 @@ MESSAGES = {
     },
     "zh_hans": {
         "welcome": (
-            "👋 嗨 <b>{name}</b>，欢迎使用 <b>PaperFilterBot 科研大总部</b>！\n\n"
-            "🔬 <b>只有这里才有的科研特权</b>：\n"
-            "• 5 大学术库交叉检索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
-            "• 💡 AI 深度导读（动机、方法、发现、限制；依据标题与摘要）\n"
-            "• 🔄 Telegram ↔ 网页大总部双向同步：手机与电脑同一文献库\n"
-            "• 👁 看过 / 没兴趣双轨学习：排序会记住你真正要的论文（多数工具只有收藏或删除）\n"
-            "• ☁️ Google Drive 双轨归档，文件夹自动维护 <code>references.bib</code>\n"
-            "• 👤 追踪学者：其新作在每次搜索中权重 +50\n\n"
-            "👇 请选择下方快捷功能，或直接在聊天室发送<b>论文关键词</b>进行检索："
+            "👋 嗨 <b>{name}</b>，这是 <b>PaperFilterBot</b>。\n\n"
+            "文献每天多到筛不完时，在这里打自己领域的关键词（例如 <code>CRISPR</code>）。"
+            "会从 arXiv、PubMed、Semantic Scholar、CrossRef、OpenAlex 捞一批，按相关与新旧排序。\n\n"
+            "卡片上可以：\n"
+            "• 👎 没兴趣 — 之后较少再推同类\n"
+            "• 看过／收藏进自己的库\n"
+            "• 短导读与深度导读 — <b>只根据标题和摘要</b>，没有读 PDF\n\n"
+            "这是测试版。排序会偏、导读可能说错。"
+            "请用 <code>/feedback</code> 写具体问题。指令一览：<code>/help</code>\n\n"
+            "若久没回复，等一分钟再发一次 <code>hi</code>。直接打关键词即可搜索。"
         ),
         "help": (
             "📖 <b>PaperFilterBot 全指令导览</b>\n\n"
@@ -548,15 +550,16 @@ MESSAGES = {
     },
     "en": {
         "welcome": (
-            "👋 Hi <b>{name}</b>, welcome to <b>PaperFilterBot HQ</b>!\n\n"
-            "🔬 <b>What only PaperFilterBot does</b>:\n"
-            "• Cross-search <b>5</b> scholarly repositories (arXiv, PubMed, Semantic Scholar, CrossRef, OpenAlex)\n"
-            "• 💡 AI Deep Reading (Motivation, Method, Finding, Limits — based on title and abstract)\n"
-            "• 🔄 Telegram ↔ Web HQ two-way sync — same library on phone and desktop\n"
-            "• 👁 Seen vs Skip dual filter: ranking learns what you actually want (most tools only save or delete)\n"
-            "• ☁️ Google Drive dual archive with auto-maintained <code>references.bib</code>\n"
-            "• 👤 Follow a scholar — their new papers get +50 ranking weight in every search\n\n"
-            "👇 Choose a shortcut below or send <b>keywords</b> directly to search:"
+            "👋 Hi <b>{name}</b>, this is <b>PaperFilterBot</b>.\n\n"
+            "When too many new papers land each day, type a topic from your field (e.g. <code>CRISPR</code>). "
+            "It searches arXiv, PubMed, Semantic Scholar, CrossRef, and OpenAlex, then ranks by relevance and recency.\n\n"
+            "On each card you can:\n"
+            "• 👎 skip — similar papers show up less later\n"
+            "• mark seen / save to your library\n"
+            "• short and deep summaries — <b>title and abstract only</b>, not the PDF\n\n"
+            "This is a beta. Ranking will be wrong sometimes; the AI can misread an abstract. "
+            "Tell me with <code>/feedback</code> (e.g. too CS-heavy, too old). Commands: <code>/help</code>\n\n"
+            "If nothing comes back, wait a minute and send <code>hi</code> again. Or just type keywords to search."
         ),
         "help": (
             "📖 <b>PaperFilterBot Command Suite</b>\n\n"
@@ -798,15 +801,16 @@ MESSAGES = {
     },
     "ja": {
         "welcome": (
-            "👋 こんにちは <b>{name}</b>、<b>PaperFilterBot 研究総本部</b>へようこそ！\n\n"
-            "🔬 <b>ここだけの研究特権</b>：\n"
-            "• 5大学術DB横断検索（arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex）\n"
-            "• 💡 AI 詳細解説（動機・手法・発見・限界；タイトルと要約に基づく）\n"
-            "• 🔄 Telegram ↔ Web HQ 双方向同期：スマホとPCで同じ文献庫\n"
-            "• 👁 既読 / 興味なしの二重学習：順位が本当に欲しい論文を覚える（多くのツールは保存か削除だけ）\n"
-            "• ☁️ Google Drive 二重保存、フォルダの <code>references.bib</code> を自動更新\n"
-            "• 👤 学者フォロー：新著が毎回の検索で +50 加点\n\n"
-            "👇 以下のメニューを選択するか、<b>キーワード</b>を直接送信して検索してください："
+            "👋 こんにちは <b>{name}</b>、これは <b>PaperFilterBot</b> です。\n\n"
+            "毎日新しい論文が多すぎるとき、自分の分野のキーワードを送ってください（例：<code>CRISPR</code>）。"
+            "arXiv / PubMed / Semantic Scholar / CrossRef / OpenAlex から集め、関連度と新しさで並べます。\n\n"
+            "カードでは：\n"
+            "• 👎 興味なし — 似た論文を後で減らせます\n"
+            "• 既読／ライブラリに保存\n"
+            "• 短い解説と詳細解説 — <b>タイトルと要旨のみ</b>。PDF は読んでいません\n\n"
+            "ベータ版です。順位は偏ることがあり、解説も間違えることがあります。"
+            "<code>/feedback</code> で具体的に書いてください。コマンド一覧：<code>/help</code>\n\n"
+            "返事がないときは1分待って <code>hi</code> を再送。キーワードを送れば検索できます。"
         ),
         "help": (
             "📖 <b>PaperFilterBot コマンド一覧</b>\n\n"
