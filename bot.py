@@ -87,7 +87,7 @@ MESSAGES = {
             "• <code>/lang</code>\n\n"
             "<b>網頁與雲端</b>\n"
             "• <code>/bind</code> 或 <code>/web</code> — 科研大總部（同一 Telegram 帳才同步）\n"
-            "• <code>/drive</code> — Google Drive（授權失敗就當沒這功能）\n"
+            "• <code>/drive</code> — Google Drive（目前實驗中，尚不穩定）\n"
             "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
             "<b>搜尋結果卡片按鈕</b>\n"
             "深度導讀、看過了、沒興趣、歸檔到雲端、免費全文 (OA)、官方 DOI\n\n"
@@ -205,7 +205,7 @@ MESSAGES = {
         "drive_connected": "✅ 您的 Google Drive 已成功連結！可以直接歸檔論文與同步 references.bib。",
         "drive_auth_prompt": "請點擊下方按鈕授權 Google Drive 存取：",
         "drive_auth_button": "🔗 授權 Google Drive",
-        "drive_oauth_not_configured": "❌ Google OAuth 設定未完成，請確認 .env 設定。",
+        "drive_oauth_not_configured": "Google Drive 目前實驗中，尚不穩定。請稍後再試 /drive。",
         "drive_auth_success": "✅ Google Drive 授權成功！現在可以隨時將論文歸檔至雲端。",
         "search_missing_args": "請輸入關鍵字，例如：<code>/search CRISPR</code>",
         "review_empty": "您尚未收藏任何論文。請先搜尋並歸檔論文後再使用。",
@@ -349,7 +349,7 @@ MESSAGES = {
             "• <code>/lang</code>\n\n"
             "<b>网页与云端</b>\n"
             "• <code>/bind</code> 或 <code>/web</code> — 科研大总部（同一 Telegram 帐才同步）\n"
-            "• <code>/drive</code> — Google Drive（授权失败就当没这功能）\n"
+            "• <code>/drive</code> — Google Drive（目前实验中，尚不稳定）\n"
             "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
             "<b>搜索结果卡片按钮</b>\n"
             "深度导读、看过了、没兴趣、归档到云端、免费全文 (OA)、官方 DOI\n\n"
@@ -467,7 +467,7 @@ MESSAGES = {
         "drive_connected": "✅ 您的 Google Drive 已成功链接！可以直接归档论文与同步 references.bib。",
         "drive_auth_prompt": "请点击下方按钮授权 Google Drive 访问：",
         "drive_auth_button": "🔗 授权 Google Drive",
-        "drive_oauth_not_configured": "❌ Google OAuth 设定未完成，请确认 .env 设定。",
+        "drive_oauth_not_configured": "Google Drive 目前实验中，尚不稳定。请稍后再试 /drive。",
         "drive_auth_success": "✅ Google Drive 授权成功！现在可以随时将论文归档至云端。",
         "search_missing_args": "请输入关键词，例如：<code>/search CRISPR</code>",
         "review_empty": "您尚未收藏任何论文。请先搜索并归档论文后再使用。",
@@ -611,7 +611,7 @@ MESSAGES = {
             "• <code>/lang</code>\n\n"
             "<b>Web and Drive</b>\n"
             "• <code>/bind</code> or <code>/web</code> — Web HQ (same Telegram account to sync)\n"
-            "• <code>/drive</code> — Google Drive (skip if OAuth fails)\n"
+            "• <code>/drive</code> — Google Drive (experimental, still unstable)\n"
             "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
             "<b>Result-card buttons</b>\n"
             "Deep read, Seen, Not interested, Archive, Open Access, DOI\n\n"
@@ -729,7 +729,7 @@ MESSAGES = {
         "drive_connected": "✅ Google Drive connected! You can archive papers & sync references.bib.",
         "drive_auth_prompt": "Click the button below to authorize Google Drive access:",
         "drive_auth_button": "🔗 Authorize Google Drive",
-        "drive_oauth_not_configured": "❌ Google OAuth not configured. Check your .env settings.",
+        "drive_oauth_not_configured": "Google Drive is experimental and still unstable. Try /drive again later.",
         "drive_auth_success": "✅ Google Drive authorized! You can now archive papers to the cloud.",
         "search_missing_args": "Enter keywords, e.g.: <code>/search CRISPR</code>",
         "review_empty": "No papers in your library. Search and archive some first!",
@@ -873,7 +873,7 @@ MESSAGES = {
             "• <code>/lang</code>\n\n"
             "<b>WebとDrive</b>\n"
             "• <code>/bind</code> または <code>/web</code> — Web総本部（同じTelegramアカウントで同期）\n"
-            "• <code>/drive</code> — Google Drive（認証に失敗したら使わなくてよい）\n"
+            "• <code>/drive</code> — Google Drive（現在実験中で、まだ不安定）\n"
             "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
             "<b>検索カードのボタン</b>\n"
             "詳細解説、閲覧済み、興味なし、ドライブ保存、OA、DOI\n\n"
@@ -991,7 +991,7 @@ MESSAGES = {
         "drive_connected": "✅ Google Drive が接続されました！論文の保存と references.bib の同期が可能です。",
         "drive_auth_prompt": "以下のボタンをクリックして Google Drive を認証してください：",
         "drive_auth_button": "🔗 Google Drive を認証",
-        "drive_oauth_not_configured": "❌ Google OAuth が設定されていません。.env を確認してください。",
+        "drive_oauth_not_configured": "Google Drive は現在実験中で、まだ不安定です。しばらくしてから /drive を再試行してください。",
         "drive_auth_success": "✅ Google Drive 認証成功！論文をクラウドに保存できます。",
         "search_missing_args": "キーワードを入力してください。例：<code>/search CRISPR</code>",
         "review_empty": "論文がまだありません。まず検索して保存してください！",
