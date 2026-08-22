@@ -28,7 +28,6 @@ interface ProFeaturesHubProps {
   library: Paper[];
   onRedeemCode: (code: string) => Promise<void> | void;
   onSelectPaperForDeep?: (paper: Paper) => void;
-  model?: string;
   userLang: string;
 }
 
@@ -36,7 +35,6 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
   user,
   library,
   onRedeemCode,
-  model,
   userLang,
 }) => {
   const { t } = useI18n(userLang);
@@ -91,7 +89,7 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
       const res = await fetch('/api/pro/chat-library', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userQ, papers: library, model }),
+        body: JSON.stringify({ question: userQ, papers: library }),
       });
       const data = await res.json();
       if (data.success) {
@@ -123,7 +121,7 @@ export const ProFeaturesHub: React.FC<ProFeaturesHubProps> = ({
       const res = await fetch('/api/pro/matrix-compare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ papers: library.slice(0, 5), model }),
+        body: JSON.stringify({ papers: library.slice(0, 5) }),
       });
       const data = await res.json();
       if (data.success) {
@@ -577,6 +575,7 @@ ${matrixData.map((r) => `| **${r.title}** (${r.authors}, ${r.year}) | ${r.pain_p
             >
               {t('waitlist_btn')}
             </button>
+            <p className="text-xs text-slate-500">{t('pro_digest_telegram_hint')}</p>
             {waitlistMsg && <p className="text-xs text-emerald-400 font-semibold">{waitlistMsg}</p>}
           </div>
         </div>

@@ -1040,33 +1040,6 @@ ${papers.map((p, i) => `${i + 1}. 標題: ${p.title}\n   摘要: ${p.summary}`).
   }
 });
 
-// 8. Digest Schedule
-app.get("/api/digest/settings", (_req, res) => {
-  res.status(501).json({ success: false, error: "Daily Telegram digest is not live yet" });
-});
-
-app.post("/api/digest/settings", (_req, res) => {
-  res.status(501).json({ success: false, error: "Daily Telegram digest is not live yet" });
-});
-
-// AI 模型清單（全部使用 GPT-4o-mini，統一低成本）
-app.get("/api/ai/models", async (req, res) => {
-  try {
-    const profile = await getProfile();
-    const models = [
-      { id: "gpt-4o-mini", name: "GPT-4o-mini", required_tier: "free", unlocked: true }
-    ];
-    res.json({
-      success: true,
-      models,
-      default: "gpt-4o-mini",
-      user_tier: profile.tier,
-    });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // 9. Library CRUD & Notes
 app.get("/api/library", async (req, res) => {
   try {

@@ -9,7 +9,6 @@ import { TelegramBindingModal } from './components/TelegramBindingModal';
 import { Paper, UserProfile, FilterMode, HistoryRecord } from './types';
 import { useI18n, Language } from './i18n';
 import './_i18n_tier';
-import { getModel, setModel, AIModel } from './modelStore';
 import { TelegramLogin } from './TelegramLogin';
 import { BrainCircuit, X, Copy, Check } from 'lucide-react';
 
@@ -35,10 +34,6 @@ export default function App() {
   const [library, setLibrary] = useState<Paper[]>([]);
   const [history, setHistory] = useState<HistoryRecord[]>([]);
 
-  // AI 模型自選
-  const [models, setModels] = useState<AIModel[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>(getModel());
-
   // 多使用者登入狀態
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [botUsername, setBotUsername] = useState<string>('');
@@ -60,14 +55,6 @@ export default function App() {
   const loadData = () => {
     fetch('/api/library').then(r => r.json()).then(d => { if (d.success) setLibrary(d.library || []); }).catch(console.error);
     fetch('/api/history').then(r => r.json()).then(d => { if (d.success) setHistory(d.history || []); }).catch(console.error);
-    fetch('/api/ai/models').then(r => r.json()).then(d => {
-      if (d.success && d.models) {
-        setModels(d.models);
-        const def = getModel() || d.default || '';
-        setModel(def);
-        setSelectedModel(def);
-      }
-    }).catch(console.error);
   };
 
   const refreshUser = () => {
@@ -120,7 +107,7 @@ export default function App() {
       const res = await fetch('/api/deep', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...paper, model: selectedModel }),
+        body: JSON.stringify({ ...paper }),
       });
       const data = await res.json();
       if (data.success) {
@@ -251,7 +238,7 @@ export default function App() {
       const res = await fetch('/api/review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ papers, model: selectedModel }),
+        body: JSON.stringify({ papers }),
       });
       const data = await res.json();
       if (data.success) {
@@ -273,7 +260,7 @@ export default function App() {
       const res = await fetch('/api/gap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ papers, model: selectedModel }),
+        body: JSON.stringify({ papers }),
       });
       const data = await res.json();
       if (data.success) {
@@ -342,9 +329,6 @@ export default function App() {
         userLang={user.user_lang}
         onLanguageChange={handleLanguageChange}
         libraryCount={library.length}
-        model={selectedModel}
-        models={models}
-        onModelChange={(m: string) => { setModel(m); setSelectedModel(m); }}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -400,7 +384,6 @@ export default function App() {
             userLang={user.user_lang}
             onRedeemCode={handleRedeemCode}
             onSelectPaperForDeep={handleOpenDeep}
-            model={selectedModel}
           />
         )}
 

@@ -11,7 +11,6 @@ import {
 import { UserProfile, FilterMode } from '../types';
 import { useI18n } from '../i18n';
 import { hasPaidTier } from '../subscriptionTiers';
-import { AIModel } from '../modelStore';
 
 interface NavbarProps {
   activeTab: string;
@@ -24,9 +23,6 @@ interface NavbarProps {
   userLang: string;
   onLanguageChange: (lang: string) => void;
   libraryCount: number;
-  model: string;
-  models: AIModel[];
-  onModelChange: (m: string) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -40,9 +36,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   userLang,
   onLanguageChange,
   libraryCount,
-  model,
-  models,
-  onModelChange
 }) => {
   const { t } = useI18n(userLang);
 
@@ -118,25 +111,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <option value="zh_hans" className="bg-slate-900 text-slate-100">🇨🇳 {t('nav_lang_zh_hans')}</option>
                 <option value="en" className="bg-slate-900 text-slate-100">🇺🇸 EN</option>
                 <option value="ja" className="bg-slate-900 text-slate-100">🇯🇵 {t('nav_lang_ja')}</option>
-              </select>
-            </div>
-
-            {/* AI Model Selector */}
-            <div className="flex items-center bg-slate-800/90 rounded-lg px-1.5 py-0.5 border border-slate-700 text-xs shrink-0 shadow-sm max-w-[170px]">
-              <select
-                value={model}
-                onChange={(e) => onModelChange(e.target.value)}
-                className="bg-transparent text-slate-200 text-xs py-1 px-1 focus:outline-none cursor-pointer font-medium w-full"
-                title={t('nav_model_tooltip')}
-              >
-                {models.length === 0 && (
-                  <option value={model} className="bg-slate-900 text-slate-100">{model || 'gpt-4o-mini'}</option>
-                )}
-                {models.map((m) => (
-                  <option key={m.id} value={m.id} className="bg-slate-900 text-slate-100" disabled={!m.unlocked}>
-                    {m.unlocked ? m.name : `🔒 ${m.name}`}
-                  </option>
-                ))}
               </select>
             </div>
 
