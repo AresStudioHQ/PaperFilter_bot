@@ -61,18 +61,38 @@ MESSAGES = {
             "若久沒回覆，等一分鐘再傳一次 <code>hi</code>。直接打關鍵字即可搜尋。"
         ),
         "help": (
-            "📖 <b>PaperFilterBot</b>\n\n"
-            "直接打關鍵字搜尋（arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex）。\n"
-            "深度導讀只根據標題和摘要，沒有讀 PDF。沒有早上自動推播。\n\n"
+            "📖 <b>PaperFilterBot 指令與按鈕</b>\n\n"
+            "<b>搜尋</b>\n"
+            "直接打關鍵字，或 <code>/search 關鍵字</code>\n"
+            "來源：arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex\n"
+            "導讀只根據標題和摘要，沒有讀 PDF。沒有早上自動推播。\n\n"
+            "<b>過濾與回饋</b>\n"
             "• <code>/digest CRISPR, LLM</code> — 立刻過濾今日新論文\n"
-            "• <code>/feedback 你的意見</code> — 打給開發者\n"
-            "• <code>/my</code> — 文獻庫　• <code>/export</code> — BibTeX / RIS / CSV\n"
-            "• <code>/chat</code> — 針對已看過的文獻提問（有額度）\n"
-            "• <code>/follow 學者名</code> — 之後搜尋提高該名字權重（不會自動抓動態）\n"
-            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
-            "• <code>/bind</code> 或 <code>/web</code> — 網頁科研大總部（同一 Telegram 帳才同步）\n"
-            "• <code>/drive</code> — 可連 Google Drive（授權失敗就當沒這功能）\n"
-            "• <code>/redeem PF-XXXXXX</code> — 兌換測試碼\n\n"
+            "• <code>/digest</code> 再跑一次　• <code>/digest off</code> 關閉\n"
+            "• <code>/feedback 意見</code> — 打給開發者\n"
+            "• <code>/waitlist</code> — 之後若收費想被通知\n"
+            "• <code>/redeem PF-XXXXXX</code>\n\n"
+            "<b>文獻庫</b>\n"
+            "• <code>/my</code> — 庫、資料夾、Drive 狀態\n"
+            "• <code>/folders</code> — 分類資料夾\n"
+            "• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> 或 <code>/ask</code> — 針對已看過的文獻提問（有額度）\n"
+            "• <code>/review</code> — 依收藏的標題與摘要寫綜述草稿\n"
+            "• <code>/gap</code> — 依收藏文獻分析缺口（同樣根據摘要）\n"
+            "• <code>/reports</code> — 綜述歷史\n\n"
+            "<b>偏好</b>\n"
+            "• <code>/follow 學者名</code> — 搜尋提高該名字權重（不會自動抓動態）\n"
+            "• <code>/unfollow 學者名</code>　• <code>/following</code>\n"
+            "• <code>/mode</code> — 頂刊 / 智慧 / 只 OA\n"
+            "• <code>/lang</code>\n\n"
+            "<b>網頁與雲端</b>\n"
+            "• <code>/bind</code> 或 <code>/web</code> — 科研大總部（同一 Telegram 帳才同步）\n"
+            "• <code>/drive</code> — Google Drive（授權失敗就當沒這功能）\n"
+            "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
+            "<b>搜尋結果卡片按鈕</b>\n"
+            "深度導讀、看過了、沒興趣、歸檔到雲端、免費全文 (OA)、官方 DOI\n\n"
+            "<b>選單按鈕</b>\n"
+            "檢索論文、開啟科研大總部、綁定同步碼、Pro、切換語言、完整指令\n\n"
             "若沒反應，等 30–60 秒再傳 <code>hi</code>。"
         ),
         "btn_search": "🔍 檢索論文",
@@ -242,9 +262,7 @@ MESSAGES = {
         "help_bind_button": "🔗 綁定網頁端",
         "help_pro_button": "👑 查看 Pro 特權",
         "unknown_command": "❌ 沒有此指令：{cmd}\n請輸入 /help 查看所有可用指令。",
-        "help_beta_extra": (
-            "\n• <code>/digest off</code> — 關掉主題　• <code>/waitlist</code> — 之後若收費想被通知"
-        ),
+        "help_beta_extra": "",
         "beta_mission": (
             "🧪 <b>7 天測試任務</b>（請盡量做完，這決定正式版要不要收費）\n"
             "1. 傳自己領域的關鍵字搜 5 次，把沒興趣的按 👎\n"
@@ -305,18 +323,38 @@ MESSAGES = {
             "若久没回复，等一分钟再发一次 <code>hi</code>。直接打关键词即可搜索。"
         ),
         "help": (
-            "📖 <b>PaperFilterBot</b>\n\n"
-            "直接打关键词搜索（arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex）。\n"
-            "深度导读只根据标题和摘要，没有读 PDF。没有早上自动推送。\n\n"
+            "📖 <b>PaperFilterBot 指令与按钮</b>\n\n"
+            "<b>搜索</b>\n"
+            "直接打关键词，或 <code>/search 关键词</code>\n"
+            "来源：arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex\n"
+            "导读只根据标题和摘要，没有读 PDF。没有早上自动推送。\n\n"
+            "<b>过滤与反馈</b>\n"
             "• <code>/digest CRISPR, LLM</code> — 立刻过滤今日新论文\n"
-            "• <code>/feedback 你的意见</code> — 打给开发者\n"
-            "• <code>/my</code> — 文献库　• <code>/export</code> — BibTeX / RIS / CSV\n"
-            "• <code>/chat</code> — 针对已看过的文献提问（有额度）\n"
-            "• <code>/follow 学者名</code> — 之后搜索提高该名字权重（不会自动抓动态）\n"
-            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
-            "• <code>/bind</code> 或 <code>/web</code> — 网页科研大总部（同一 Telegram 帐才同步）\n"
-            "• <code>/drive</code> — 可连 Google Drive（授权失败就当没这功能）\n"
-            "• <code>/redeem PF-XXXXXX</code> — 兑换测试码\n\n"
+            "• <code>/digest</code> 再跑一次　• <code>/digest off</code> 关闭\n"
+            "• <code>/feedback 意见</code> — 打给开发者\n"
+            "• <code>/waitlist</code> — 之后若收费想被通知\n"
+            "• <code>/redeem PF-XXXXXX</code>\n\n"
+            "<b>文献库</b>\n"
+            "• <code>/my</code> — 库、文件夹、Drive 状态\n"
+            "• <code>/folders</code> — 分类文件夹\n"
+            "• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> 或 <code>/ask</code> — 针对已看过的文献提问（有额度）\n"
+            "• <code>/review</code> — 依收藏的标题与摘要写综述草稿\n"
+            "• <code>/gap</code> — 依收藏文献分析缺口（同样根据摘要）\n"
+            "• <code>/reports</code> — 综述历史\n\n"
+            "<b>偏好</b>\n"
+            "• <code>/follow 学者名</code> — 搜索提高该名字权重（不会自动抓动态）\n"
+            "• <code>/unfollow 学者名</code>　• <code>/following</code>\n"
+            "• <code>/mode</code> — 顶刊 / 智能 / 只 OA\n"
+            "• <code>/lang</code>\n\n"
+            "<b>网页与云端</b>\n"
+            "• <code>/bind</code> 或 <code>/web</code> — 科研大总部（同一 Telegram 帐才同步）\n"
+            "• <code>/drive</code> — Google Drive（授权失败就当没这功能）\n"
+            "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
+            "<b>搜索结果卡片按钮</b>\n"
+            "深度导读、看过了、没兴趣、归档到云端、免费全文 (OA)、官方 DOI\n\n"
+            "<b>菜单按钮</b>\n"
+            "检索论文、开启科研大总部、绑定同步码、Pro、切换语言、完整指令\n\n"
             "若没反应，等 30–60 秒再传 <code>hi</code>。"
         ),
         "btn_search": "🔍 检索论文",
@@ -486,9 +524,7 @@ MESSAGES = {
         "help_bind_button": "🔗 绑定网页端",
         "help_pro_button": "👑 查看 Pro 特权",
         "unknown_command": "❌ 没有此指令：{cmd}\n请输入 /help 查看所有可用指令。",
-        "help_beta_extra": (
-            "\n• <code>/digest off</code> — 关掉主题　• <code>/waitlist</code> — 之后若收费想被通知"
-        ),
+        "help_beta_extra": "",
         "beta_mission": (
             "🧪 <b>7 天测试任务</b>\n"
             "1. 用自己领域的关键词搜 5 次，没兴趣按 👎\n"
@@ -549,18 +585,38 @@ MESSAGES = {
             "If nothing comes back, wait a minute and send <code>hi</code> again. Or just type keywords to search."
         ),
         "help": (
-            "📖 <b>PaperFilterBot</b>\n\n"
-            "Type keywords to search (arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex).\n"
+            "📖 <b>PaperFilterBot commands and buttons</b>\n\n"
+            "<b>Search</b>\n"
+            "Type keywords, or <code>/search keywords</code>\n"
+            "Sources: arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex\n"
             "Deep read is title + abstract only — no PDFs. No morning auto-push.\n\n"
+            "<b>Filter and feedback</b>\n"
             "• <code>/digest CRISPR, LLM</code> — filter today's new papers now\n"
-            "• <code>/feedback your notes</code> — sent to the developer\n"
-            "• <code>/my</code> — library　• <code>/export</code> — BibTeX / RIS / CSV\n"
-            "• <code>/chat</code> — ask about papers you've already seen (quota)\n"
-            "• <code>/follow Name</code> — boosts that name in later search (no author feed)\n"
-            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
-            "• <code>/bind</code> or <code>/web</code> — optional web HQ (same Telegram account to sync)\n"
-            "• <code>/drive</code> — Google Drive (skip it if OAuth fails)\n"
-            "• <code>/redeem PF-XXXXXX</code> — redeem a test code\n\n"
+            "• <code>/digest</code> run again　• <code>/digest off</code>\n"
+            "• <code>/feedback notes</code> — sent to the developer\n"
+            "• <code>/waitlist</code> — ping if paid Pro ever launches\n"
+            "• <code>/redeem PF-XXXXXX</code>\n\n"
+            "<b>Library</b>\n"
+            "• <code>/my</code> — library, folders, Drive status\n"
+            "• <code>/folders</code>\n"
+            "• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> or <code>/ask</code> — questions on papers you've seen (quota)\n"
+            "• <code>/review</code> — review draft from saved titles/abstracts\n"
+            "• <code>/gap</code> — gap notes from saved papers (abstracts too)\n"
+            "• <code>/reports</code> — review history\n\n"
+            "<b>Prefs</b>\n"
+            "• <code>/follow Name</code> — boosts that name in search (no author feed)\n"
+            "• <code>/unfollow Name</code>　• <code>/following</code>\n"
+            "• <code>/mode</code> — top-tier / smart / OA only\n"
+            "• <code>/lang</code>\n\n"
+            "<b>Web and Drive</b>\n"
+            "• <code>/bind</code> or <code>/web</code> — Web HQ (same Telegram account to sync)\n"
+            "• <code>/drive</code> — Google Drive (skip if OAuth fails)\n"
+            "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
+            "<b>Result-card buttons</b>\n"
+            "Deep read, Seen, Not interested, Archive, Open Access, DOI\n\n"
+            "<b>Menu buttons</b>\n"
+            "Search, Open Web HQ, Bind, Pro, Language, Full help\n\n"
             "If nothing comes back, wait 30–60s and send <code>hi</code>."
         ),
         "btn_search": "🔍 Search Papers",
@@ -730,9 +786,7 @@ MESSAGES = {
         "help_bind_button": "🔗 Bind to Web",
         "help_pro_button": "👑 View Pro Features",
         "unknown_command": "❌ Unknown command: {cmd}\nType /help to see all commands.",
-        "help_beta_extra": (
-            "\n• <code>/digest off</code> — clear topics　• <code>/waitlist</code> — ping if paid Pro ever launches"
-        ),
+        "help_beta_extra": "",
         "beta_mission": (
             "<b>7-day beta mission</b>\n"
             "1. Search your field 5 times; 👎 what you don't want\n"
@@ -793,18 +847,38 @@ MESSAGES = {
             "返事がないときは1分待って <code>hi</code> を再送。キーワードを送れば検索できます。"
         ),
         "help": (
-            "📖 <b>PaperFilterBot</b>\n\n"
-            "キーワードを送ると検索します（arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex）。\n"
+            "📖 <b>PaperFilterBot コマンドとボタン</b>\n\n"
+            "<b>検索</b>\n"
+            "キーワードを送るか <code>/search キーワード</code>\n"
+            "出典：arXiv / PubMed / Semantic Scholar / Crossref / OpenAlex\n"
             "詳細解説はタイトルと要約のみ。PDFは読みません。朝の自動配信はありません。\n\n"
+            "<b>フィルタとフィードバック</b>\n"
             "• <code>/digest CRISPR, LLM</code> — 今日の新着を今すぐフィルタ\n"
+            "• <code>/digest</code> 再実行　• <code>/digest off</code>\n"
             "• <code>/feedback 意見</code> — 開発者に送る\n"
-            "• <code>/my</code> — ライブラリ　• <code>/export</code> — BibTeX / RIS / CSV\n"
-            "• <code>/chat</code> — 既読論文への質問（回数制限あり）\n"
+            "• <code>/waitlist</code> — 有料化時に通知\n"
+            "• <code>/redeem PF-XXXXXX</code>\n\n"
+            "<b>ライブラリ</b>\n"
+            "• <code>/my</code> — 庫・フォルダ・Drive状態\n"
+            "• <code>/folders</code>\n"
+            "• <code>/export</code> — BibTeX / RIS / CSV\n"
+            "• <code>/chat</code> または <code>/ask</code> — 既読論文への質問（回数制限あり）\n"
+            "• <code>/review</code> — 保存したタイトルと要約からレビュー草稿\n"
+            "• <code>/gap</code> — 保存文献からギャップ（要約ベース）\n"
+            "• <code>/reports</code> — レビュー履歴\n\n"
+            "<b>設定</b>\n"
             "• <code>/follow 著者名</code> — 検索でその名前を優遇（フィード自動取得なし）\n"
-            "• <code>/mode</code> <code>/lang</code> <code>/pro</code>\n"
+            "• <code>/unfollow 著者名</code>　• <code>/following</code>\n"
+            "• <code>/mode</code> — トップ誌 / スマート / OAのみ\n"
+            "• <code>/lang</code>\n\n"
+            "<b>WebとDrive</b>\n"
             "• <code>/bind</code> または <code>/web</code> — Web総本部（同じTelegramアカウントで同期）\n"
             "• <code>/drive</code> — Google Drive（認証に失敗したら使わなくてよい）\n"
-            "• <code>/redeem PF-XXXXXX</code> — テストコード引き換え\n\n"
+            "• <code>/pro</code>　• <code>/start</code>　• <code>/help</code>\n\n"
+            "<b>検索カードのボタン</b>\n"
+            "詳細解説、閲覧済み、興味なし、ドライブ保存、OA、DOI\n\n"
+            "<b>メニューボタン</b>\n"
+            "論文検索、Web総本部、連携コード、Pro、言語、コマンド一覧\n\n"
             "反応がないときは 30–60 秒待って <code>hi</code> を送ってください。"
         ),
         "btn_search": "🔍 論文検索",
@@ -974,9 +1048,7 @@ MESSAGES = {
         "help_bind_button": "🔗 Web連携",
         "help_pro_button": "👑 Pro機能を見る",
         "unknown_command": "❌ 未知のコマンド：{cmd}\n/help で利用可能なコマンド一覧を確認できます。",
-        "help_beta_extra": (
-            "\n• <code>/digest off</code> — テーマ解除　• <code>/waitlist</code> — 有料化時に通知"
-        ),
+        "help_beta_extra": "",
         "beta_mission": (
             "<b>7日間のテスト</b>\n"
             "1. 自分の分野で5回検索し、不要なら 👎\n"
@@ -1189,11 +1261,7 @@ def handle_start(message):
         pass
     welcome_text = _t(user_id, "welcome", name=name)
 
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    markup.add(
-        types.InlineKeyboardButton(_t(user_id, "btn_bind_web"), callback_data="cmd_bind"),
-        types.InlineKeyboardButton(_t(user_id, "btn_view_pro"), callback_data="cmd_pro")
-    )
+    markup = make_main_menu(user_id)
     markup.add(
         types.InlineKeyboardButton(_t(user_id, "btn_full_help"), callback_data="cmd_help")
     )
@@ -1222,11 +1290,11 @@ def handle_help(message, override_user_id=None):
             "\n💡 測試員的 user_id 在 /codes 兌換紀錄裡直接看得到。"
         )
 
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    markup.add(
-        types.InlineKeyboardButton(_t(user_id, "help_bind_button"), callback_data="cmd_bind"),
-        types.InlineKeyboardButton(_t(user_id, "help_pro_button"), callback_data="cmd_pro")
-    )
+    markup = make_main_menu(user_id)
+    if WEB_APP_URL:
+        markup.add(
+            types.InlineKeyboardButton(_t(user_id, "btn_open_web"), url=WEB_APP_URL)
+        )
     bot.send_message(message.chat.id, help_text, reply_markup=markup, parse_mode="HTML")
 
 @bot.message_handler(commands=['my', 'library'])
